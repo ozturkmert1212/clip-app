@@ -1,0 +1,48 @@
+name: ClipApp
+options:
+  bundleIdPrefix: com.mertozturk
+  deploymentTarget:
+    macOS: "13.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+  knownRegions: [en, tr]
+packages:
+  KeyboardShortcuts:
+    url: https://github.com/sindresorhus/KeyboardShortcuts
+    from: 2.0.0
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    SWIFT_EMIT_LOC_STRINGS: YES
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  ClipApp:
+    type: application
+    platform: macOS
+    sources:
+      - ClipApp
+    dependencies:
+      - package: KeyboardShortcuts
+    info:
+      path: ClipApp/Info.plist
+      properties:
+        CFBundleDisplayName: ClipApp
+        CFBundleDevelopmentRegion: en
+        CFBundleLocalizations: [en, tr]
+        LSUIElement: true
+        LSApplicationCategoryType: public.app-category.utilities
+        NSMicrophoneUsageDescription: ClipApp uses the microphone to add your voice to your clips.
+    entitlements:
+      path: ClipApp/ClipApp.entitlements
+      properties:
+        com.apple.security.app-sandbox: false
+        com.apple.security.device.audio-input: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mertozturk.ClipApp
+        DEVELOPMENT_TEAM: CRHSYX58TX
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_IDENTITY: "Apple Development"
+        ENABLE_HARDENED_RUNTIME: YES

@@ -1,0 +1,1002 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "" : {
+      "shouldTranslate" : false
+    },
+    "%lld seconds" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld saniye"
+          }
+        }
+      }
+    },
+    "%lld%%" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%%%lld"
+          }
+        }
+      }
+    },
+    "After turning on Screen Recording, restart ClipApp for the change to take effect." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekran Kaydı iznini açtıktan sonra değişikliğin geçerli olması için ClipApp'i yeniden başlat."
+          }
+        }
+      }
+    },
+    "Allow" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İzin Ver"
+          }
+        }
+      }
+    },
+    "Appears in the chosen corner for a few seconds when a clip is saved or something goes wrong; it never ends up in clips. A system notification is sent as well." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip kaydedilince ya da bir sorun olunca seçilen köşede birkaç saniye görünür; kliplere girmez. Sistem bildirimi ayrıca gönderilir."
+          }
+        }
+      }
+    },
+    "Applications" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulamalar"
+          }
+        }
+      }
+    },
+    "Audio" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ses"
+          }
+        }
+      }
+    },
+    "Bitrate" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bitrate"
+          }
+        }
+      }
+    },
+    "Bottom left" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sol alt"
+          }
+        }
+      }
+    },
+    "Bottom right" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağ alt"
+          }
+        }
+      }
+    },
+    "Buffer length" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buffer süresi"
+          }
+        }
+      }
+    },
+    "Can't write to the save folder: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıt klasörüne yazılamıyor: %@"
+          }
+        }
+      }
+    },
+    "Capture error, retrying: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakalama hatası, yeniden deneniyor: %@"
+          }
+        }
+      }
+    },
+    "Capture off" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakalama kapalı"
+          }
+        }
+      }
+    },
+    "Capture source" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakalama kaynağı"
+          }
+        }
+      }
+    },
+    "Capture stopped" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakalama durdu"
+          }
+        }
+      }
+    },
+    "Capture stopped, clips can't be saved" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakalama durdu, klip alınamaz"
+          }
+        }
+      }
+    },
+    "Capture stopped, clips can't be saved. Allow ClipApp under System Settings > Privacy & Security > Screen Recording." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakalama durdu, klip alınamaz. Sistem Ayarları > Gizlilik ve Güvenlik > Ekran Kaydı'ndan ClipApp'e izin ver."
+          }
+        }
+      }
+    },
+    "Capturing the main display" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ana ekran yakalanıyor"
+          }
+        }
+      }
+    },
+    "Capturing the main display instead. This clears once the source is back or you pick another one in Settings." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Onun yerine ana ekran yakalanıyor. Kaynak geri gelince ya da ayarlardan yenisini seçince düzelir."
+          }
+        }
+      }
+    },
+    "Capturing: %@ · %lld×%lld" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakalanıyor: %@ · %lld×%lld"
+          }
+        }
+      }
+    },
+    "Capturing: %@ · %lld×%lld (selected source unavailable)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakalanıyor: %@ · %lld×%lld (seçili kaynak yok)"
+          }
+        }
+      }
+    },
+    "Choose" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seç"
+          }
+        }
+      }
+    },
+    "Choose…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seç…"
+          }
+        }
+      }
+    },
+    "Clip" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip"
+          }
+        }
+      }
+    },
+    "Clip saved" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip kaydedildi"
+          }
+        }
+      }
+    },
+    "Clip shortcut" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip kısayolu"
+          }
+        }
+      }
+    },
+    "ClipApp" : {
+      "shouldTranslate" : false
+    },
+    "ClipApp Permissions" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ClipApp İzinleri"
+          }
+        }
+      }
+    },
+    "ClipApp Settings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ClipApp Ayarları"
+          }
+        }
+      }
+    },
+    "ClipApp needs permission to work" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ClipApp'in çalışması için izin gerekiyor"
+          }
+        }
+      }
+    },
+    "Couldn't create the video track" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Video track'i oluşturulamadı"
+          }
+        }
+      }
+    },
+    "Couldn't save clip" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip kaydedilemedi"
+          }
+        }
+      }
+    },
+    "Couldn't save clip: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip kaydedilemedi: %@"
+          }
+        }
+      }
+    },
+    "Couldn't write the clip" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip yazılamadı"
+          }
+        }
+      }
+    },
+    "Disk full, the clip wasn't saved" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disk dolu, klip kaydedilemedi"
+          }
+        }
+      }
+    },
+    "Display" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekran"
+          }
+        }
+      }
+    },
+    "Displays" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekranlar"
+          }
+        }
+      }
+    },
+    "Each source gets its own audio track: system audio first, then microphone. Most players only play the first one." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her kaynak ayrı bir ses track'i olur: önce sistem sesi, sonra mikrofon. Çoğu oynatıcı yalnızca ilkini çalar."
+          }
+        }
+      }
+    },
+    "Example: %@.mp4\n{date}, {time} and {source} can be used." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Örnek: %@.mp4\n{date}, {time} ve {source} kullanılabilir."
+          }
+        }
+      }
+    },
+    "FPS" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FPS"
+          }
+        }
+      }
+    },
+    "File name" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dosya adı"
+          }
+        }
+      }
+    },
+    "Folder" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klasör"
+          }
+        }
+      }
+    },
+    "For this option, copy ClipApp to the /Applications folder and open it from there. It is currently running from: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu seçenek için ClipApp'i /Applications klasörüne kopyalayıp oradan aç. Şu an şuradan çalışıyor: %@"
+          }
+        }
+      }
+    },
+    "Frames in the last second: %lld" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son saniye: %lld kare"
+          }
+        }
+      }
+    },
+    "General" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genel"
+          }
+        }
+      }
+    },
+    "Granted" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verildi"
+          }
+        }
+      }
+    },
+    "If no banner shows up: macOS hides banners because ClipApp captures the screen all the time. Turn on \"Allow notifications when mirroring or sharing the display\" at the top of the Notifications page." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bant görünmüyorsa: ClipApp ekranı sürekli yakaladığı için macOS bantları gizler. Bildirimler sayfasının en üstündeki \"Ekran yansıtılırken veya paylaşılırken bildirimlere izin ver\" seçeneğini aç."
+          }
+        }
+      }
+    },
+    "Language" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dil"
+          }
+        }
+      }
+    },
+    "Last clip: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son klip: %@"
+          }
+        }
+      }
+    },
+    "Launch at login" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oturum açılınca başlat"
+          }
+        }
+      }
+    },
+    "Loading…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yükleniyor…"
+          }
+        }
+      }
+    },
+    "Main display (automatic)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ana ekran (otomatik)"
+          }
+        }
+      }
+    },
+    "Memory cap active: content exceeds the target bitrate, keeping the last ~%lld s" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bellek tavanı devrede: içerik hedef bitrate'i aşıyor, son ~%lld sn tutuluyor"
+          }
+        }
+      }
+    },
+    "Message corner" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilgi kutusu köşesi"
+          }
+        }
+      }
+    },
+    "Microphone" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mikrofon"
+          }
+        }
+      }
+    },
+    "Microphone level" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mikrofon seviyesi"
+          }
+        }
+      }
+    },
+    "Mix audio into one track" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sesleri tek track'te birleştir"
+          }
+        }
+      }
+    },
+    "Native" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yerel"
+          }
+        }
+      }
+    },
+    "No Screen Recording permission" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekran kaydı izni yok"
+          }
+        }
+      }
+    },
+    "No Screen Recording permission, capture stopped" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekran kaydı izni yok, yakalama durdu"
+          }
+        }
+      }
+    },
+    "No display found to capture" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakalanacak ekran bulunamadı"
+          }
+        }
+      }
+    },
+    "No microphone permission, clips have no microphone" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mikrofon izni yok, klipler mikrofonsuz"
+          }
+        }
+      }
+    },
+    "No microphone permission; clips are saved without the microphone." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mikrofon izni yok; klipler mikrofonsuz kaydediliyor."
+          }
+        }
+      }
+    },
+    "Nothing in the buffer yet" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buffer'da henüz görüntü yok"
+          }
+        }
+      }
+    },
+    "Notifications" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bildirimler"
+          }
+        }
+      }
+    },
+    "Open Clips Folder" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip Klasörünü Aç"
+          }
+        }
+      }
+    },
+    "Open Notification Settings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bildirim Ayarlarını Aç"
+          }
+        }
+      }
+    },
+    "Open System Settings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sistem Ayarları'nı Aç"
+          }
+        }
+      }
+    },
+    "Optional. To add your own voice to clips." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İsteğe bağlı. Kliplere kendi sesini eklemek için."
+          }
+        }
+      }
+    },
+    "Optional. To tell you when a clip is saved or something goes wrong." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İsteğe bağlı. Klip kaydedilince ve bir sorun olunca haber vermek için."
+          }
+        }
+      }
+    },
+    "Permissions…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İzinler…"
+          }
+        }
+      }
+    },
+    "Quit ClipApp" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ClipApp'ten Çık"
+          }
+        }
+      }
+    },
+    "Refresh the source list" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaynak listesini yenile"
+          }
+        }
+      }
+    },
+    "Required. To capture the screen and keep the last seconds in memory." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zorunlu. Ekranı yakalayıp son saniyeleri bellekte tutmak için."
+          }
+        }
+      }
+    },
+    "Resolution" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çözünürlük"
+          }
+        }
+      }
+    },
+    "Restart" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeniden Başlat"
+          }
+        }
+      }
+    },
+    "Retrying" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeniden deneniyor"
+          }
+        }
+      }
+    },
+    "Retrying: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeniden deneniyor: %@"
+          }
+        }
+      }
+    },
+    "Save Last %lld Seconds" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son %lld Saniyeyi Kaydet"
+          }
+        }
+      }
+    },
+    "Saving" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıt"
+          }
+        }
+      }
+    },
+    "Saving Clip…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip kaydediliyor…"
+          }
+        }
+      }
+    },
+    "Screen Recording" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekran Kaydı"
+          }
+        }
+      }
+    },
+    "Screen Recording permission required" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekran kaydı izni gerekli"
+          }
+        }
+      }
+    },
+    "Selected source not found" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seçili kaynak bulunamadı"
+          }
+        }
+      }
+    },
+    "Settings…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlar…"
+          }
+        }
+      }
+    },
+    "Show a brief on-screen message" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekranda kısa bilgi göster"
+          }
+        }
+      }
+    },
+    "Show in Finder" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finder'da Göster"
+          }
+        }
+      }
+    },
+    "Starting capture…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakalama başlatılıyor…"
+          }
+        }
+      }
+    },
+    "System audio" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sistem sesi"
+          }
+        }
+      }
+    },
+    "System audio and microphone are mixed into one audio track; both are heard everywhere, including Discord, VLC and browsers." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sistem sesi ve mikrofon tek ses track'ine karışır; Discord, VLC ve tarayıcılar dahil her yerde ikisi de duyulur."
+          }
+        }
+      }
+    },
+    "System audio level" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sistem sesi seviyesi"
+          }
+        }
+      }
+    },
+    "The language changes after ClipApp restarts." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dil, ClipApp yeniden başlatılınca değişir."
+          }
+        }
+      }
+    },
+    "Top left" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sol üst"
+          }
+        }
+      }
+    },
+    "Top right" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağ üst"
+          }
+        }
+      }
+    },
+    "Unavailable (capturing the main display)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kullanılamıyor (ana ekran yakalanıyor)"
+          }
+        }
+      }
+    },
+    "Video" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Video"
+          }
+        }
+      }
+    },
+    "Window" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pencere"
+          }
+        }
+      }
+    },
+    "Windows" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pencereler"
+          }
+        }
+      }
+    },
+    "You need to allow ClipApp under System Settings > General > Login Items." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sistem Ayarları > Genel > Giriş Öğeleri'nden ClipApp'e izin vermen gerekiyor."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
