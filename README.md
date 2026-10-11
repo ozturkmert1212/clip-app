@@ -5,7 +5,10 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/menu.png" alt="ClipApp menu showing capture status and the Save Last 30 Seconds command" width="240">
+  <img src="docs/images/menu.png" alt="ClipApp menu showing capture status and the Save Last 30 Seconds command" width="260">
+</p>
+
+<p align="center">
   <img src="docs/images/settings-top.png" alt="ClipApp settings: clip, video and audio options" width="300">
   <img src="docs/images/settings-bottom.png" alt="ClipApp settings: audio, saving and general options" width="300">
 </p>
