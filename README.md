@@ -1,5 +1,15 @@
 # ClipApp
 
+<p align="center">
+  <img src="docs/images/desktop.png" alt="ClipApp running in the menu bar, with its menu and settings window open on the desktop" width="900">
+</p>
+
+<p align="center">
+  <img src="docs/images/menu.png" alt="ClipApp menu showing capture status and the Save Last 30 Seconds command" width="240">
+  <img src="docs/images/settings-top.png" alt="ClipApp settings: clip, video and audio options" width="300">
+  <img src="docs/images/settings-bottom.png" alt="ClipApp settings: audio, saving and general options" width="300">
+</p>
+
 A menu bar "instant replay" clipping app for macOS (the Medal / ShadowPlay idea). It captures the screen in the background, keeps the last N seconds in memory and saves them as an mp4 when you press a global shortcut.
 
 The interface is in English by default. Türkçe için: Settings > General > Language.
