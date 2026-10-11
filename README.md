@@ -31,6 +31,12 @@ The interface is in English by default. Türkçe için: Settings > General > Lan
 - macOS 13+
 - Xcode 15+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`)
 
+## Download
+
+Grab the latest dmg from [Releases](https://github.com/ozturkmert1212/clip-app/releases/latest). Requires an Apple Silicon Mac with macOS 13 or later.
+
+The app is not notarized, so macOS blocks the first launch: open System Settings > Privacy & Security and click **Open Anyway** next to ClipApp (or run `xattr -dr com.apple.quarantine /Applications/ClipApp.app`). Then grant Screen Recording and restart the app.
+
 ## Build and install
 
 ```bash
