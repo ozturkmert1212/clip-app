@@ -7,3 +7,4 @@ graphify-out/
 swiftly.pkg
 .claude/settings.json
 dist/
+release-notes.md
