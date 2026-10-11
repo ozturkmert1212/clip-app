@@ -76,7 +76,7 @@ See `CLAUDE.md` for an architecture overview and development notes.
 
 `project.yml` contains the author's `DEVELOPMENT_TEAM` and `bundleIdPrefix`. Replace both with your own before building (your Team ID is the `OU=` value of your "Apple Development" certificate, also shown in Xcode > Settings > Accounts). Without a stable signing identity, macOS may ask for the Screen Recording permission again after every rebuild.
 
-There are no prebuilt binaries: the app is not notarized, so a build only runs on the Mac that signed it.
+If you would rather not build it yourself, a prebuilt dmg is available under [Releases](https://github.com/ozturkmert1212/clip-app/releases/latest), see "Download" above.
 
 ## License
 
