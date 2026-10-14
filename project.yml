@@ -62,6 +62,7 @@ targets:
     sources:
       - ClipAppTests
       - ClipApp/Buffer
+      - ClipApp/Capture/CapturePrivacy.swift
       - ClipApp/Clip
       - ClipApp/Encoding
       - ClipApp/Library/ClipCatalog.swift
