@@ -71,6 +71,7 @@ targets:
       - ClipApp/Library/ClipTrimmer.swift
       - ClipApp/Settings/AppLanguage.swift
       - ClipApp/App/GameContext.swift
+      - ClipApp/App/CaptureActivity.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mertozturk.ClipAppTests
