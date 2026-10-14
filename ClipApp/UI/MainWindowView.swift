@@ -152,7 +152,8 @@ struct GameIcon: View {
     }
 }
 
-/// Capture state, how much is buffered and the same action as the shortcut.
+/// Capture state, how much is buffered, and the two actions that are also
+/// on the shortcuts: saving a clip and starting or stopping a recording.
 private struct CaptureStatusView: View {
     @ObservedObject var permissions: PermissionManager
     @ObservedObject var settings: SettingsStore
@@ -160,36 +161,35 @@ private struct CaptureStatusView: View {
     @ObservedObject var capture: CaptureManager
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Brand.Space.one) {
             Divider()
-            HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Circle()
-                    .fill(statusColor)
-                    .frame(width: 8, height: 8)
-                Text(statusText)
-                    .font(.callout)
-                    .lineLimit(3)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            if let seconds = controller.recordingSeconds {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Circle()
-                        .fill(Color.red)
-                        .frame(width: 8, height: 8)
-                    Text("Recording · \(ClipFormat.duration(TimeInterval(seconds)))")
+            VStack(alignment: .leading, spacing: Brand.Space.half) {
+                HStack(alignment: .firstTextBaseline, spacing: Brand.Space.one) {
+                    indicator
+                    Text(verbatim: headline)
                         .font(.callout)
                         .monospacedDigit()
+                        .lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-            }
-            Text("Buffer: \(controller.bufferedSeconds) of \(settings.bufferSeconds) s")
-                .font(.caption)
-                .monospacedDigit()
-                .foregroundStyle(.secondary)
-            if let seconds = controller.byteLimitedSeconds {
-                Text("Memory cap active: content exceeds the target bitrate, keeping the last ~\(seconds) s")
+                // During a recording the headline is the recording; the source moves down here.
+                if controller.isRecording {
+                    Text(verbatim: captureText)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Text("Buffer: \(controller.bufferedSeconds) of \(settings.bufferSeconds) s")
                     .font(.caption)
+                    .monospacedDigit()
                     .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                if let seconds = controller.byteLimitedSeconds {
+                    Text("Memory cap active: content exceeds the target bitrate, keeping the last ~\(seconds) s")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             Button {
                 controller.saveClip()
@@ -197,39 +197,73 @@ private struct CaptureStatusView: View {
                 Text(controller.isSaving
                      ? AppLanguage.string("Saving Clip…")
                      : AppLanguage.string("Save Last \(settings.bufferSeconds) Seconds"))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            .buttonStyle(PrimaryButtonStyle())
             .disabled(controller.isSaving)
             Button {
                 controller.toggleRecording()
             } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: controller.isRecording ? "stop.fill" : "record.circle")
-                    Text(controller.recordingSeconds.map { AppLanguage.string("Stop Recording (\(ClipFormat.duration(TimeInterval($0))))") }
-                         ?? AppLanguage.string("Start Recording"))
-                        .monospacedDigit()
+                HStack(spacing: Brand.Space.one) {
+                    if let seconds = controller.recordingSeconds {
+                        RecordDot(onRed: true)
+                        Text("Stop Recording")
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                        Text(verbatim: ClipFormat.duration(TimeInterval(seconds)))
+                            .monospacedDigit()
+                    } else {
+                        Image(systemName: "record.circle")
+                        Text("Start Recording")
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
                 }
                 .frame(maxWidth: .infinity)
             }
-            .controlSize(.large)
-            .tint(controller.isRecording ? .red : nil)
+            .buttonStyle(RecordingButtonStyle(isRecording: controller.isRecording))
         }
-        .padding([.horizontal, .bottom], 12)
+        .padding([.horizontal, .bottom], Brand.Space.two - Brand.Space.half)
     }
 
-    private var statusColor: Color {
-        guard permissions.screenRecordingGranted else { return .red }
+    /// A dot for the states that are fine, a warning sign for the ones that
+    /// are not, so the difference does not hang on color alone.
+    @ViewBuilder
+    private var indicator: some View {
+        switch status {
+        case .recording:
+            RecordDot()
+        case .problem:
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.caption)
+                .foregroundStyle(status.color)
+        case .capturing, .idle:
+            Circle()
+                .fill(status.color)
+                .frame(width: Brand.dotSize, height: Brand.dotSize)
+        }
+    }
+
+    private var status: Brand.Status {
+        guard permissions.screenRecordingGranted else { return .problem }
+        if controller.isRecording { return .recording }
         switch capture.state {
-        case .running: return .green
-        case .starting: return .yellow
-        case .idle: return .secondary
-        case .failed, .permissionDenied: return .red
+        case .running: return .capturing
+        case .starting, .idle: return .idle
+        case .failed, .permissionDenied: return .problem
         }
     }
 
-    private var statusText: String {
+    private var headline: String {
+        if let seconds = controller.recordingSeconds, permissions.screenRecordingGranted {
+            return AppLanguage.string("Recording · \(ClipFormat.duration(TimeInterval(seconds)))")
+        }
+        return captureText
+    }
+
+    private var captureText: String {
         guard permissions.screenRecordingGranted else { return AppLanguage.string("Screen Recording permission required") }
         switch capture.state {
         case .idle: return AppLanguage.string("Capture off")

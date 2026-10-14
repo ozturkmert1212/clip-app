@@ -1594,6 +1594,16 @@
         }
       }
     },
+    "Stop Recording" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydı Durdur"
+          }
+        }
+      }
+    },
     "Stop Recording (%@)" : {
       "localizations" : {
         "tr" : {

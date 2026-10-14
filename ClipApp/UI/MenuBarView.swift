@@ -16,7 +16,12 @@ struct MenuBarView: View {
         if !permissions.screenRecordingGranted {
             Button(AppLanguage.string("Screen Recording permission needed")) { windows.showMain(.settings) }
         } else {
-            Text(verbatim: statusText)
+            // The same dot as in the window: indigo while capturing, red while recording.
+            Label {
+                Text(verbatim: statusText)
+            } icon: {
+                Image(nsImage: status.menuImage)
+            }
             if settings.microphoneEnabled, permissions.microphoneStatus != .granted {
                 Button(AppLanguage.string("Microphone permission needed")) { windows.showMain(.settings) }
             }
@@ -77,6 +82,15 @@ struct MenuBarView: View {
                     .disabled(controller.isRecording)
                 }
             }
+        }
+    }
+
+    private var status: Brand.Status {
+        if controller.isRecording { return .recording }
+        switch capture.state {
+        case .running: return .capturing
+        case .starting, .idle: return .idle
+        case .failed, .permissionDenied: return .problem
         }
     }
 
