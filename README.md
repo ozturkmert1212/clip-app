@@ -24,10 +24,10 @@ The interface is in English by default. Türkçe için: Settings > General > Lan
 - Record for as long as you like with Start/Stop Recording (menu, sidebar or a shortcut you assign in Settings). Recordings go to `Videos/` as `Recording_<date>_<time>.mp4`, are written straight to disk in fragments so a crash does not lose them, and the replay buffer keeps working meanwhile.
 - System audio and microphone, each with its own level. Every file gets a mixed audio track that all players use; game audio and microphone are also stored as separate, disabled tracks so their balance can be changed later (can be turned off in Settings).
 - A system notification when a clip is saved or something goes wrong (the notification reveals the clip in Finder), plus a small on-screen message in a corner of the screen for a few seconds. The message never ends up in clips and also shows above full screen games; its corner is chosen in Settings (default top left) and it can be turned off.
-- System notifications (banners) and ClipApp's own window stay out of clips while a display is captured.
+- System notifications (banners) and ClipApp's own windows stay out of clips while a display is captured. To show ClipApp in your clips and recordings (for a tutorial, say), turn on Settings > General > Show ClipApp in recordings; it takes effect at once without clearing the buffer or stopping a recording. The brief on-screen message stays out either way.
 - A clip library: thumbnails grouped by game in the sidebar, newest first, with rename, move to another game, reveal in Finder, copy and move to Trash, for one clip or a selection (⌘-click, ⇧-click, ⌘A). Double-click a clip to play it.
 - Editing: pick a range under the player and set the level of game audio and microphone separately (0–150 %, or mute) while listening. Save as a new file or over the original; the video is copied losslessly, or re-encoded to exactly the selected range.
-- Settings: buffer length, resolution, FPS, bitrate, source, audio, save folder, launch at login, language (English or Turkish).
+- Settings: buffer length, resolution, FPS, bitrate, source, audio, save folder, showing ClipApp in recordings, launch at login, language (English or Turkish).
 
 ## Requirements
 
