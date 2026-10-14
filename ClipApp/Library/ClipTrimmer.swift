@@ -45,10 +45,16 @@ enum ClipTrimmer {
         mode: Mode,
         audio: AudioEdit? = nil,
         isFullLength: Bool = false,
+        replacingOriginal: Bool = false,
         progress: @escaping @MainActor (Double) -> Void
     ) async throws -> URL {
         let asset = AVURLAsset(url: source, options: [AVURLAssetPreferPreciseDurationAndTimingKey: true])
-        let output = outputURL(for: source, suffix: isFullLength ? "edited" : "trimmed")
+        // A replacement is written beside the original under a hidden name
+        // and only swapped in once it is complete, so a failure or a cancel
+        // leaves the original as it was.
+        let output = replacingOriginal
+            ? source.deletingLastPathComponent().appendingPathComponent(".\(UUID().uuidString).tmp.mp4")
+            : outputURL(for: source, suffix: isFullLength ? "edited" : "trimmed")
         do {
             // An export session copies samples but ignores an audio mix
             // (measured), so anything beyond a plain cut goes through the
@@ -57,6 +63,15 @@ enum ClipTrimmer {
                 try await copy(asset, range: range, to: output, progress: progress)
             } else {
                 try await rewrite(asset, range: range, reencodesVideo: mode == .reencode, audio: audio, to: output, progress: progress)
+            }
+            if replacingOriginal {
+                let created = try? source.resourceValues(forKeys: [.creationDateKey]).creationDate
+                _ = try FileManager.default.replaceItemAt(source, withItemAt: output, options: .usingNewMetadataOnly)
+                // The clip keeps its place in the list.
+                if let created {
+                    try? FileManager.default.setAttributes([.creationDate: created], ofItemAtPath: source.path)
+                }
+                return source
             }
         } catch {
             try? FileManager.default.removeItem(at: output)

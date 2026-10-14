@@ -74,6 +74,16 @@
         }
       }
     },
+    "Ask every time" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her seferinde sor"
+          }
+        }
+      }
+    },
     "Audio" : {
       "localizations" : {
         "tr" : {
@@ -550,6 +560,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ekranlar"
+          }
+        }
+      }
+    },
+    "Don't ask again" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir daha sorma"
           }
         }
       }
@@ -1244,6 +1264,46 @@
         }
       }
     },
+    "Replace" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üzerine Yaz"
+          }
+        }
+      }
+    },
+    "Replace original" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orijinalin üzerine yaz"
+          }
+        }
+      }
+    },
+    "Replace the original" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orijinalin üzerine yaz"
+          }
+        }
+      }
+    },
+    "Replace the original clip?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orijinal klibin üzerine yazılsın mı?"
+          }
+        }
+      }
+    },
     "Required. To capture the screen and keep the last seconds in memory." : {
       "localizations" : {
         "tr" : {
@@ -1304,6 +1364,16 @@
         }
       }
     },
+    "Save" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydet"
+          }
+        }
+      }
+    },
     "Save Edited Clip" : {
       "localizations" : {
         "tr" : {
@@ -1320,6 +1390,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Son %lld Saniyeyi Kaydet"
+          }
+        }
+      }
+    },
+    "Save as a new clip" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni klip olarak kaydet"
+          }
+        }
+      }
+    },
+    "Save as new clip" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni klip olarak kaydet"
           }
         }
       }
@@ -1514,12 +1604,42 @@
         }
       }
     },
+    "The clip is overwritten with the edited version. This can't be undone." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klibin üzerine düzenlenmiş sürüm yazılır. Bu işlem geri alınamaz."
+          }
+        }
+      }
+    },
     "The disk couldn't keep up with the recording" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Disk kayda yetişemedi"
+          }
+        }
+      }
+    },
+    "The original was replaced" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orijinalin üzerine yazıldı"
+          }
+        }
+      }
+    },
+    "This can be changed in Settings." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu, Ayarlar'dan değiştirilebilir."
           }
         }
       }
@@ -1600,6 +1720,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Videolar"
+          }
+        }
+      }
+    },
+    "When saving an edited clip" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Düzenlenmiş klip kaydedilirken"
           }
         }
       }

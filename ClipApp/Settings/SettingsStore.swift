@@ -29,6 +29,21 @@ final class SettingsStore: ObservableObject {
         }
     }
 
+    /// What saving an edited clip does with the original.
+    enum EditSaveMode: String, CaseIterable, Identifiable {
+        case ask, newClip, replace
+
+        var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .ask: return AppLanguage.string("Ask every time")
+            case .newClip: return AppLanguage.string("Save as a new clip")
+            case .replace: return AppLanguage.string("Replace the original")
+            }
+        }
+    }
+
     static let bufferOptions = [15, 30, 60, 120]
     static let fpsOptions = [30, 60]
     static let bitrateOptions = [4, 6, 8, 12, 16, 24, 40]
@@ -53,6 +68,8 @@ final class SettingsStore: ObservableObject {
     @Published var keepAudioStems: Bool { didSet { defaults.set(keepAudioStems, forKey: Key.keepAudioStems) } }
     @Published var saveDirectory: URL { didSet { defaults.set(saveDirectory.path, forKey: Key.saveDirectory) } }
     @Published var fileNameFormat: String { didSet { defaults.set(fileNameFormat, forKey: Key.fileNameFormat) } }
+
+    @Published var editSaveMode: EditSaveMode { didSet { defaults.set(editSaveMode.rawValue, forKey: Key.editSaveMode) } }
 
     /// On-screen confirmation for saved clips and problems, see `HUD`.
     @Published var showHUD: Bool { didSet { defaults.set(showHUD, forKey: Key.showHUD) } }
@@ -92,6 +109,7 @@ final class SettingsStore: ObservableObject {
         static let showHUD = "showHUD"
         static let hudCorner = "hudCorner"
         static let openWindowAtLaunch = "openWindowAtLaunch"
+        static let editSaveMode = "editSaveMode"
     }
 
     init() {
@@ -123,6 +141,7 @@ final class SettingsStore: ObservableObject {
         showHUD = defaults.object(forKey: Key.showHUD) as? Bool ?? true
         hudCorner = defaults.string(forKey: Key.hudCorner).flatMap(HUD.Corner.init) ?? .topLeft
         openWindowAtLaunch = defaults.object(forKey: Key.openWindowAtLaunch) as? Bool ?? true
+        editSaveMode = defaults.string(forKey: Key.editSaveMode).flatMap(EditSaveMode.init) ?? .ask
         language = AppLanguage.selected
     }
 

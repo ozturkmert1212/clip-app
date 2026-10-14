@@ -83,6 +83,10 @@ struct SettingsView: View {
                         .help(settings.saveDirectory.path)
                     Button("Choose…", action: chooseDirectory)
                 }
+                Picker("When saving an edited clip", selection: $settings.editSaveMode) {
+                    ForEach(SettingsStore.EditSaveMode.allCases) { Text($0.title).tag($0) }
+                }
+                .id(settings.language)
                 TextField("File name", text: $settings.fileNameFormat)
                 Text("Example: \(settings.clipFileName(source: AppLanguage.string("Display"))).mp4\n{date}, {time} and {source} can be used.")
                     .font(.caption)

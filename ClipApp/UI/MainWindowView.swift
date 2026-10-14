@@ -42,7 +42,7 @@ struct MainWindowView: View {
                 if navigation.selection == .settings {
                     SettingsView(settings: settings, permissions: permissions, capture: capture)
                 } else {
-                    ClipsView(library: library, filter: navigation.selection)
+                    ClipsView(library: library, settings: settings, filter: navigation.selection)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

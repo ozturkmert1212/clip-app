@@ -5,6 +5,8 @@ import SwiftUI
 final class ClipPlayerModel: ObservableObject {
     enum Outcome {
         case saved(String)
+        /// The edit was written over the original, which is now what plays.
+        case replaced
         case failed(String)
     }
 
@@ -44,16 +46,19 @@ final class ClipPlayerModel: ObservableObject {
     private var timeObserver: Any?
     private var stopsAtTrimEnd = false
     private var exportTask: Task<Void, Never>?
-    private let onTrimmed: () -> Void
+    private let onTrimmed: (Bool) -> Void
     /// The levels the file's mixed track was made with.
     private var savedEdit = ClipTrimmer.AudioEdit()
     /// The preview's own copies of the two source tracks.
     private var previewTracks: [AVCompositionTrack] = []
 
-    /// `onTrimmed` is called after a trimmed clip was written.
-    init(url: URL, onTrimmed: @escaping () -> Void) {
+    /// `onTrimmed` is called after an edited clip was written, with whether
+    /// it replaced the original. `wasReplaced` says this model is showing the
+    /// result of such a replacement.
+    init(url: URL, wasReplaced: Bool, onTrimmed: @escaping (Bool) -> Void) {
         self.url = url
         self.onTrimmed = onTrimmed
+        outcome = wasReplaced ? .replaced : nil
         player = AVPlayer(url: url)
         timeObserver = player.addPeriodicTimeObserver(
             forInterval: CMTime(value: 1, timescale: 30),
@@ -220,7 +225,7 @@ final class ClipPlayerModel: ObservableObject {
         player.play()
     }
 
-    func saveTrimmed() {
+    func saveTrimmed(replacingOriginal: Bool) {
         guard exportTask == nil, canSave else { return }
         let range = CMTimeRange(
             start: CMTime(seconds: trimStart, preferredTimescale: 600),
@@ -234,11 +239,14 @@ final class ClipPlayerModel: ObservableObject {
         exportProgress = 0
         exportTask = Task {
             do {
-                let saved = try await ClipTrimmer.trim(url, range: range, mode: mode, audio: audio, isFullLength: isFullLength) {
+                let saved = try await ClipTrimmer.trim(
+                    url, range: range, mode: mode, audio: audio,
+                    isFullLength: isFullLength, replacingOriginal: replacingOriginal
+                ) {
                     self.exportProgress = $0
                 }
-                outcome = .saved(saved.lastPathComponent)
-                onTrimmed()
+                outcome = replacingOriginal ? .replaced : .saved(saved.lastPathComponent)
+                onTrimmed(replacingOriginal)
             } catch is CancellationError {
                 outcome = nil
             } catch {
@@ -279,15 +287,23 @@ final class ClipPlayerModel: ObservableObject {
 
 struct ClipPlayerView: View {
     let clip: ClipItem
+    let settings: SettingsStore
     let onClose: () -> Void
 
     @StateObject private var model: ClipPlayerModel
 
-    init(clip: ClipItem, onTrimmed: @escaping () -> Void, onClose: @escaping () -> Void) {
+    init(
+        clip: ClipItem,
+        settings: SettingsStore,
+        wasReplaced: Bool,
+        onTrimmed: @escaping (Bool) -> Void,
+        onClose: @escaping () -> Void
+    ) {
         self.clip = clip
+        self.settings = settings
         self.onClose = onClose
         // An autoclosure: the model is only built for the first of the view's values.
-        _model = StateObject(wrappedValue: ClipPlayerModel(url: clip.url, onTrimmed: onTrimmed))
+        _model = StateObject(wrappedValue: ClipPlayerModel(url: clip.url, wasReplaced: wasReplaced, onTrimmed: onTrimmed))
     }
 
     var body: some View {
@@ -306,7 +322,7 @@ struct ClipPlayerView: View {
             Divider()
             PlayerSurface(player: model.player)
             Divider()
-            TrimPanel(model: model)
+            TrimPanel(model: model, settings: settings)
         }
         .onAppear { model.player.play() }
         .onDisappear { model.player.pause() }
@@ -337,6 +353,12 @@ private struct PlayerSurface: NSViewRepresentable {
 
 private struct TrimPanel: View {
     @ObservedObject var model: ClipPlayerModel
+    let settings: SettingsStore
+
+    @State private var isChoosing = false
+    /// What the sheet was answered with, acted on once it is gone.
+    @State private var pendingChoice: SettingsStore.EditSaveMode?
+    @State private var isConfirmingReplace = false
 
     /// The controls to the left of the timeline and the waveforms.
     private static let leading: CGFloat = 290
@@ -401,7 +423,7 @@ private struct TrimPanel: View {
                         .frame(width: 120)
                     Button("Cancel", action: model.cancelExport)
                 } else {
-                    Button("Save Edited Clip", action: model.saveTrimmed)
+                    Button("Save Edited Clip", action: save)
                         .buttonStyle(.borderedProminent)
                         .disabled(!model.canSave)
                 }
@@ -411,6 +433,10 @@ private struct TrimPanel: View {
             switch model.outcome {
             case .saved(let name):
                 Label("Saved as \(name)", systemImage: "checkmark.circle.fill")
+                    .font(.callout)
+                    .foregroundStyle(.green)
+            case .replaced:
+                Label("The original was replaced", systemImage: "checkmark.circle.fill")
                     .font(.callout)
                     .foregroundStyle(.green)
             case .failed(let message):
@@ -423,6 +449,78 @@ private struct TrimPanel: View {
             }
         }
         .padding(12)
+        .sheet(isPresented: $isChoosing) {
+            if let choice = pendingChoice {
+                pendingChoice = nil
+                start(choice)
+            }
+        } content: {
+            SaveChoiceSheet { choice, remember in
+                if remember { settings.editSaveMode = choice }
+                pendingChoice = choice
+            }
+        }
+        .alert("Replace the original clip?", isPresented: $isConfirmingReplace) {
+            Button("Replace", role: .destructive) { model.saveTrimmed(replacingOriginal: true) }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("The clip is overwritten with the edited version. This can't be undone.")
+        }
+    }
+
+    private func save() {
+        if settings.editSaveMode == .ask {
+            isChoosing = true
+        } else {
+            start(settings.editSaveMode)
+        }
+    }
+
+    /// Replacing always asks once more, even when it is the remembered choice.
+    private func start(_ mode: SettingsStore.EditSaveMode) {
+        if mode == .replace {
+            isConfirmingReplace = true
+        } else {
+            model.saveTrimmed(replacingOriginal: false)
+        }
+    }
+
+    /// Asks what to do with the original, and whether to keep asking.
+    private struct SaveChoiceSheet: View {
+        let onChoose: (SettingsStore.EditSaveMode, Bool) -> Void
+
+        @Environment(\.dismiss) private var dismiss
+        @State private var choice = SettingsStore.EditSaveMode.newClip
+        @State private var remember = false
+
+        var body: some View {
+            VStack(alignment: .leading, spacing: 14) {
+                Text("Save Edited Clip")
+                    .font(.headline)
+                Picker("", selection: $choice) {
+                    Text("Save as new clip").tag(SettingsStore.EditSaveMode.newClip)
+                    Text("Replace original").tag(SettingsStore.EditSaveMode.replace)
+                }
+                .pickerStyle(.radioGroup)
+                .labelsHidden()
+                Toggle("Don't ask again", isOn: $remember)
+                Text("This can be changed in Settings.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                HStack {
+                    Spacer()
+                    Button("Cancel", role: .cancel) { dismiss() }
+                        .keyboardShortcut(.cancelAction)
+                    Button("Save") {
+                        dismiss()
+                        onChoose(choice, remember)
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+            }
+            .padding(20)
+            .frame(width: 340)
+        }
     }
 
     /// One audio source: mute, level and its waveform under the timeline.

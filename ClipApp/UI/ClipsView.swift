@@ -2,11 +2,14 @@ import SwiftUI
 
 struct ClipsView: View {
     @ObservedObject var library: ClipLibrary
+    let settings: SettingsStore
     /// The sidebar row this list belongs to; never `.settings`.
     let filter: SidebarItem
 
     @State private var selection: URL?
     @State private var playing: ClipItem?
+    /// Bumped when the open clip was replaced on disk, to load it afresh.
+    @State private var playerGeneration = 0
     @State private var renaming: ClipItem?
     @State private var newName = ""
     @State private var moving: [ClipItem] = []
@@ -17,6 +20,7 @@ struct ClipsView: View {
     var body: some View {
         content
             .onChange(of: filter) { _ in playing = nil }
+            .onChange(of: playing?.url) { _ in playerGeneration = 0 }
             // A clip deleted or renamed behind the player's back closes it.
             .onChange(of: library.items) { items in
                 if let playing, !items.contains(where: { $0.url == playing.url }) { self.playing = nil }
@@ -29,8 +33,13 @@ struct ClipsView: View {
     @ViewBuilder
     private var content: some View {
         if let playing {
-            ClipPlayerView(clip: playing, onTrimmed: library.refresh) { self.playing = nil }
-                .id(playing.url)
+            ClipPlayerView(clip: playing, settings: settings, wasReplaced: playerGeneration > 0) { replaced in
+                library.refresh()
+                if replaced { playerGeneration += 1 }
+            } onClose: {
+                self.playing = nil
+            }
+            .id("\(playing.url.path)#\(playerGeneration)")
         } else if !library.isLoaded {
             ProgressView()
         } else if shown.isEmpty {
