@@ -1624,6 +1624,16 @@
         }
       }
     },
+    "Start clipping when ClipApp opens" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ClipApp açılınca klip almayı başlat"
+          }
+        }
+      }
+    },
     "Starting capture…" : {
       "localizations" : {
         "tr" : {

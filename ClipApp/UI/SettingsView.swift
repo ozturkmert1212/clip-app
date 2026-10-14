@@ -153,6 +153,7 @@ struct SettingsView: View {
                 Text("ClipApp's own windows and menu appear in clips and recordings. The brief on-screen message never does.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                Toggle("Start clipping when ClipApp opens", isOn: $settings.startClippingAtLaunch)
                 Toggle("Open window at launch", isOn: $settings.openWindowAtLaunch)
                 Toggle("Launch at login", isOn: Binding(
                     get: { settings.launchAtLogin },

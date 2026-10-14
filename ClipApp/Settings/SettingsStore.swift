@@ -79,6 +79,12 @@ final class SettingsStore: ObservableObject {
         didSet { defaults.set(showClipAppInCaptures, forKey: CapturePrivacy.showsClipAppKey) }
     }
 
+    /// Whether clipping starts by itself at launch, a launch as a login item
+    /// included. Off by default: capture runs only once the user asks for it.
+    @Published var startClippingAtLaunch: Bool {
+        didSet { defaults.set(startClippingAtLaunch, forKey: CaptureActivity.startsAtLaunchKey) }
+    }
+
     /// Whether the main window comes up at launch. A launch as a login item
     /// never opens it.
     @Published var openWindowAtLaunch: Bool { didSet { defaults.set(openWindowAtLaunch, forKey: Key.openWindowAtLaunch) } }
@@ -143,6 +149,7 @@ final class SettingsStore: ObservableObject {
         showHUD = defaults.object(forKey: Key.showHUD) as? Bool ?? true
         hudCorner = defaults.string(forKey: Key.hudCorner).flatMap(HUD.Corner.init) ?? .topLeft
         showClipAppInCaptures = CapturePrivacy.storedShowsClipApp(in: defaults)
+        startClippingAtLaunch = CaptureActivity.storedStartsAtLaunch(in: defaults)
         openWindowAtLaunch = defaults.object(forKey: Key.openWindowAtLaunch) as? Bool ?? true
         editSaveMode = defaults.string(forKey: Key.editSaveMode).flatMap(EditSaveMode.init) ?? .ask
         language = AppLanguage.selected

@@ -94,7 +94,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             // Started by the system at login, the app stays in the menu bar.
             windows.showMain(.allClips)
         }
-        // Capture only starts when the user starts clipping or a recording.
+        // Capture only starts when the user starts clipping or a recording,
+        // or here if they asked for it, a launch at login included. Without
+        // the permission the window is already on Settings.
+        if settings.startClippingAtLaunch, permissions.screenRecordingGranted {
+            controller.startClipping()
+        }
     }
 
     /// A click on the Dock icon, or opening the app again while it runs.
