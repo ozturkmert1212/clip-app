@@ -44,6 +44,8 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mertozturk.ClipApp
+        # Apple Silicon only; a Release build would otherwise be universal.
+        ARCHS: arm64
         DEVELOPMENT_TEAM: CRHSYX58TX
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_IDENTITY: "Apple Development"
