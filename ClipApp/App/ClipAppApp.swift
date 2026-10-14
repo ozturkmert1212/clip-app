@@ -71,12 +71,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Asked once at first launch; a refusal only costs the banners.
         permissions.requestNotificationsIfUndetermined()
-        // Started by the system at login, the app stays in the menu bar.
-        if settings.openWindowAtLaunch, !Self.launchedAsLoginItem {
-            windows.showMain(.allClips)
-        }
+        controller.onOpenSettings = { [windows] in windows.showMain(.settings) }
         if !permissions.screenRecordingGranted {
-            windows.showPermissions()
+            // Nothing works without it, so the window opens where it is granted,
+            // whatever the launch was.
+            windows.showMain(.settings)
+        } else if settings.openWindowAtLaunch, !Self.launchedAsLoginItem {
+            // Started by the system at login, the app stays in the menu bar.
+            windows.showMain(.allClips)
         }
         // Capture starts as soon as the permission is there, including at launch.
         permissions.$screenRecordingGranted

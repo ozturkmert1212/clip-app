@@ -24,6 +24,12 @@ final class ClipController: ObservableObject {
 
     let capture: CaptureManager
 
+    /// Shows the Settings tab, where the permissions are; a click on a
+    /// permission notification ends up here.
+    var onOpenSettings: () -> Void = {} {
+        didSet { notifier.onOpenSettings = onOpenSettings }
+    }
+
     private let settings: SettingsStore
     private let permissions: PermissionManager
     private let ringBuffer: RingBuffer
@@ -135,9 +141,10 @@ final class ClipController: ObservableObject {
             outageTask = nil
             report(
                 title: AppLanguage.string("No Screen Recording permission"),
-                body: AppLanguage.string("Capture stopped, clips can't be saved. Allow ClipApp under System Settings > Privacy & Security > Screen Recording."),
+                body: AppLanguage.string("Capture stopped, clips can't be saved. Click to open ClipApp's Settings, where the permission is granted."),
                 hudDetail: AppLanguage.string("Capture stopped, clips can't be saved"),
-                identifier: "capture"
+                identifier: "capture",
+                opensSettings: true
             )
         case .failed(let message):
             lastFailure = message
@@ -160,8 +167,8 @@ final class ClipController: ObservableObject {
 
     /// A problem goes out both ways: the notification stays in Notification
     /// Center, the HUD is what is actually seen while the screen is captured.
-    private func report(title: String, body: String, hudDetail: String? = nil, identifier: String) {
-        notifier.show(title: title, body: body, identifier: identifier)
+    private func report(title: String, body: String, hudDetail: String? = nil, identifier: String, opensSettings: Bool = false) {
+        notifier.show(title: title, body: body, identifier: identifier, opensSettings: opensSettings)
         if settings.showHUD { hud.show(.failure, title: title, detail: hudDetail ?? body, in: settings.hudCorner) }
     }
 
@@ -198,7 +205,16 @@ final class ClipController: ObservableObject {
         guard !isSaving else { return }
         // Without the permission the buffer is empty or holds stale footage.
         if capture.state == .permissionDenied || !permissions.screenRecordingGranted {
-            finish(.failed(AppLanguage.string("No Screen Recording permission")))
+            isSaving = false
+            lastResult = .failed(AppLanguage.string("No Screen Recording permission"))
+            NSSound.beep()
+            report(
+                title: AppLanguage.string("Couldn't save clip"),
+                body: AppLanguage.string("No Screen Recording permission. Click to open ClipApp's Settings."),
+                hudDetail: AppLanguage.string("No Screen Recording permission"),
+                identifier: "clipFailed",
+                opensSettings: true
+            )
             return
         }
         // Capture timestamps are on the host clock, so "now" is too.

@@ -53,9 +53,11 @@ While developing, build with `-configuration Debug` and open `build/Build/Produc
 
 ## Permissions
 
-- **Screen Recording (required):** Requested at first launch. After granting it under System Settings > Privacy & Security > Screen Recording, restart the app.
-- **Microphone (optional):** Requested when the microphone is turned on in Settings. Without it, clips are saved with system audio only.
-- **Notifications (optional):** Requested at first launch; also available from the "Permissions…" window in the menu. macOS hides notifications by default while the screen is shared or recorded; since ClipApp captures the screen all the time, turn on "Allow notifications when mirroring or sharing the display" under System Settings > Notifications if you want to see the banners. The "Open Notification Settings" button in the "Permissions…" window takes you there. That switch cannot be flipped from code, so the on-screen message works independently of it.
+All permissions are listed under Settings > Permissions with their current state and a button to request them or to open the right page of System Settings. If Screen Recording is missing, the app opens there.
+
+- **Screen Recording (required):** Requested from that row. After granting it under System Settings > Privacy & Security > Screen Recording, restart the app (the row offers a button).
+- **Microphone (optional):** Requested when the microphone is turned on, in Settings or in the menu. Without it, clips are saved with system audio only.
+- **Notifications (optional):** Requested at first launch. macOS hides notifications by default while the screen is shared or recorded; since ClipApp captures the screen all the time, turn on "Allow notifications when mirroring or sharing the display" under System Settings > Notifications if you want to see the banners. The row has a button that takes you there. That switch cannot be flipped from code, so the on-screen message works independently of it.
 
 ## Language
 

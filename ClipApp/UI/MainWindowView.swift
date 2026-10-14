@@ -14,6 +14,8 @@ enum SidebarItem: Hashable {
 @MainActor
 final class MainNavigation: ObservableObject {
     @Published var selection: SidebarItem = .allClips
+    /// Counts requests to show Settings; each one shows it from the top.
+    @Published var settingsVisit = 0
 }
 
 struct MainWindowView: View {
@@ -41,6 +43,7 @@ struct MainWindowView: View {
             Group {
                 if navigation.selection == .settings {
                     SettingsView(settings: settings, permissions: permissions, capture: capture)
+                        .id(navigation.settingsVisit)
                 } else {
                     ClipsView(library: library, settings: settings, filter: navigation.selection)
                 }

@@ -1,13 +1,11 @@
 import AppKit
-import Combine
 import SwiftUI
 
-/// Hosts SwiftUI views in plain AppKit windows. An LSUIElement app has no
-/// reliable way to open a SwiftUI scene conditionally at launch.
+/// Hosts the main window's SwiftUI view in a plain AppKit window. With
+/// `LSUIElement` there is no reliable way to open a SwiftUI scene
+/// conditionally at launch.
 @MainActor
 final class WindowManager: NSObject, NSWindowDelegate {
-    private static let mainID = "main"
-    private static let permissionsID = "permissions"
     static let mainFrameName = "MainWindow"
 
     let navigation = MainNavigation()
@@ -15,41 +13,29 @@ final class WindowManager: NSObject, NSWindowDelegate {
     private let settings: SettingsStore
     private let permissions: PermissionManager
     private let controller: ClipController
-    private var windows: [String: NSWindow] = [:]
+    private var mainWindow: NSWindow?
     /// Starts watching the save folder the first time the window is shown.
     private lazy var library = ClipLibrary(settings: settings)
-    private var cancellables: Set<AnyCancellable> = []
 
     init(settings: SettingsStore, permissions: PermissionManager, controller: ClipController) {
         self.settings = settings
         self.permissions = permissions
         self.controller = controller
-        super.init()
-        // A window title is set once, so it has to follow the language by hand.
-        settings.$language
-            .dropFirst()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.windows[Self.permissionsID]?.title = AppLanguage.string("ClipApp Permissions")
-            }
-            .store(in: &cancellables)
-    }
-
-    func showPermissions() {
-        show(id: Self.permissionsID, title: AppLanguage.string("ClipApp Permissions")) {
-            LanguageRoot(settings: settings) { [permissions] in
-                PermissionView(permissions: permissions)
-            }
-        }
     }
 
     /// Brings the main window forward; `item` nil keeps what it was showing.
-    /// While it is open the app has a Dock icon, see `windowWillClose`.
+    /// Asking for Settings always lands at its top, where the permissions
+    /// are. While the window is open the app has a Dock icon, see
+    /// `windowWillClose`.
     func showMain(_ item: SidebarItem? = nil) {
         if let item { navigation.selection = item }
-        if windows[Self.mainID] == nil { windows[Self.mainID] = makeMainWindow() }
+        if item == .settings { navigation.settingsVisit += 1 }
+        let window = mainWindow ?? makeMainWindow()
+        mainWindow = window
         NSApp.setActivationPolicy(.regular)
-        show(windows[Self.mainID]!)
+        if window.isMiniaturized { window.deminiaturize(nil) }
+        NSApp.activate(ignoringOtherApps: true)
+        window.makeKeyAndOrderFront(nil)
     }
 
     private func makeMainWindow() -> NSWindow {
@@ -78,25 +64,7 @@ final class WindowManager: NSObject, NSWindowDelegate {
         return window
     }
 
-    private func show<Content: View>(id: String, title: String, @ViewBuilder content: () -> Content) {
-        if windows[id] == nil {
-            let window = NSWindow(contentViewController: NSHostingController(rootView: content()))
-            window.title = title
-            window.styleMask = [.titled, .closable]
-            window.isReleasedWhenClosed = false
-            window.center()
-            windows[id] = window
-        }
-        show(windows[id]!)
-    }
-
-    private func show(_ window: NSWindow) {
-        if window.isMiniaturized { window.deminiaturize(nil) }
-        NSApp.activate(ignoringOtherApps: true)
-        window.makeKeyAndOrderFront(nil)
-    }
-
-    // MARK: - NSWindowDelegate (main window only)
+    // MARK: - NSWindowDelegate
 
     /// Closing the window only hides the interface: the app goes back to the
     /// menu bar and capture keeps running.

@@ -10,6 +10,47 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
+            Section("Permissions") {
+                PermissionRow(
+                    icon: "rectangle.dashed.badge.record",
+                    title: "Screen Recording",
+                    detail: "Required. To capture the screen and keep the last seconds in memory.",
+                    status: permissions.screenRecordingStatus,
+                    action: permissions.requestScreenRecording
+                ) {
+                    // A running app keeps seeing the old answer.
+                    if permissions.screenRecordingStatus == .denied {
+                        Text("ClipApp only sees this permission after a restart: turn it on in System Settings, then restart.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Button("Restart ClipApp", action: permissions.relaunch)
+                            .controlSize(.small)
+                    }
+                }
+                PermissionRow(
+                    icon: "mic",
+                    title: "Microphone",
+                    detail: "Optional. To add your own voice to clips.",
+                    status: permissions.microphoneStatus,
+                    action: permissions.requestMicrophone
+                ) {}
+                PermissionRow(
+                    icon: "bell",
+                    title: "Notifications",
+                    detail: "Optional. To tell you when a clip is saved or something goes wrong.",
+                    status: permissions.notificationStatus,
+                    action: permissions.requestNotifications
+                ) {
+                    Text("If no banner shows up: macOS hides banners because ClipApp captures the screen all the time. Turn on \"Allow notifications when mirroring or sharing the display\" at the top of the Notifications page.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button("Open Notification Settings", action: permissions.openNotificationSettings)
+                        .controlSize(.small)
+                }
+            }
+
             Section("Clip") {
                 Picker("Buffer length", selection: $settings.bufferSeconds) {
                     ForEach(SettingsStore.bufferOptions, id: \.self) { Text("\($0) seconds").tag($0) }
@@ -194,5 +235,51 @@ struct SettingsView: View {
         if panel.runModal() == .OK, let url = panel.url {
             settings.saveDirectory = url
         }
+    }
+}
+
+/// One permission: what it is for, where it stands right now, and the one
+/// thing that can be done about it.
+private struct PermissionRow<Extra: View>: View {
+    let icon: String
+    let title: LocalizedStringKey
+    let detail: LocalizedStringKey
+    let status: PermissionManager.Status
+    let action: () -> Void
+    @ViewBuilder let extra: () -> Extra
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .font(.title3)
+                .frame(width: 26)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                extra()
+            }
+            Spacer(minLength: 12)
+            VStack(alignment: .trailing, spacing: 6) {
+                switch status {
+                case .granted:
+                    Label("Granted", systemImage: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                case .denied:
+                    Label("Not granted", systemImage: "xmark.circle.fill")
+                        .foregroundStyle(.orange)
+                    // The system only asks once; after that the switch is there.
+                    Button("Open System Settings", action: action)
+                case .notDetermined:
+                    Label("Not determined", systemImage: "questionmark.circle")
+                        .foregroundStyle(.secondary)
+                    Button("Request", action: action)
+                }
+            }
+            .font(.callout)
+        }
+        .padding(.vertical, 2)
     }
 }

@@ -54,16 +54,6 @@
         }
       }
     },
-    "After turning on Screen Recording, restart ClipApp for the change to take effect." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ekran Kaydı iznini açtıktan sonra değişikliğin geçerli olması için ClipApp'i yeniden başlat."
-          }
-        }
-      }
-    },
     "All Clips" : {
       "localizations" : {
         "tr" : {
@@ -254,12 +244,12 @@
         }
       }
     },
-    "Capture stopped, clips can't be saved. Allow ClipApp under System Settings > Privacy & Security > Screen Recording." : {
+    "Capture stopped, clips can't be saved. Click to open ClipApp's Settings, where the permission is granted." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yakalama durdu, klip alınamaz. Sistem Ayarları > Gizlilik ve Güvenlik > Ekran Kaydı'ndan ClipApp'e izin ver."
+            "value" : "Yakalama durdu, klip kaydedilemiyor. İznin verildiği ClipApp Ayarları'nı açmak için tıkla."
           }
         }
       }
@@ -354,22 +344,12 @@
         }
       }
     },
-    "ClipApp Permissions" : {
+    "ClipApp only sees this permission after a restart: turn it on in System Settings, then restart." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ClipApp İzinleri"
-          }
-        }
-      }
-    },
-    "ClipApp needs permission to work" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ClipApp'in çalışması için izin gerekiyor"
+            "value" : "ClipApp bu izni ancak yeniden başlatılınca görür: Sistem Ayarları'nda aç, sonra yeniden başlat."
           }
         }
       }
@@ -924,6 +904,16 @@
         }
       }
     },
+    "No Screen Recording permission. Click to open ClipApp's Settings." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekran Kaydı izni yok. ClipApp Ayarları'nı açmak için tıkla."
+          }
+        }
+      }
+    },
     "No clips yet" : {
       "localizations" : {
         "tr" : {
@@ -960,6 +950,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Henüz kayıt yok"
+          }
+        }
+      }
+    },
+    "Not determined" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Belirlenmedi"
+          }
+        }
+      }
+    },
+    "Not granted" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verilmedi"
           }
         }
       }
@@ -1084,12 +1094,12 @@
         }
       }
     },
-    "Permissions…" : {
+    "Permissions" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "İzinler…"
+            "value" : "İzinler"
           }
         }
       }
@@ -1304,6 +1314,16 @@
         }
       }
     },
+    "Request" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İste"
+          }
+        }
+      }
+    },
     "Required. To capture the screen and keep the last seconds in memory." : {
       "localizations" : {
         "tr" : {
@@ -1330,6 +1350,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yeniden Başlat"
+          }
+        }
+      }
+    },
+    "Restart ClipApp" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ClipApp'i Yeniden Başlat"
           }
         }
       }

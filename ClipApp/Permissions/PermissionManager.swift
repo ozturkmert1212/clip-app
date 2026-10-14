@@ -5,22 +5,39 @@ import UserNotifications
 
 @MainActor
 final class PermissionManager: ObservableObject {
-    enum MicrophoneStatus {
+    enum Status {
         case notDetermined, granted, denied
     }
-    typealias NotificationStatus = MicrophoneStatus
+    typealias MicrophoneStatus = Status
+    typealias NotificationStatus = Status
 
     @Published private(set) var screenRecordingGranted = CGPreflightScreenCaptureAccess()
+    /// The system has no "not asked yet" for Screen Recording, so the app
+    /// remembers whether it asked.
+    @Published private(set) var screenRecordingRequested = UserDefaults.standard.bool(forKey: PermissionManager.screenRequestedKey)
     @Published private(set) var microphoneStatus = PermissionManager.currentMicrophoneStatus()
     /// Unknown until the first asynchronous check comes back.
     @Published private(set) var notificationStatus: NotificationStatus = .notDetermined
 
     private static let screenRequestedKey = "hasRequestedScreenRecording"
     private var poll: Timer?
+    private var activation: NSObjectProtocol?
+
+    /// Without the permission and after asking, the switch may already be on
+    /// in System Settings: a running process keeps seeing the old answer.
+    var screenRecordingStatus: Status {
+        screenRecordingGranted ? .granted : (screenRecordingRequested ? .denied : .notDetermined)
+    }
 
     init() {
-        // Permissions can be granted or revoked in System Settings at any time.
+        // Permissions can be granted or revoked in System Settings at any time:
+        // checked when the user comes back to the app, and on a timer.
         refresh()
+        activation = NotificationCenter.default.addObserver(
+            forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.refresh() }
+        }
         poll = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.refresh() }
         }
@@ -80,6 +97,7 @@ final class PermissionManager: ObservableObject {
             openSettings(pane: "Privacy_ScreenCapture")
         } else {
             defaults.set(true, forKey: Self.screenRequestedKey)
+            screenRecordingRequested = true
             CGRequestScreenCaptureAccess()
         }
         refresh()

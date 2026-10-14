@@ -8,6 +8,11 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
     private static let clipCategory = "clipSaved"
     private static let revealAction = "reveal"
     private static let pathKey = "path"
+    private static let settingsKey = "settings"
+
+    /// Called on the main queue when a notification about a missing
+    /// permission is clicked.
+    var onOpenSettings: () -> Void = {}
 
     private let logger = Logger(subsystem: "com.mertozturk.ClipApp", category: "notifications")
     private let center = UNUserNotificationCenter.current()
@@ -39,10 +44,12 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
     }
 
     /// A later message with the same `identifier` replaces the earlier one.
-    func show(title: String, body: String, identifier: String) {
+    /// With `opensSettings` a click on it shows ClipApp's Settings.
+    func show(title: String, body: String, identifier: String, opensSettings: Bool = false) {
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
+        if opensSettings { content.userInfo = [Self.settingsKey: true] }
         post(content, identifier: identifier)
     }
 
@@ -69,10 +76,14 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        if response.actionIdentifier != UNNotificationDismissActionIdentifier,
-           let path = response.notification.request.content.userInfo[Self.pathKey] as? String {
-            DispatchQueue.main.async {
-                NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: path)])
+        let userInfo = response.notification.request.content.userInfo
+        if response.actionIdentifier != UNNotificationDismissActionIdentifier {
+            if let path = userInfo[Self.pathKey] as? String {
+                DispatchQueue.main.async {
+                    NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: path)])
+                }
+            } else if userInfo[Self.settingsKey] != nil {
+                DispatchQueue.main.async { [onOpenSettings] in onOpenSettings() }
             }
         }
         completionHandler()
