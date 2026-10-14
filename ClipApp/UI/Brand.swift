@@ -61,6 +61,12 @@ enum Brand {
     /// The dot itself, as in the icon. Only ever means "recording".
     static let recordDot = Palette.recordBright
 
+    /// The system's own signal colors, named for what they say here. They
+    /// always come with a symbol or a word.
+    static let success = Color.green
+    static let warning = Color.orange
+    static let failure = Color.red
+
     /// Hairlines around cards and neutral buttons.
     static let hairline = Color(nsColor: .separatorColor)
 
@@ -95,7 +101,7 @@ enum Brand {
             case .capturing: return Brand.accentText
             case .recording: return Brand.recordDot
             case .idle: return Color.secondary
-            case .problem: return Color.orange
+            case .problem: return Brand.warning
             }
         }
 

@@ -358,7 +358,7 @@ private struct TrimPanel: View {
     private static let leading: CGFloat = 290
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Brand.Space.one) {
             HStack(spacing: 0) {
                 Label("Trim", systemImage: "scissors")
                     .frame(width: Self.leading, alignment: .leading)
@@ -428,15 +428,15 @@ private struct TrimPanel: View {
             case .saved(let name):
                 Label("Saved as \(name)", systemImage: "checkmark.circle.fill")
                     .font(.callout)
-                    .foregroundStyle(.green)
+                    .foregroundStyle(Brand.success)
             case .replaced:
                 Label("The original was replaced", systemImage: "checkmark.circle.fill")
                     .font(.callout)
-                    .foregroundStyle(.green)
+                    .foregroundStyle(Brand.success)
             case .failed(let message):
                 Label("Couldn't save the edited clip: \(message)", systemImage: "exclamationmark.triangle.fill")
                     .font(.callout)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(Brand.failure)
                     .fixedSize(horizontal: false, vertical: true)
             case nil:
                 EmptyView()
@@ -488,7 +488,7 @@ private struct TrimPanel: View {
         @State private var remember = false
 
         var body: some View {
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: Brand.Space.two) {
                 Text("Save Edited Clip")
                     .font(.headline)
                 Picker("", selection: $choice) {
@@ -513,7 +513,7 @@ private struct TrimPanel: View {
                     .keyboardShortcut(.defaultAction)
                 }
             }
-            .padding(20)
+            .padding(Brand.Space.three)
             .frame(width: 340)
         }
     }
@@ -548,7 +548,7 @@ private struct TrimPanel: View {
                         .monospacedDigit()
                         .frame(width: 36, alignment: .trailing)
                 }
-                .padding(.trailing, 10)
+                .padding(.trailing, Brand.Space.one)
                 .frame(width: TrimPanel.leading, alignment: .leading)
                 Waveform(peaks: peaks, level: level, isMuted: isMuted, color: color)
                     // Lines up with the timeline's bar, which is inset by its handles.

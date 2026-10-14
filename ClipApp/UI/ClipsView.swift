@@ -287,14 +287,14 @@ private struct ClipCard<Actions: View>: View {
                             .font(.caption.weight(.medium))
                             .monospacedDigit()
                             .foregroundStyle(.white)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
+                            .padding(.horizontal, Brand.Space.one)
+                            .padding(.vertical, Brand.Space.half / 2)
                             .background(Color.black.opacity(0.65), in: Capsule())
-                            .padding(6)
+                            .padding(Brand.Space.one)
                     }
                 }
             HStack(alignment: .top, spacing: Brand.Space.half) {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: Brand.Space.half) {
                     Text(verbatim: clip.name)
                         .fontWeight(.medium)
                         .lineLimit(1)

@@ -101,10 +101,10 @@ private struct HUDView: View {
     let detail: String?
 
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: Brand.Space.one) {
             Image(systemName: kind == .success ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
                 .font(.title2)
-                .foregroundStyle(kind == .success ? Color.green : Color.yellow)
+                .foregroundStyle(kind == .success ? Brand.success : Color.yellow)
             VStack(alignment: .leading, spacing: 1) {
                 Text(title)
                     .font(.headline)
@@ -118,13 +118,13 @@ private struct HUDView: View {
                 }
             }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.horizontal, Brand.Space.two)
+        .padding(.vertical, Brand.Space.one)
         .frame(maxWidth: 340, alignment: .leading)
         .fixedSize()
-        .background(Color.black.opacity(0.8), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(Color.black.opacity(0.8), in: RoundedRectangle(cornerRadius: Brand.Radius.card, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: Brand.Radius.card, style: .continuous)
                 .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
         )
     }

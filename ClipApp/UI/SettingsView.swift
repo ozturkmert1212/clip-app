@@ -159,12 +159,12 @@ struct SettingsView: View {
                 if !settings.runsFromApplications {
                     Text("For this option, copy ClipApp to the /Applications folder and open it from there. It is currently running from: \(Bundle.main.bundlePath)")
                         .font(.caption)
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(Brand.warning)
                 }
                 if let error = settings.launchAtLoginError {
                     Text(error)
                         .font(.caption)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(Brand.failure)
                 }
             }
 
@@ -266,11 +266,11 @@ private struct PermissionRow<Extra: View>: View {
     @ViewBuilder let extra: () -> Extra
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: Brand.Space.two) {
             Image(systemName: icon)
                 .font(.title3)
                 .frame(width: 26)
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Brand.Space.half) {
                 Text(title)
                 Text(detail)
                     .font(.caption)
@@ -279,14 +279,14 @@ private struct PermissionRow<Extra: View>: View {
                 extra()
             }
             Spacer(minLength: 12)
-            VStack(alignment: .trailing, spacing: 6) {
+            VStack(alignment: .trailing, spacing: Brand.Space.one) {
                 switch status {
                 case .granted:
                     Label("Granted", systemImage: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
+                        .foregroundStyle(Brand.success)
                 case .denied:
                     Label("Not granted", systemImage: "xmark.circle.fill")
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(Brand.warning)
                     // The system only asks once; after that the switch is there.
                     Button("Open System Settings", action: action)
                 case .notDetermined:
@@ -297,6 +297,6 @@ private struct PermissionRow<Extra: View>: View {
             }
             .font(.callout)
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, Brand.Space.half)
     }
 }
