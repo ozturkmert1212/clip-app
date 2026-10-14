@@ -58,8 +58,9 @@ final class CaptureManager: ObservableObject {
         }
     }
 
-    /// Our own windows that must never end up in a clip (the HUD). Read on
-    /// every (re)start.
+    /// Our own windows that must never end up in a clip (the HUD). Only used
+    /// if ClipApp itself cannot be excluded as an application, which covers
+    /// every window it has or opens later. Read on every (re)start.
     var excludedWindowIDs: [CGWindowID] = []
 
     /// Draws every notification banner. Kept out of display captures so that
@@ -346,14 +347,20 @@ final class CaptureManager: ObservableObject {
             logger.error("Nothing excluded from capture: shareable content unavailable")
             return Exclusions()
         }
-        let result = Exclusions(
-            windows: content.windows.filter { excludedWindowIDs.contains($0.windowID) },
-            applications: content.applications.filter { $0.bundleIdentifier == Self.notificationCenterBundleIdentifier }
-        )
-        if result.windows.count != excludedWindowIDs.count {
-            logger.error("Only \(result.windows.count) of \(self.excludedWindowIDs.count) own window(s) found to exclude")
+        // Excluding ClipApp as an application keeps the main window, its
+        // sheets and menus and the HUD out of clips without tracking window IDs.
+        let own = content.applications.filter { $0.bundleIdentifier == Bundle.main.bundleIdentifier }
+        let notificationCenter = content.applications.filter {
+            $0.bundleIdentifier == Self.notificationCenterBundleIdentifier
         }
-        if result.applications.isEmpty {
+        let result = Exclusions(
+            windows: own.isEmpty ? content.windows.filter { excludedWindowIDs.contains($0.windowID) } : [],
+            applications: own + notificationCenter
+        )
+        if own.isEmpty {
+            logger.error("ClipApp not found as an application; excluding \(result.windows.count) of \(self.excludedWindowIDs.count) own window(s) instead")
+        }
+        if notificationCenter.isEmpty {
             logger.error("Notification Center not found; banners will be captured")
         }
         return result

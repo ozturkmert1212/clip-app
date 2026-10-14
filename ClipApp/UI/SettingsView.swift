@@ -105,6 +105,7 @@ struct SettingsView: View {
                 Text("Appears in the chosen corner for a few seconds when a clip is saved or something goes wrong; it never ends up in clips. A system notification is sent as well.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                Toggle("Open window at launch", isOn: $settings.openWindowAtLaunch)
                 Toggle("Launch at login", isOn: Binding(
                     get: { settings.launchAtLogin },
                     set: { settings.setLaunchAtLogin($0) }
@@ -124,7 +125,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 500, height: 820)
+        .task { await reloadSources() }
         // The window is reused, so the list is refreshed whenever it comes forward.
         .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in
             // Also picks up a microphone permission flipped in System Settings.

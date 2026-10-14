@@ -57,6 +57,10 @@ final class SettingsStore: ObservableObject {
     @Published var showHUD: Bool { didSet { defaults.set(showHUD, forKey: Key.showHUD) } }
     @Published var hudCorner: HUD.Corner { didSet { defaults.set(hudCorner.rawValue, forKey: Key.hudCorner) } }
 
+    /// Whether the main window comes up at launch. A launch as a login item
+    /// never opens it.
+    @Published var openWindowAtLaunch: Bool { didSet { defaults.set(openWindowAtLaunch, forKey: Key.openWindowAtLaunch) } }
+
     /// Takes effect at the next launch, see `AppLanguage`.
     @Published var language: AppLanguage { didSet { AppLanguage.selected = language } }
 
@@ -86,6 +90,7 @@ final class SettingsStore: ObservableObject {
         static let fileNameFormat = "fileNameFormat"
         static let showHUD = "showHUD"
         static let hudCorner = "hudCorner"
+        static let openWindowAtLaunch = "openWindowAtLaunch"
     }
 
     init() {
@@ -116,6 +121,7 @@ final class SettingsStore: ObservableObject {
         fileNameFormat = defaults.string(forKey: Key.fileNameFormat) ?? Self.defaultFileNameFormat
         showHUD = defaults.object(forKey: Key.showHUD) as? Bool ?? true
         hudCorner = defaults.string(forKey: Key.hudCorner).flatMap(HUD.Corner.init) ?? .topLeft
+        openWindowAtLaunch = defaults.object(forKey: Key.openWindowAtLaunch) as? Bool ?? true
         language = AppLanguage.selected
     }
 

@@ -17,6 +17,8 @@ final class ClipController: ObservableObject {
     /// Set while the ring buffer's byte limit keeps it shorter than the
     /// configured duration: the seconds it currently reaches back.
     @Published private(set) var byteLimitedSeconds: Int?
+    /// How far back a clip saved right now would reach, for the status strip.
+    @Published private(set) var bufferedSeconds = 0
 
     let capture: CaptureManager
 
@@ -72,6 +74,10 @@ final class ClipController: ObservableObject {
                 let status = self.ringBuffer.videoStatus()
                 let seconds = status.isByteLimited ? Int(status.span.rounded()) : nil
                 if seconds != self.byteLimitedSeconds { self.byteLimitedSeconds = seconds }
+                // Measured to now, not to the newest frame: a static screen delivers none.
+                let reach = status.oldest.map { (CMClockGetTime(CMClockGetHostTimeClock()) - $0).seconds } ?? 0
+                let buffered = min(self.settings.bufferSeconds, max(0, Int(reach)))
+                if buffered != self.bufferedSeconds { self.bufferedSeconds = buffered }
             }
             .store(in: &cancellables)
         capture.$state

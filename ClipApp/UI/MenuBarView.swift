@@ -34,12 +34,15 @@ struct MenuBarView: View {
             controller.openClipDirectory()
         }
         Divider()
+        Button("Open ClipApp") {
+            windows.showMain(.clips)
+        }
         Button("Settings…") {
-            windows.showSettings(settings, capture: capture, permissions: permissions)
+            windows.showMain(.settings)
         }
         .keyboardShortcut(",")
         Button("Permissions…") {
-            windows.showPermissions(permissions)
+            windows.showPermissions()
         }
         Divider()
         Button("Quit ClipApp") {

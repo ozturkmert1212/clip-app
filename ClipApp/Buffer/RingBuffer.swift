@@ -28,6 +28,8 @@ final class RingBuffer {
         let bytes: Int
         /// Seconds between the oldest and the newest buffered frame.
         let span: TimeInterval
+        /// Presentation time of the oldest buffered frame, on the host clock.
+        let oldest: CMTime?
         /// The byte limit, not the duration, currently decides how far back the buffer reaches.
         let isByteLimited: Bool
     }
@@ -59,7 +61,7 @@ final class RingBuffer {
         lock.lock()
         defer { lock.unlock() }
         let span = video.last.map { ($0.time - video[0].time).seconds } ?? 0
-        return VideoStatus(bytes: videoBytes, span: span, isByteLimited: isByteLimited)
+        return VideoStatus(bytes: videoBytes, span: span, oldest: video.first?.time, isByteLimited: isByteLimited)
     }
 
     /// A shorter duration takes effect on the next keyframe; a longer one fills

@@ -114,12 +114,32 @@
         }
       }
     },
+    "Buffer: %lld of %lld s" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tampon: %lld / %lld sn"
+          }
+        }
+      }
+    },
     "Can't write to the save folder: %@" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kayıt klasörüne yazılamıyor: %@"
+          }
+        }
+      }
+    },
+    "Capture error, retrying" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakalama hatası, yeniden deneniyor"
           }
         }
       }
@@ -200,6 +220,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Onun yerine ana ekran yakalanıyor. Kaynak geri gelince ya da ayarlardan yenisini seçince düzelir."
+          }
+        }
+      }
+    },
+    "Capturing · %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakalanıyor · %@"
           }
         }
       }
@@ -287,22 +317,22 @@
         }
       }
     },
-    "ClipApp Settings" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ClipApp Ayarları"
-          }
-        }
-      }
-    },
     "ClipApp needs permission to work" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "ClipApp'in çalışması için izin gerekiyor"
+          }
+        }
+      }
+    },
+    "Clips" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klipler"
           }
         }
       }
@@ -607,6 +637,16 @@
         }
       }
     },
+    "No clips yet" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Henüz klip yok"
+          }
+        }
+      }
+    },
     "No display found to capture" : {
       "localizations" : {
         "tr" : {
@@ -657,6 +697,16 @@
         }
       }
     },
+    "Open ClipApp" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ClipApp'i Aç"
+          }
+        }
+      }
+    },
     "Open Clips Folder" : {
       "localizations" : {
         "tr" : {
@@ -683,6 +733,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sistem Ayarları'nı Aç"
+          }
+        }
+      }
+    },
+    "Open window at launch" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açılışta pencereyi aç"
           }
         }
       }
@@ -797,6 +857,16 @@
         }
       }
     },
+    "Saved clips appear here. Press the clip shortcut or use the save button to keep the last seconds." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydettiğin klipler burada görünür. Son saniyeleri saklamak için klip kısayoluna bas ya da kaydet düğmesini kullan."
+          }
+        }
+      }
+    },
     "Saving" : {
       "localizations" : {
         "tr" : {
@@ -843,6 +913,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Seçili kaynak bulunamadı"
+          }
+        }
+      }
+    },
+    "Settings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlar"
           }
         }
       }
