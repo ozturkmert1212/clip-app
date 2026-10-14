@@ -6,6 +6,7 @@ import SwiftUI
 @MainActor
 final class WindowManager: NSObject, NSWindowDelegate {
     private static let mainID = "main"
+    static let mainFrameName = "MainWindow"
 
     let navigation = MainNavigation()
 
@@ -56,7 +57,7 @@ final class WindowManager: NSObject, NSWindowDelegate {
         window.setContentSize(NSSize(width: 960, height: 640))
         window.center()
         // Restores the last frame if there is one, and saves it from here on.
-        window.setFrameAutosaveName("MainWindow")
+        window.setFrameAutosaveName(Self.mainFrameName)
         window.delegate = self
         return window
     }

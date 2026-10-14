@@ -4,6 +4,7 @@ struct ClipsView: View {
     @ObservedObject var library: ClipLibrary
 
     @State private var selection: URL?
+    @State private var playing: ClipItem?
     @State private var renaming: ClipItem?
     @State private var newName = ""
     @State private var failure: Failure?
@@ -15,13 +16,20 @@ struct ClipsView: View {
 
     var body: some View {
         Group {
-            if !library.isLoaded {
+            if let playing {
+                ClipPlayerView(clip: playing) { self.playing = nil }
+                    .id(playing.url)
+            } else if !library.isLoaded {
                 ProgressView()
             } else if library.clips.isEmpty {
                 emptyState
             } else {
                 grid
             }
+        }
+        // A clip deleted or renamed behind the player's back closes it.
+        .onChange(of: library.clips) { clips in
+            if let playing, !clips.contains(where: { $0.url == playing.url }) { self.playing = nil }
         }
         .alert("Rename Clip", isPresented: Binding(get: { renaming != nil }, set: { if !$0 { renaming = nil } })) {
             TextField("Name", text: $newName)
@@ -46,6 +54,7 @@ struct ClipsView: View {
                         actions(for: clip)
                     }
                     .onTapGesture { selection = clip.url }
+                    .simultaneousGesture(TapGesture(count: 2).onEnded { playing = clip })
                     .contextMenu { actions(for: clip) }
                 }
             }
@@ -70,6 +79,8 @@ struct ClipsView: View {
 
     @ViewBuilder
     private func actions(for clip: ClipItem) -> some View {
+        Button("Play") { playing = clip }
+        Divider()
         Button("Rename…") {
             newName = clip.name
             renaming = clip

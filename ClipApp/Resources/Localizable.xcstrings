@@ -847,6 +847,16 @@
         }
       }
     },
+    "Play" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oynat"
+          }
+        }
+      }
+    },
     "Quit ClipApp" : {
       "localizations" : {
         "tr" : {
