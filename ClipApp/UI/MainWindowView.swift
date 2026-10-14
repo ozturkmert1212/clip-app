@@ -315,29 +315,29 @@ private struct CaptureStatusView: View {
                 }
                 .buttonStyle(PrimaryButtonStyle())
             case .saveClip:
-                HStack(spacing: Brand.Space.one) {
-                    Button {
-                        controller.saveClip()
-                    } label: {
-                        Text(controller.isSaving
-                             ? AppLanguage.string("Saving Clip…")
-                             : AppLanguage.string("Save Last \(settings.bufferSeconds) Seconds"))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(PrimaryButtonStyle())
-                    .disabled(controller.isSaving)
-                    // Secondary and small: the sidebar has no room for two titles side by side.
-                    Button {
-                        controller.stopClipping()
-                    } label: {
-                        Image(systemName: "stop.fill")
-                    }
-                    .buttonStyle(NeutralButtonStyle())
-                    .help(Text("Stop Clipping"))
-                    .accessibilityLabel(Text("Stop Clipping"))
+                Button {
+                    controller.saveClip()
+                } label: {
+                    Text(controller.isSaving
+                         ? AppLanguage.string("Saving Clip…")
+                         : AppLanguage.string("Save Last \(settings.bufferSeconds) Seconds"))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .frame(maxWidth: .infinity)
                 }
+                .buttonStyle(PrimaryButtonStyle())
+                .disabled(controller.isSaving)
+                Button {
+                    controller.stopClipping()
+                } label: {
+                    // A title that does not fit wraps rather than being cut off.
+                    Text("Stop Clipping")
+                        .lineLimit(2)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(NeutralButtonStyle())
             }
             Button {
                 controller.toggleRecording()

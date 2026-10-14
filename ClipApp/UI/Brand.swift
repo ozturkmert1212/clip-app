@@ -151,18 +151,17 @@ struct PrimaryButtonStyle: ButtonStyle {
     }
 }
 
-/// A plain control-colored button next to a primary one, such as Stop
-/// Clipping beside Save; sized to match `PrimaryButtonStyle`.
+/// A plain control-colored button below a primary one, such as Stop
+/// Clipping under Save; looks like Start Recording before a recording runs.
 struct NeutralButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         let shape = RoundedRectangle(cornerRadius: Brand.Radius.control, style: .continuous)
         configuration.label
-            .font(.body.weight(.semibold))
             .foregroundStyle(Color.primary)
             .padding(.vertical, Brand.Space.one)
-            .padding(.horizontal, Brand.Space.one + Brand.Space.half)
+            .padding(.horizontal, Brand.Space.two)
             .background {
                 shape.fill(Color(nsColor: .controlColor))
                 shape.strokeBorder(Brand.hairline)
