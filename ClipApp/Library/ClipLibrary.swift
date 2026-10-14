@@ -42,11 +42,17 @@ final class ClipLibrary: ObservableObject {
         // finished it; this is what picks up the final size and duration.
         controller.$lastResult
             .dropFirst()
-            .sink { [weak self] _ in self?.scheduleReload() }
+            .sink { [weak self] _ in self?.refresh() }
             .store(in: &cancellables)
     }
 
     // MARK: - Actions
+
+    /// For a file written by the app itself: the folder reports that it
+    /// appeared, but not that it is complete.
+    func refresh() {
+        scheduleReload()
+    }
 
     func reveal(_ clip: ClipItem) {
         NSWorkspace.shared.activateFileViewerSelecting([clip.url])

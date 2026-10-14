@@ -17,7 +17,7 @@ struct ClipsView: View {
     var body: some View {
         Group {
             if let playing {
-                ClipPlayerView(clip: playing) { self.playing = nil }
+                ClipPlayerView(clip: playing, onTrimmed: library.refresh) { self.playing = nil }
                     .id(playing.url)
             } else if !library.isLoaded {
                 ProgressView()
@@ -181,12 +181,11 @@ private struct ClipThumbnail: View {
 enum ClipFormat {
     /// `m:ss`, or `m:ss.t` with `tenths` for the trim controls.
     static func duration(_ seconds: TimeInterval, tenths: Bool = false) -> String {
-        let total = max(0, seconds)
         if tenths {
-            let whole = Int(total)
-            return String(format: "%d:%02d.%d", whole / 60, whole % 60, Int((total - Double(whole)) * 10))
+            let total = Int((max(0, seconds) * 10).rounded())
+            return String(format: "%d:%02d.%d", total / 600, total / 10 % 60, total % 10)
         }
-        let rounded = Int(total.rounded())
+        let rounded = Int(max(0, seconds).rounded())
         return String(format: "%d:%02d", rounded / 60, rounded % 60)
     }
 }
