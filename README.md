@@ -13,15 +13,16 @@
   <img src="docs/images/settings-bottom.png" alt="ClipApp settings: audio, saving and general options" width="300">
 </p>
 
-An "instant replay" clipping app for macOS (the Medal / ShadowPlay idea). It captures the screen in the background, keeps the last N seconds in memory and saves them as an mp4 when you press a global shortcut. Saved clips are listed, played and trimmed in the app's window; closing the window leaves ClipApp running in the menu bar.
+An "instant replay" clipping app for macOS (the Medal / ShadowPlay idea). Once you start clipping, it captures the screen in the background, keeps the last N seconds in memory and saves them as an mp4 when you press a global shortcut. Saved clips are listed, played and trimmed in the app's window; closing the window leaves ClipApp running in the menu bar.
 
 The interface is in English by default. Türkçe için: Settings > General > Language.
 
 ## Features
 
-- Continuous screen capture (a display, a single window or a single application), hardware H.264 encoding, a 15–120 second buffer in memory.
-- Save the last N seconds as an mp4 with a global shortcut (default ⌃⌥⌘R) or from the menu; capture keeps running while the clip is written. Clips are filed and named by game: `Clips/<game>/<game>_<date>_<time>.mp4` under the save folder, the game being the app in front (or the one you just left, when ClipApp itself is in front).
-- Record for as long as you like with Start/Stop Recording (menu, sidebar or a shortcut you assign in Settings). Recordings go to `Videos/` as `Recording_<date>_<time>.mp4`, are written straight to disk in fragments so a crash does not lose them, and the replay buffer keeps working meanwhile.
+- Clipping you turn on yourself: **Start Clipping** (sidebar or menu) starts capture and the replay buffer, **Stop Clipping** empties the buffer and stops capture, so nothing is captured, no CPU is used and the system's screen recording indicator is off while you are not clipping. To have it start by itself, turn on Settings > General > Start clipping when ClipApp opens (off by default; also applies when ClipApp starts at login).
+- Screen capture of a display, a single window or a single application, hardware H.264 encoding, a 15–120 second buffer in memory.
+- While clipping, save the last N seconds as an mp4 with a global shortcut (default ⌃⌥⌘R) or from the menu; capture keeps running while the clip is written. Pressed while clipping is off, the shortcut only shows a short reminder. Clips are filed and named by game: `Clips/<game>/<game>_<date>_<time>.mp4` under the save folder, the game being the app in front (or the one you just left, when ClipApp itself is in front).
+- Record for as long as you like with Start/Stop Recording (menu, sidebar or a shortcut you assign in Settings). Recordings go to `Videos/` as `Recording_<date>_<time>.mp4`, are written straight to disk in fragments so a crash does not lose them. A recording works with clipping off too: it starts capture for itself and stops it when it ends. With clipping on, the replay buffer keeps working during the recording; Stop Clipping during a recording empties the buffer and leaves the recording running.
 - System audio and microphone, each with its own level. Every file gets a mixed audio track that all players use; game audio and microphone are also stored as separate, disabled tracks so their balance can be changed later (can be turned off in Settings).
 - A system notification when a clip is saved or something goes wrong (the notification reveals the clip in Finder), plus a small on-screen message in a corner of the screen for a few seconds. The message never ends up in clips and also shows above full screen games; its corner is chosen in Settings (default top left) and it can be turned off.
 - System notifications (banners) and ClipApp's own windows stay out of clips while a display is captured. To show ClipApp in your clips and recordings (for a tutorial, say), turn on Settings > General > Show ClipApp in recordings; it takes effect at once without clearing the buffer or stopping a recording. The brief on-screen message stays out either way.
@@ -55,9 +56,9 @@ While developing, build with `-configuration Debug` and open `build/Build/Produc
 
 All permissions are listed under Settings > Permissions with their current state and a button to request them or to open the right page of System Settings. If Screen Recording is missing, the app opens there.
 
-- **Screen Recording (required):** Requested from that row. After granting it under System Settings > Privacy & Security > Screen Recording, restart the app (the row offers a button).
+- **Screen Recording (required):** Requested from that row, or by the first Start Clipping, which also opens that row while the permission is missing. After granting it under System Settings > Privacy & Security > Screen Recording, restart the app (the row offers a button).
 - **Microphone (optional):** Requested when the microphone is turned on, in Settings or in the menu. Without it, clips are saved with system audio only.
-- **Notifications (optional):** Requested at first launch. macOS hides notifications by default while the screen is shared or recorded; since ClipApp captures the screen all the time, turn on "Allow notifications when mirroring or sharing the display" under System Settings > Notifications if you want to see the banners. The row has a button that takes you there. That switch cannot be flipped from code, so the on-screen message works independently of it.
+- **Notifications (optional):** Requested at first launch. macOS hides notifications by default while the screen is shared or recorded; since ClipApp captures the screen while clipping, turn on "Allow notifications when mirroring or sharing the display" under System Settings > Notifications if you want to see the banners. The row has a button that takes you there. That switch cannot be flipped from code, so the on-screen message works independently of it.
 
 ## Language
 
@@ -65,6 +66,7 @@ English is the default, regardless of the system language. Turkish can be select
 
 ## Known limits
 
+- Nothing is kept until clipping is started: with clipping off there is no buffer, so the shortcut cannot save what happened before you pressed Start Clipping. Turn on "Start clipping when ClipApp opens" to have it running from launch.
 - To keep notifications out of clips, Notification Center is excluded from capture; desktop widgets belong to it too, so they do not appear in display clips. With a single window or application as the source, only that application is captured anyway.
 - The global shortcut may not work in games that run in exclusive fullscreen. Use borderless or windowed mode in the game's display settings.
 - The separate game audio and microphone tracks are marked disabled, so players use the mixed track; a player that ignores that flag and plays every track at once would play the audio doubled.
