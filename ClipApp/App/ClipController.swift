@@ -95,9 +95,9 @@ final class ClipController: ObservableObject {
             outageTask = nil
             if usingFallback, !reportedFallback {
                 report(
-                    title: String(localized: "Selected source not found"),
-                    body: String(localized: "Capturing the main display instead. This clears once the source is back or you pick another one in Settings."),
-                    hudDetail: String(localized: "Capturing the main display"),
+                    title: AppLanguage.string("Selected source not found"),
+                    body: AppLanguage.string("Capturing the main display instead. This clears once the source is back or you pick another one in Settings."),
+                    hudDetail: AppLanguage.string("Capturing the main display"),
                     identifier: "capture"
                 )
             }
@@ -106,9 +106,9 @@ final class ClipController: ObservableObject {
             outageTask?.cancel()
             outageTask = nil
             report(
-                title: String(localized: "No Screen Recording permission"),
-                body: String(localized: "Capture stopped, clips can't be saved. Allow ClipApp under System Settings > Privacy & Security > Screen Recording."),
-                hudDetail: String(localized: "Capture stopped, clips can't be saved"),
+                title: AppLanguage.string("No Screen Recording permission"),
+                body: AppLanguage.string("Capture stopped, clips can't be saved. Allow ClipApp under System Settings > Privacy & Security > Screen Recording."),
+                hudDetail: AppLanguage.string("Capture stopped, clips can't be saved"),
                 identifier: "capture"
             )
         case .failed(let message):
@@ -119,9 +119,9 @@ final class ClipController: ObservableObject {
                 try? await Task.sleep(nanoseconds: 5_000_000_000)
                 guard !Task.isCancelled, let self else { return }
                 self.report(
-                    title: String(localized: "Capture stopped"),
-                    body: String(localized: "Retrying: \(self.lastFailure)"),
-                    hudDetail: String(localized: "Retrying"),
+                    title: AppLanguage.string("Capture stopped"),
+                    body: AppLanguage.string("Retrying: \(self.lastFailure)"),
+                    hudDetail: AppLanguage.string("Retrying"),
                     identifier: "capture"
                 )
             }
@@ -157,7 +157,7 @@ final class ClipController: ObservableObject {
         guard !isSaving else { return }
         // Without the permission the buffer is empty or holds stale footage.
         if capture.state == .permissionDenied || !permissions.screenRecordingGranted {
-            finish(.failed(String(localized: "No Screen Recording permission")))
+            finish(.failed(AppLanguage.string("No Screen Recording permission")))
             return
         }
         // Capture timestamps are on the host clock, so "now" is too.
@@ -166,7 +166,7 @@ final class ClipController: ObservableObject {
             finish(.failed(ClipWriter.WriteError.emptyBuffer.localizedDescription))
             return
         }
-        var sourceName = String(localized: "Display")
+        var sourceName = AppLanguage.string("Display")
         if case .running(let source, _, _, _) = capture.state { sourceName = source }
         let directory = settings.saveDirectory
         let name = settings.clipFileName(source: sourceName)
@@ -195,12 +195,12 @@ final class ClipController: ObservableObject {
             NSSound(named: "Glass")?.play()
             notifier.clipSaved(url)
             if settings.showHUD {
-                hud.show(.success, title: String(localized: "Clip saved"), detail: url.lastPathComponent, in: settings.hudCorner)
+                hud.show(.success, title: AppLanguage.string("Clip saved"), detail: url.lastPathComponent, in: settings.hudCorner)
             }
         case .failed(let message):
             logger.error("Clip failed: \(message, privacy: .public)")
             NSSound.beep()
-            report(title: String(localized: "Couldn't save clip"), body: message, identifier: "clipFailed")
+            report(title: AppLanguage.string("Couldn't save clip"), body: message, identifier: "clipFailed")
         }
     }
 }

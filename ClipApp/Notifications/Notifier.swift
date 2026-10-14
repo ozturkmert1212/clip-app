@@ -15,15 +15,22 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
     override init() {
         super.init()
         center.delegate = self
-        let reveal = UNNotificationAction(identifier: Self.revealAction, title: String(localized: "Show in Finder"))
+        registerActions()
+    }
+
+    /// The action's title is fixed when the category is registered, so this
+    /// runs again before each notification that carries it.
+    private func registerActions() {
+        let reveal = UNNotificationAction(identifier: Self.revealAction, title: AppLanguage.string("Show in Finder"))
         center.setNotificationCategories([
             UNNotificationCategory(identifier: Self.clipCategory, actions: [reveal], intentIdentifiers: []),
         ])
     }
 
     func clipSaved(_ url: URL) {
+        registerActions()
         let content = UNMutableNotificationContent()
-        content.title = String(localized: "Clip saved")
+        content.title = AppLanguage.string("Clip saved")
         content.body = url.lastPathComponent
         content.categoryIdentifier = Self.clipCategory
         content.userInfo = [Self.pathKey: url.path]

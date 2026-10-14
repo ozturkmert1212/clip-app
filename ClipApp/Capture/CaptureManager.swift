@@ -107,7 +107,7 @@ final class CaptureManager: ObservableObject {
     /// What the settings picker offers. Asking ScreenCaptureKit without the
     /// permission would pop the system prompt, so that case returns the default only.
     func availableSources() async -> AvailableSources {
-        var result = AvailableSources(displays: [SourceOption(source: .display(nil), title: String(localized: "Main display (automatic)"))])
+        var result = AvailableSources(displays: [SourceOption(source: .display(nil), title: AppLanguage.string("Main display (automatic)"))])
         guard CGPreflightScreenCaptureAccess(),
               let content = try? await SCShareableContent.excludingDesktopWindows(true, onScreenWindowsOnly: true)
         else { return result }
@@ -288,7 +288,7 @@ final class CaptureManager: ObservableObject {
     private enum CaptureError: LocalizedError {
         case noDisplay
 
-        var errorDescription: String? { String(localized: "No display found to capture") }
+        var errorDescription: String? { AppLanguage.string("No display found to capture") }
     }
 
     /// A window or app that no longer exists falls back to the main display, so
@@ -307,7 +307,7 @@ final class CaptureManager: ObservableObject {
                     scale = NSScreen.main?.backingScaleFactor ?? 2
                 }
                 let name = window.title.flatMap { $0.isEmpty ? nil : $0 }
-                    ?? window.owningApplication?.applicationName ?? String(localized: "Window")
+                    ?? window.owningApplication?.applicationName ?? AppLanguage.string("Window")
                 let size = CGSize(width: window.frame.width * scale, height: window.frame.height * scale)
                 return Target(filter: filter, name: name, pixelSize: size)
             }
@@ -384,7 +384,7 @@ final class CaptureManager: ObservableObject {
         let screen = NSScreen.screens.first {
             ($0.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? CGDirectDisplayID) == displayID
         }
-        return screen?.localizedName ?? String(localized: "Display")
+        return screen?.localizedName ?? AppLanguage.string("Display")
     }
 
     private func pixelSize(of display: SCDisplay) -> CGSize {

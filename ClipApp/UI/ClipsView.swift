@@ -92,7 +92,7 @@ struct ClipsView: View {
             do {
                 try library.trash(clip)
             } catch {
-                failure = Failure(title: String(localized: "Couldn't move the clip to the Trash"), message: error.localizedDescription)
+                failure = Failure(title: AppLanguage.string("Couldn't move the clip to the Trash"), message: error.localizedDescription)
             }
         }
     }
@@ -102,7 +102,7 @@ struct ClipsView: View {
         do {
             try library.rename(clip, to: newName)
         } catch {
-            failure = Failure(title: String(localized: "Couldn't rename the clip"), message: error.localizedDescription)
+            failure = Failure(title: AppLanguage.string("Couldn't rename the clip"), message: error.localizedDescription)
         }
     }
 }
@@ -111,6 +111,8 @@ private struct ClipCard<Actions: View>: View {
     let clip: ClipItem
     let isSelected: Bool
     @ViewBuilder let actions: () -> Actions
+
+    @Environment(\.locale) private var locale
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -121,7 +123,7 @@ private struct ClipCard<Actions: View>: View {
                         .lineLimit(1)
                         .truncationMode(.middle)
                         .help(clip.name)
-                    Text(verbatim: clip.date.formatted(date: .abbreviated, time: .shortened))
+                    Text(verbatim: clip.date.formatted(.dateTime.day().month(.abbreviated).year().hour().minute().locale(locale)))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Text(verbatim: details)

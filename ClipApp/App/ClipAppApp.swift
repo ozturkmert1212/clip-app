@@ -15,13 +15,15 @@ struct ClipAppApp: App {
 
     var body: some Scene {
         MenuBarExtra("ClipApp", systemImage: "record.circle") {
-            MenuBarView(
-                permissions: appDelegate.permissions,
-                settings: appDelegate.settings,
-                controller: appDelegate.controller,
-                capture: appDelegate.controller.capture,
-                windows: appDelegate.windows
-            )
+            LanguageRoot(settings: appDelegate.settings) {
+                MenuBarView(
+                    permissions: appDelegate.permissions,
+                    settings: appDelegate.settings,
+                    controller: appDelegate.controller,
+                    capture: appDelegate.controller.capture,
+                    windows: appDelegate.windows
+                )
+            }
         }
     }
 }

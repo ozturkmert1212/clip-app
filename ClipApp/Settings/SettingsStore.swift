@@ -24,7 +24,7 @@ final class SettingsStore: ObservableObject {
             case .p720: return "720p"
             case .p1080: return "1080p"
             case .p1440: return "1440p"
-            case .native: return String(localized: "Native")
+            case .native: return AppLanguage.string("Native")
             }
         }
     }
@@ -147,7 +147,7 @@ final class SettingsStore: ObservableObject {
                 try SMAppService.mainApp.unregister()
             }
             launchAtLoginError = SMAppService.mainApp.status == .requiresApproval
-                ? String(localized: "You need to allow ClipApp under System Settings > General > Login Items.")
+                ? AppLanguage.string("You need to allow ClipApp under System Settings > General > Login Items.")
                 : nil
         } catch {
             launchAtLoginError = error.localizedDescription

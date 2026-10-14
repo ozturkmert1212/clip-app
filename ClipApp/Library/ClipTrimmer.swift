@@ -18,10 +18,10 @@ enum ClipTrimmer {
 
         var errorDescription: String? {
             switch self {
-            case .unsupported: return String(localized: "This clip can't be trimmed")
-            case .directoryUnavailable(let path): return String(localized: "Can't write to the save folder: \(path)")
-            case .diskFull: return String(localized: "Disk full, the trimmed clip wasn't saved")
-            case .failed(let error): return error?.localizedDescription ?? String(localized: "Couldn't write the trimmed clip")
+            case .unsupported: return AppLanguage.string("This clip can't be trimmed")
+            case .directoryUnavailable(let path): return AppLanguage.string("Can't write to the save folder: \(path)")
+            case .diskFull: return AppLanguage.string("Disk full, the trimmed clip wasn't saved")
+            case .failed(let error): return error?.localizedDescription ?? AppLanguage.string("Couldn't write the trimmed clip")
             }
         }
     }

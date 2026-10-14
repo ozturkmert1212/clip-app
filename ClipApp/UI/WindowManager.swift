@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import SwiftUI
 
 /// Hosts SwiftUI views in plain AppKit windows. An LSUIElement app has no
@@ -6,6 +7,7 @@ import SwiftUI
 @MainActor
 final class WindowManager: NSObject, NSWindowDelegate {
     private static let mainID = "main"
+    private static let permissionsID = "permissions"
     static let mainFrameName = "MainWindow"
 
     let navigation = MainNavigation()
@@ -16,16 +18,28 @@ final class WindowManager: NSObject, NSWindowDelegate {
     private var windows: [String: NSWindow] = [:]
     /// Starts watching the save folder the first time the window is shown.
     private lazy var library = ClipLibrary(settings: settings, controller: controller)
+    private var cancellables: Set<AnyCancellable> = []
 
     init(settings: SettingsStore, permissions: PermissionManager, controller: ClipController) {
         self.settings = settings
         self.permissions = permissions
         self.controller = controller
+        super.init()
+        // A window title is set once, so it has to follow the language by hand.
+        settings.$language
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.windows[Self.permissionsID]?.title = AppLanguage.string("ClipApp Permissions")
+            }
+            .store(in: &cancellables)
     }
 
     func showPermissions() {
-        show(id: "permissions", title: String(localized: "ClipApp Permissions")) {
-            PermissionView(permissions: permissions)
+        show(id: Self.permissionsID, title: AppLanguage.string("ClipApp Permissions")) {
+            LanguageRoot(settings: settings) { [permissions] in
+                PermissionView(permissions: permissions)
+            }
         }
     }
 
@@ -39,14 +53,16 @@ final class WindowManager: NSObject, NSWindowDelegate {
     }
 
     private func makeMainWindow() -> NSWindow {
-        let hosting = NSHostingController(rootView: MainWindowView(
-            navigation: navigation,
-            settings: settings,
-            permissions: permissions,
-            controller: controller,
-            capture: controller.capture,
-            library: library
-        ))
+        let hosting = NSHostingController(rootView: LanguageRoot(settings: settings) { [self] in
+            MainWindowView(
+                navigation: navigation,
+                settings: settings,
+                permissions: permissions,
+                controller: controller,
+                capture: controller.capture,
+                library: library
+            )
+        })
         // The window, not the content, decides the size.
         hosting.sizingOptions = []
         let window = NSWindow(contentViewController: hosting)

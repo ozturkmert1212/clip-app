@@ -97,8 +97,8 @@ private struct CaptureStatusView: View {
                 controller.saveClip()
             } label: {
                 Text(controller.isSaving
-                     ? String(localized: "Saving Clip…")
-                     : String(localized: "Save Last \(settings.bufferSeconds) Seconds"))
+                     ? AppLanguage.string("Saving Clip…")
+                     : AppLanguage.string("Save Last \(settings.bufferSeconds) Seconds"))
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
@@ -119,13 +119,13 @@ private struct CaptureStatusView: View {
     }
 
     private var statusText: String {
-        guard permissions.screenRecordingGranted else { return String(localized: "Screen Recording permission required") }
+        guard permissions.screenRecordingGranted else { return AppLanguage.string("Screen Recording permission required") }
         switch capture.state {
-        case .idle: return String(localized: "Capture off")
-        case .starting: return String(localized: "Starting capture…")
-        case .running(let source, _, _, _): return String(localized: "Capturing · \(source)")
-        case .failed: return String(localized: "Capture error, retrying")
-        case .permissionDenied: return String(localized: "No Screen Recording permission, capture stopped")
+        case .idle: return AppLanguage.string("Capture off")
+        case .starting: return AppLanguage.string("Starting capture…")
+        case .running(let source, _, _, _): return AppLanguage.string("Capturing · \(source)")
+        case .failed: return AppLanguage.string("Capture error, retrying")
+        case .permissionDenied: return AppLanguage.string("No Screen Recording permission, capture stopped")
         }
     }
 }

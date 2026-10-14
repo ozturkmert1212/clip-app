@@ -19,10 +19,10 @@ final class HUD {
 
         var title: String {
             switch self {
-            case .topLeft: return String(localized: "Top left")
-            case .topRight: return String(localized: "Top right")
-            case .bottomLeft: return String(localized: "Bottom left")
-            case .bottomRight: return String(localized: "Bottom right")
+            case .topLeft: return AppLanguage.string("Top left")
+            case .topRight: return AppLanguage.string("Top right")
+            case .bottomLeft: return AppLanguage.string("Bottom left")
+            case .bottomRight: return AppLanguage.string("Bottom right")
             }
         }
 

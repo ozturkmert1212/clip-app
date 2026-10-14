@@ -1237,12 +1237,12 @@
         }
       }
     },
-    "The language changes after ClipApp restarts." : {
+    "Text supplied by macOS, such as the app menu and the shortcut field, changes after ClipApp restarts." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dil, ClipApp yeniden başlatılınca değişir."
+            "value" : "Uygulama menüsü ve kısayol alanı gibi macOS tarafından sağlanan metinler, ClipApp yeniden başlatılınca değişir."
           }
         }
       }

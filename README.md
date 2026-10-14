@@ -58,7 +58,7 @@ While developing, build with `-configuration Debug` and open `build/Build/Produc
 
 ## Language
 
-English is the default, regardless of the system language. Turkish can be selected under Settings > General > Language; the change applies after the restart offered there.
+English is the default, regardless of the system language. Turkish can be selected under Settings > General > Language and applies at once; text that macOS supplies (the app menu, the shortcut field) follows after the restart offered there.
 
 ## Known limits
 

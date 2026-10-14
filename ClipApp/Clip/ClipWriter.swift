@@ -12,11 +12,11 @@ enum ClipWriter {
 
         var errorDescription: String? {
             switch self {
-            case .emptyBuffer: return String(localized: "Nothing in the buffer yet")
-            case .cannotAddInput: return String(localized: "Couldn't create the video track")
-            case .directoryUnavailable(let path): return String(localized: "Can't write to the save folder: \(path)")
-            case .diskFull: return String(localized: "Disk full, the clip wasn't saved")
-            case .writerFailed(let error): return error?.localizedDescription ?? String(localized: "Couldn't write the clip")
+            case .emptyBuffer: return AppLanguage.string("Nothing in the buffer yet")
+            case .cannotAddInput: return AppLanguage.string("Couldn't create the video track")
+            case .directoryUnavailable(let path): return AppLanguage.string("Can't write to the save folder: \(path)")
+            case .diskFull: return AppLanguage.string("Disk full, the clip wasn't saved")
+            case .writerFailed(let error): return error?.localizedDescription ?? AppLanguage.string("Couldn't write the clip")
             }
         }
     }

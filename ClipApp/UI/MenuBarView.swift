@@ -7,61 +7,63 @@ struct MenuBarView: View {
     @ObservedObject var capture: CaptureManager
     let windows: WindowManager
 
+    // Menu items are AppKit in the end, so every title is looked up in the
+    // chosen language here instead of relying on the environment.
     var body: some View {
-        Text(statusText)
+        Text(verbatim: statusText)
         if case .running = capture.state {
-            Text("Frames in the last second: \(capture.framesLastSecond)")
+            Text(verbatim: AppLanguage.string("Frames in the last second: \(capture.framesLastSecond)"))
         }
         if let seconds = controller.byteLimitedSeconds {
-            Text("Memory cap active: content exceeds the target bitrate, keeping the last ~\(seconds) s")
+            Text(verbatim: AppLanguage.string("Memory cap active: content exceeds the target bitrate, keeping the last ~\(seconds) s"))
         }
         if settings.microphoneEnabled, permissions.microphoneStatus != .granted {
-            Text("No microphone permission, clips have no microphone")
+            Text(verbatim: AppLanguage.string("No microphone permission, clips have no microphone"))
         }
         Divider()
         Button(controller.isSaving
-               ? String(localized: "Saving Clip…")
-               : String(localized: "Save Last \(settings.bufferSeconds) Seconds")) {
+               ? AppLanguage.string("Saving Clip…")
+               : AppLanguage.string("Save Last \(settings.bufferSeconds) Seconds")) {
             controller.saveClip()
         }
         .disabled(controller.isSaving)
         switch controller.lastResult {
-        case .saved(let url): Text("Last clip: \(url.lastPathComponent)")
-        case .failed(let message): Text("Couldn't save clip: \(message)")
+        case .saved(let url): Text(verbatim: AppLanguage.string("Last clip: \(url.lastPathComponent)"))
+        case .failed(let message): Text(verbatim: AppLanguage.string("Couldn't save clip: \(message)"))
         case nil: EmptyView()
         }
-        Button("Open Clips Folder") {
+        Button(AppLanguage.string("Open Clips Folder")) {
             controller.openClipDirectory()
         }
         Divider()
-        Button("Open ClipApp") {
+        Button(AppLanguage.string("Open ClipApp")) {
             windows.showMain(.clips)
         }
-        Button("Settings…") {
+        Button(AppLanguage.string("Settings…")) {
             windows.showMain(.settings)
         }
         .keyboardShortcut(",")
-        Button("Permissions…") {
+        Button(AppLanguage.string("Permissions…")) {
             windows.showPermissions()
         }
         Divider()
-        Button("Quit ClipApp") {
+        Button(AppLanguage.string("Quit ClipApp")) {
             NSApp.terminate(nil)
         }
         .keyboardShortcut("q")
     }
 
     private var statusText: String {
-        guard permissions.screenRecordingGranted else { return String(localized: "Screen Recording permission required") }
+        guard permissions.screenRecordingGranted else { return AppLanguage.string("Screen Recording permission required") }
         switch capture.state {
-        case .idle: return String(localized: "Capture off")
-        case .starting: return String(localized: "Starting capture…")
+        case .idle: return AppLanguage.string("Capture off")
+        case .starting: return AppLanguage.string("Starting capture…")
         case .running(let source, let width, let height, let usingFallback):
             return usingFallback
-                ? String(localized: "Capturing: \(source) · \(width)×\(height) (selected source unavailable)")
-                : String(localized: "Capturing: \(source) · \(width)×\(height)")
-        case .failed(let message): return String(localized: "Capture error, retrying: \(message)")
-        case .permissionDenied: return String(localized: "No Screen Recording permission, capture stopped")
+                ? AppLanguage.string("Capturing: \(source) · \(width)×\(height) (selected source unavailable)")
+                : AppLanguage.string("Capturing: \(source) · \(width)×\(height)")
+        case .failed(let message): return AppLanguage.string("Capture error, retrying: \(message)")
+        case .permissionDenied: return AppLanguage.string("No Screen Recording permission, capture stopped")
         }
     }
 }

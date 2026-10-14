@@ -22,6 +22,7 @@ struct SettingsView: View {
                     Picker("Capture source", selection: $settings.source) {
                         sourceOptions
                     }
+                    .id(settings.language)
                     Button {
                         Task { await reloadSources() }
                     } label: {
@@ -32,6 +33,9 @@ struct SettingsView: View {
                 Picker("Resolution", selection: $settings.resolution) {
                     ForEach(SettingsStore.Resolution.allCases) { Text($0.title).tag($0) }
                 }
+                // Titles that are plain strings only reach the pop-up menu
+                // when it is rebuilt, hence the identity tied to the language.
+                .id(settings.language)
                 Picker("FPS", selection: $settings.fps) {
                     ForEach(SettingsStore.fpsOptions, id: \.self) { Text(verbatim: "\($0)").tag($0) }
                 }
@@ -79,7 +83,7 @@ struct SettingsView: View {
                     Button("Choose…", action: chooseDirectory)
                 }
                 TextField("File name", text: $settings.fileNameFormat)
-                Text("Example: \(settings.clipFileName(source: String(localized: "Display"))).mp4\n{date}, {time} and {source} can be used.")
+                Text("Example: \(settings.clipFileName(source: AppLanguage.string("Display"))).mp4\n{date}, {time} and {source} can be used.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -90,7 +94,7 @@ struct SettingsView: View {
                 }
                 if settings.language != AppLanguage.launched {
                     HStack {
-                        Text("The language changes after ClipApp restarts.")
+                        Text("Text supplied by macOS, such as the app menu and the shortcut field, changes after ClipApp restarts.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         Spacer()
@@ -101,6 +105,7 @@ struct SettingsView: View {
                 Picker("Message corner", selection: $settings.hudCorner) {
                     ForEach(HUD.Corner.allCases) { Text($0.title).tag($0) }
                 }
+                .id(settings.language)
                 .disabled(!settings.showHUD)
                 Text("Appears in the chosen corner for a few seconds when a clip is saved or something goes wrong; it never ends up in clips. A system notification is sent as well.")
                     .font(.caption)
@@ -126,6 +131,10 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .task { await reloadSources() }
+        // The source list holds finished titles.
+        .onChange(of: settings.language) { _ in
+            Task { await reloadSources() }
+        }
         // The window is reused, so the list is refreshed whenever it comes forward.
         .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in
             // Also picks up a microphone permission flipped in System Settings.
@@ -179,7 +188,7 @@ struct SettingsView: View {
         panel.canChooseFiles = false
         panel.canCreateDirectories = true
         panel.directoryURL = settings.saveDirectory
-        panel.prompt = String(localized: "Choose")
+        panel.prompt = AppLanguage.string("Choose")
         if panel.runModal() == .OK, let url = panel.url {
             settings.saveDirectory = url
         }
