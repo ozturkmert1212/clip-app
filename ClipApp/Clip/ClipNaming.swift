@@ -35,6 +35,17 @@ enum ClipNaming {
         return "\(prefix(for: newGame))_\(name[stamp])\(ending)"
     }
 
+    /// `<name>.<ext>` in `directory`, or `<name>_2`, `<name>_3`… if that is taken.
+    static func uniqueURL(in directory: URL, name: String, pathExtension: String = "mp4") -> URL {
+        var url = directory.appendingPathComponent(name).appendingPathExtension(pathExtension)
+        var suffix = 2
+        while FileManager.default.fileExists(atPath: url.path) {
+            url = directory.appendingPathComponent("\(name)_\(suffix)").appendingPathExtension(pathExtension)
+            suffix += 1
+        }
+        return url
+    }
+
     private static func prefix(for game: String) -> String {
         guard game.count > maximumGameLength else { return game }
         return String(game.prefix(maximumGameLength)).trimmingCharacters(in: .whitespaces)

@@ -21,10 +21,7 @@ struct ClipInfo: Codable, Equatable {
     private static let identifier = AVMetadataIdentifier.iTunesMetadataUserComment
 
     var metadataItems: [AVMetadataItem] {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        encoder.outputFormatting = .sortedKeys
-        guard let data = try? encoder.encode(self), let json = String(data: data, encoding: .utf8) else { return [] }
+        guard let json else { return [] }
         let item = AVMutableMetadataItem()
         item.identifier = Self.identifier
         item.value = json as NSString
@@ -34,13 +31,27 @@ struct ClipInfo: Codable, Equatable {
 
     static func read(from asset: AVAsset) async -> ClipInfo? {
         guard let metadata = try? await asset.load(.metadata) else { return nil }
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
         for item in AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: identifier) {
-            if let json = try? await item.load(.stringValue), let info = try? decoder.decode(ClipInfo.self, from: Data(json.utf8)) {
-                return info
-            }
+            if let json = try? await item.load(.stringValue), let info = ClipInfo(json: json) { return info }
         }
         return nil
+    }
+}
+
+extension ClipInfo {
+    /// The record as it is stored in the file.
+    var json: String? {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        encoder.outputFormatting = .sortedKeys
+        return (try? encoder.encode(self)).flatMap { String(data: $0, encoding: .utf8) }
+    }
+
+    /// `nil` for anything that is not such a record, e.g. another app's comment.
+    init?(json: String) {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        guard let info = try? decoder.decode(ClipInfo.self, from: Data(json.utf8)) else { return nil }
+        self = info
     }
 }

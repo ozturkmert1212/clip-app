@@ -47,7 +47,7 @@ enum ClipWriter {
         guard FileManager.default.isWritableFile(atPath: directory.path) else {
             throw WriteError.directoryUnavailable(directory.path)
         }
-        let url = uniqueURL(in: directory, name: name)
+        let url = ClipNaming.uniqueURL(in: directory, name: name)
 
         let writer: AVAssetWriter
         do {
@@ -278,16 +278,6 @@ enum ClipWriter {
             sampleBufferOut: &rebased
         )
         return rebased
-    }
-
-    private static func uniqueURL(in directory: URL, name: String) -> URL {
-        var url = directory.appendingPathComponent("\(name).mp4")
-        var suffix = 2
-        while FileManager.default.fileExists(atPath: url.path) {
-            url = directory.appendingPathComponent("\(name)_\(suffix).mp4")
-            suffix += 1
-        }
-        return url
     }
 }
 

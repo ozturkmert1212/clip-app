@@ -3,41 +3,6 @@ import AVFoundation
 import Combine
 import OSLog
 
-struct ClipItem: Identifiable, Equatable {
-    enum Category: Hashable {
-        /// `Clips/<name>/`.
-        case game(String)
-        /// Clips from before the folder layout, lying directly in the save folder.
-        case other
-        /// `Videos/`: recordings rather than instant replays.
-        case video
-    }
-
-    let url: URL
-    let category: Category
-    let date: Date
-    let size: Int64
-    /// Changes whenever the file does; keys the detail and thumbnail caches.
-    let fingerprint: String
-    /// Read from the file after the list is up, `nil` until then.
-    var duration: TimeInterval?
-    /// `nil` until read, and for files that carry none.
-    var info: ClipInfo?
-
-    var id: URL { url }
-    var name: String { url.deletingPathExtension().lastPathComponent }
-}
-
-/// One row of the sidebar's game list.
-struct GameGroup: Identifiable, Equatable {
-    let name: String
-    let count: Int
-    /// Of the app the clips were recorded in, for its icon.
-    let bundleID: String?
-
-    var id: String { name }
-}
-
 /// The mp4 files under the save folder, newest first: clips by game, clips
 /// from the old flat layout and recordings. Follows the folder, so a saved,
 /// renamed, moved or deleted file shows up without a manual refresh.
@@ -123,23 +88,8 @@ final class ClipLibrary: ObservableObject {
     /// it; one the user renamed keeps its name. The game recorded inside
     /// each file stays what it was.
     func move(_ clips: [ClipItem], toGame name: String) throws {
-        let game = GameContext.folderName(name)
-        let directory = settings.clipsDirectory.appendingPathComponent(game, isDirectory: true)
         defer { scheduleReload() }
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        for clip in clips where clip.category != .game(game) && clip.category != .video {
-            var name = clip.name
-            if case .game(let old) = clip.category, let automatic = ClipNaming.renamed(name, from: old, to: game) {
-                name = automatic
-            }
-            var target = directory.appendingPathComponent(name).appendingPathExtension(clip.url.pathExtension)
-            var suffix = 2
-            while FileManager.default.fileExists(atPath: target.path) {
-                target = directory.appendingPathComponent("\(name)_\(suffix)").appendingPathExtension(clip.url.pathExtension)
-                suffix += 1
-            }
-            try FileManager.default.moveItem(at: clip.url, to: target)
-        }
+        try ClipCatalog.move(clips, toGame: name, root: settings.saveDirectory)
     }
 
     // MARK: - Folder
@@ -163,7 +113,7 @@ final class ClipLibrary: ObservableObject {
 
     private func reload() async {
         let root = settings.saveDirectory
-        var found = await Task.detached(priority: .userInitiated) { Self.list(root) }.value
+        var found = await Task.detached(priority: .userInitiated) { ClipCatalog.list(root) }.value
         guard !Task.isCancelled else { return }
         for index in found.indices {
             if let known = details[found[index].fingerprint] {
@@ -187,45 +137,6 @@ final class ClipLibrary: ObservableObject {
                 items[index].info = info
             }
         }
-    }
-
-    nonisolated private static func list(_ root: URL) -> [ClipItem] {
-        var result = files(in: root, category: .other)
-        let clips = root.appendingPathComponent("Clips", isDirectory: true)
-        result += files(in: clips, category: .other)
-        for folder in subfolders(of: clips) {
-            result += files(in: folder, category: .game(folder.lastPathComponent))
-        }
-        result += files(in: root.appendingPathComponent("Videos", isDirectory: true), category: .video)
-        return result.sorted { $0.date > $1.date }
-    }
-
-    nonisolated private static func subfolders(of directory: URL) -> [URL] {
-        let urls = (try? FileManager.default.contentsOfDirectory(
-            at: directory, includingPropertiesForKeys: [.isDirectoryKey], options: .skipsHiddenFiles
-        )) ?? []
-        return urls.filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true }
-    }
-
-    nonisolated private static func files(in directory: URL, category: ClipItem.Category) -> [ClipItem] {
-        let keys: [URLResourceKey] = [.creationDateKey, .contentModificationDateKey, .fileSizeKey]
-        let urls = (try? FileManager.default.contentsOfDirectory(
-            at: directory, includingPropertiesForKeys: keys, options: .skipsHiddenFiles
-        )) ?? []
-        return urls
-            .filter { $0.pathExtension.lowercased() == "mp4" }
-            .compactMap { url -> ClipItem? in
-                guard let values = try? url.resourceValues(forKeys: Set(keys)) else { return nil }
-                let modified = values.contentModificationDate ?? .distantPast
-                let size = Int64(values.fileSize ?? 0)
-                return ClipItem(
-                    url: url,
-                    category: category,
-                    date: values.creationDate ?? modified,
-                    size: size,
-                    fingerprint: "\(url.path)|\(size)|\(modified.timeIntervalSince1970)"
-                )
-            }
     }
 }
 

@@ -226,7 +226,7 @@ final class ClipController: ObservableObject {
         // Filed under the app in front right now (not when the write finishes),
         // or the one that was in front during the clip if ClipApp is now.
         let game = games.current(within: TimeInterval(settings.bufferSeconds))
-        let directory = settings.clipsDirectory.appendingPathComponent(game.name, isDirectory: true)
+        let directory = ClipCatalog.gameDirectory(game.name, in: settings.saveDirectory)
         let info = ClipInfo(game: game.name, bundleID: game.bundleID, recorded: Date())
         let name = ClipNaming.clipName(game: game.name)
         let keepStems = settings.keepAudioStems
@@ -273,7 +273,7 @@ final class ClipController: ObservableObject {
         do {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
             let writer = try RecordingWriter(
-                url: Self.recordingURL(in: directory),
+                url: ClipNaming.uniqueURL(in: directory, name: ClipNaming.recordingName()),
                 videoFormat: videoFormat,
                 audioFormats: audioFormats,
                 keepStems: settings.keepAudioStems,
@@ -319,17 +319,6 @@ final class ClipController: ObservableObject {
                 identifier: "recordingFailed"
             )
         }
-    }
-
-    private static func recordingURL(in directory: URL) -> URL {
-        let name = ClipNaming.recordingName()
-        var url = directory.appendingPathComponent("\(name).mp4")
-        var suffix = 2
-        while FileManager.default.fileExists(atPath: url.path) {
-            url = directory.appendingPathComponent("\(name)_\(suffix).mp4")
-            suffix += 1
-        }
-        return url
     }
 
     private func announce(_ title: String, detail: String?, identifier: String) {

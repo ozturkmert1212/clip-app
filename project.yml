@@ -49,3 +49,30 @@ targets:
         CODE_SIGN_IDENTITY: "Apple Development"
         ENABLE_HARDENED_RUNTIME: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    scheme:
+      testTargets:
+        - ClipAppTests
+  # Not hosted by the app: launching ClipApp would start screen capture. The
+  # tests compile the parts they exercise, none of which touches the screen,
+  # a permission or a device.
+  ClipAppTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - ClipAppTests
+      - ClipApp/Buffer
+      - ClipApp/Clip
+      - ClipApp/Encoding
+      - ClipApp/Library/ClipCatalog.swift
+      - ClipApp/Library/ClipEditing.swift
+      - ClipApp/Library/ClipInfo.swift
+      - ClipApp/Library/ClipTrimmer.swift
+      - ClipApp/Settings/AppLanguage.swift
+      - ClipApp/App/GameContext.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mertozturk.ClipAppTests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+        SWIFT_EMIT_LOC_STRINGS: NO

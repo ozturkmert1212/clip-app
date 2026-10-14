@@ -20,16 +20,11 @@ final class ClipPlayerModel: ObservableObject {
         case stems
     }
 
-    /// The shortest selection the handles allow.
-    static let minimumLength: TimeInterval = 0.5
-
     let url: URL
     let player: AVPlayer
 
-    @Published private(set) var duration: TimeInterval = 0
+    @Published private(set) var selection = TrimSelection(duration: 0)
     @Published private(set) var currentTime: TimeInterval = 0
-    @Published private(set) var trimStart: TimeInterval = 0
-    @Published private(set) var trimEnd: TimeInterval = 0
     @Published var precise = false
     @Published private(set) var audioLayout = AudioLayout.loading
     /// Linear gains for the preview and for the next save, 1 = as recorded.
@@ -70,8 +65,7 @@ final class ClipPlayerModel: ObservableObject {
         Task {
             let asset = AVURLAsset(url: url, options: [AVURLAssetPreferPreciseDurationAndTimingKey: true])
             guard let time = try? await asset.load(.duration), time.isNumeric else { return }
-            duration = time.seconds
-            trimEnd = time.seconds
+            selection = TrimSelection(duration: time.seconds)
             await loadAudio(asset, duration: time)
         }
     }
@@ -108,15 +102,12 @@ final class ClipPlayerModel: ObservableObject {
             audioLayout = .single
             return
         }
-        if let levels = info?.levels {
-            savedEdit.system = levels[ClipInfo.AudioRole.system.rawValue] ?? 1
-            savedEdit.microphone = levels[ClipInfo.AudioRole.microphone.rawValue] ?? 1
-        }
-        // A level of zero comes back as muted, with the slider left at 100 %.
-        systemMuted = savedEdit.system == 0
-        systemLevel = savedEdit.system == 0 ? 1 : savedEdit.system
-        microphoneMuted = savedEdit.microphone == 0
-        microphoneLevel = savedEdit.microphone == 0 ? 1 : savedEdit.microphone
+        savedEdit = ClipTrimmer.AudioEdit(stored: info?.levels)
+        let levels = AudioLevels(saved: savedEdit)
+        systemMuted = levels.systemMuted
+        systemLevel = levels.system
+        microphoneMuted = levels.microphoneMuted
+        microphoneLevel = levels.microphone
 
         let wasPlaying = player.rate != 0
         let position = player.currentTime()
@@ -134,10 +125,12 @@ final class ClipPlayerModel: ObservableObject {
     }
 
     private var audioEdit: ClipTrimmer.AudioEdit {
-        ClipTrimmer.AudioEdit(
-            system: systemMuted ? 0 : systemLevel,
-            microphone: microphoneMuted ? 0 : microphoneLevel
-        )
+        var levels = AudioLevels()
+        levels.system = systemLevel
+        levels.microphone = microphoneLevel
+        levels.systemMuted = systemMuted
+        levels.microphoneMuted = microphoneMuted
+        return levels.edit
     }
 
     /// The levels differ from the ones the file was saved with.
@@ -202,15 +195,18 @@ final class ClipPlayerModel: ObservableObject {
         if let timeObserver { player.removeTimeObserver(timeObserver) }
     }
 
-    var isTrimmed: Bool { duration > 0 && (trimStart > 0.01 || trimEnd < duration - 0.01) }
+    var duration: TimeInterval { selection.duration }
+    var trimStart: TimeInterval { selection.start }
+    var trimEnd: TimeInterval { selection.end }
+    var isTrimmed: Bool { selection.isTrimmed }
 
     func setTrimStart(_ time: TimeInterval) {
-        trimStart = min(max(0, time), trimEnd - Self.minimumLength)
+        selection.setStart(time)
         preview(trimStart)
     }
 
     func setTrimEnd(_ time: TimeInterval) {
-        trimEnd = max(min(duration, time), trimStart + Self.minimumLength)
+        selection.setEnd(time)
         preview(trimEnd)
     }
 
@@ -227,10 +223,7 @@ final class ClipPlayerModel: ObservableObject {
 
     func saveTrimmed(replacingOriginal: Bool) {
         guard exportTask == nil, canSave else { return }
-        let range = CMTimeRange(
-            start: CMTime(seconds: trimStart, preferredTimescale: 600),
-            end: CMTime(seconds: trimEnd, preferredTimescale: 600)
-        )
+        let range = selection.range
         let mode: ClipTrimmer.Mode = precise ? .reencode : .passthrough
         // Unchanged levels leave the file's own mix as it is.
         let audio = isAudioChanged ? audioEdit : nil
@@ -545,7 +538,7 @@ private struct TrimPanel: View {
                     }
                     .buttonStyle(.borderless)
                     .help(isMuted ? "Unmute" : "Mute")
-                    Slider(value: $level, in: 0...1.5, step: 0.05)
+                    Slider(value: $level, in: 0...AudioLevels.maximum, step: 0.05)
                         .disabled(isMuted)
                     Text(verbatim: "\(Int((level * 100).rounded()))%")
                         .font(.caption)

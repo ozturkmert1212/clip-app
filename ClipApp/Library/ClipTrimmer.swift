@@ -250,7 +250,7 @@ enum ClipTrimmer {
             readers.append(mixReader)
 
             info.audio = [.mix, .system, .microphone]
-            info.levels = [ClipInfo.AudioRole.system.rawValue: audio.system, ClipInfo.AudioRole.microphone.rawValue: audio.microphone]
+            info.levels = audio.stored
             writer.metadata = info.metadataItems
         }
 

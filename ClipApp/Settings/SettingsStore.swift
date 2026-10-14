@@ -143,8 +143,8 @@ final class SettingsStore: ObservableObject {
 
     /// Clips live in `Clips/<game>/`, recordings in `Videos/`, both under the
     /// folder the user picked.
-    var clipsDirectory: URL { saveDirectory.appendingPathComponent("Clips", isDirectory: true) }
-    var videosDirectory: URL { saveDirectory.appendingPathComponent("Videos", isDirectory: true) }
+    var clipsDirectory: URL { ClipCatalog.clipsDirectory(in: saveDirectory) }
+    var videosDirectory: URL { ClipCatalog.videosDirectory(in: saveDirectory) }
 
     var captureConfiguration: CaptureConfiguration {
         CaptureConfiguration(
