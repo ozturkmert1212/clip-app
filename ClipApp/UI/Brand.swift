@@ -35,8 +35,16 @@ enum Brand {
     /// (#C9C4FF on the dark backgrounds is 8.5:1 or more).
     static let accentText = Color(light: 0x4B3FD1, dark: 0xC9C4FF)
 
-    /// The quieter partner of `accentText`, for the second of two series.
-    static let accentSecondary = Color(light: 0x8E86E8, dark: 0x8F88E6)
+    /// The editor's two audio sources: game audio in indigo, the microphone
+    /// in lavender (darkened in light mode, where the icon's lavender would
+    /// disappear into the background).
+    static let gameAudio = accent
+    static let microphoneAudio = Color(light: 0x9C95EC, dark: 0xC9C4FF)
+
+    /// The playback position: a lavender line with a dark edge, so it shows
+    /// on the indigo selection as well as on the bare track.
+    static let playhead = Palette.lavender
+    static let playheadEdge = Palette.indigoDeepest.opacity(0.55)
 
     /// The primary button, top to bottom. White on both ends is above 6:1.
     static let primaryGradient = LinearGradient(

@@ -301,7 +301,7 @@ struct ClipPlayerView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 12) {
+            HStack(spacing: Brand.Space.one) {
                 Button(action: onClose) {
                     Label("Clips", systemImage: "chevron.left")
                 }
@@ -311,7 +311,8 @@ struct ClipPlayerView: View {
                     .truncationMode(.middle)
                 Spacer()
             }
-            .padding(10)
+            .padding(.horizontal, Brand.Space.two)
+            .padding(.vertical, Brand.Space.one)
             Divider()
             PlayerSurface(player: model.player)
             Divider()
@@ -374,12 +375,12 @@ private struct TrimPanel: View {
             switch model.audioLayout {
             case .stems:
                 AudioRow(
-                    title: "Game audio", systemImage: "gamecontroller",
+                    title: "Game audio", systemImage: "gamecontroller", color: Brand.gameAudio,
                     level: $model.systemLevel, isMuted: $model.systemMuted,
                     peaks: model.waveforms[.system] ?? []
                 )
                 AudioRow(
-                    title: "Microphone", systemImage: "mic",
+                    title: "Microphone", systemImage: "mic", color: Brand.microphoneAudio,
                     level: $model.microphoneLevel, isMuted: $model.microphoneMuted,
                     peaks: model.waveforms[.microphone] ?? []
                 )
@@ -390,7 +391,7 @@ private struct TrimPanel: View {
             case .loading, .none:
                 EmptyView()
             }
-            HStack(spacing: 16) {
+            HStack(spacing: Brand.Space.two) {
                 Text("Start \(ClipFormat.duration(model.trimStart, tenths: true))")
                 Text("End \(ClipFormat.duration(model.trimEnd, tenths: true))")
                 Text("Length \(ClipFormat.duration(model.trimEnd - model.trimStart, tenths: true))")
@@ -400,8 +401,8 @@ private struct TrimPanel: View {
             .font(.callout)
             .monospacedDigit()
 
-            HStack(alignment: .top, spacing: 16) {
-                VStack(alignment: .leading, spacing: 2) {
+            HStack(alignment: .top, spacing: Brand.Space.two) {
+                VStack(alignment: .leading, spacing: Brand.Space.half) {
                     Toggle("Precise (re-encode)", isOn: $model.precise)
                     Text(model.precise
                          ? "Re-encodes the video at the source's bitrate so the file holds exactly the selected range. Slower, with a slight loss in quality."
@@ -441,7 +442,7 @@ private struct TrimPanel: View {
                 EmptyView()
             }
         }
-        .padding(12)
+        .padding(Brand.Space.two)
         .sheet(isPresented: $isChoosing) {
             if let choice = pendingChoice {
                 pendingChoice = nil
@@ -521,13 +522,14 @@ private struct TrimPanel: View {
     private struct AudioRow: View {
         let title: LocalizedStringKey
         let systemImage: String
+        let color: Color
         @Binding var level: Double
         @Binding var isMuted: Bool
         let peaks: [Float]
 
         var body: some View {
             HStack(spacing: 0) {
-                HStack(spacing: 6) {
+                HStack(spacing: Brand.Space.one) {
                     Label(title, systemImage: systemImage)
                         .lineLimit(1)
                         .frame(width: 104, alignment: .leading)
@@ -548,7 +550,7 @@ private struct TrimPanel: View {
                 }
                 .padding(.trailing, 10)
                 .frame(width: TrimPanel.leading, alignment: .leading)
-                Waveform(peaks: peaks, gain: isMuted ? 0 : level)
+                Waveform(peaks: peaks, level: level, isMuted: isMuted, color: color)
                     // Lines up with the timeline's bar, which is inset by its handles.
                     .padding(.horizontal, TrimTimeline.handleWidth)
                     .frame(height: 26)
@@ -558,14 +560,17 @@ private struct TrimPanel: View {
 
     private struct Waveform: View {
         let peaks: [Float]
-        let gain: Double
+        let level: Double
+        /// A muted source keeps its shape, faded.
+        let isMuted: Bool
+        let color: Color
 
         var body: some View {
             Canvas { context, size in
                 // Drawn relative to the track's own loudest point, which sits at
                 // two thirds of the height so that 150 % still fits.
                 guard let loudest = peaks.max(), loudest > 0 else { return }
-                let scale = CGFloat(gain) / 1.5 / CGFloat(loudest)
+                let scale = CGFloat(level / AudioLevels.maximum) / CGFloat(loudest)
                 let step = size.width / CGFloat(peaks.count)
                 var path = Path()
                 for (index, peak) in peaks.enumerated() {
@@ -575,9 +580,9 @@ private struct TrimPanel: View {
                         width: max(1, step - 0.5), height: height
                     ))
                 }
-                context.fill(path, with: .color(.accentColor.opacity(gain == 0 ? 0.3 : 0.8)))
+                context.fill(path, with: .color(color.opacity(isMuted ? 0.25 : 0.9)))
             }
-            .background(Color.secondary.opacity(0.12), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
+            .background(Color.secondary.opacity(0.12), in: RoundedRectangle(cornerRadius: Brand.Radius.row, style: .continuous))
         }
     }
 }
@@ -608,12 +613,12 @@ private struct TrimTimeline: View {
             }
 
             ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                RoundedRectangle(cornerRadius: Brand.Radius.row, style: .continuous)
                     .fill(Color.secondary.opacity(0.25))
                     .contentShape(Rectangle())
                     .gesture(drag { onSeek(time($0)) })
                 Rectangle()
-                    .fill(Color.accentColor.opacity(0.35))
+                    .fill(Brand.fill.opacity(0.45))
                     .frame(width: max(0, position(end) - position(start)))
                     .offset(x: position(start))
                     .allowsHitTesting(false)
@@ -624,9 +629,11 @@ private struct TrimTimeline: View {
                     .offset(x: position(end))
                     .gesture(drag { onEnd(time($0)) })
                 Rectangle()
-                    .fill(Color.primary)
+                    .fill(Brand.playhead)
                     .frame(width: 2)
-                    .offset(x: position(min(max(0, current), duration)) - 1)
+                    .padding(.horizontal, 1)
+                    .background(Brand.playheadEdge)
+                    .offset(x: position(min(max(0, current), duration)) - 2)
                     .allowsHitTesting(false)
             }
             .coordinateSpace(name: Self.space)
@@ -636,7 +643,7 @@ private struct TrimTimeline: View {
 
     private var handle: some View {
         RoundedRectangle(cornerRadius: 3, style: .continuous)
-            .fill(Color.accentColor)
+            .fill(Brand.fill)
             .frame(width: Self.handleWidth)
             .overlay {
                 Capsule()
