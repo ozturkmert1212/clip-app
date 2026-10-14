@@ -149,7 +149,7 @@ struct ClipsView: View {
             title: filter == .videos ? "No recordings yet" : "No clips yet",
             message: filter == .videos
                 ? "Recordings appear here. Start one from the sidebar, the menu or with the recording shortcut."
-                : "Saved clips appear here. Press the clip shortcut or use the save button to keep the last seconds."
+                : "Saved clips appear here. Start clipping, then press the clip shortcut or the save button to keep the last seconds."
         )
     }
 

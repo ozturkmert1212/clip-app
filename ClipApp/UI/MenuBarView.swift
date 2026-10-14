@@ -51,7 +51,9 @@ struct MenuBarView: View {
         Menu(AppLanguage.string("Source")) {
             Text(verbatim: controller.isRecording
                  ? AppLanguage.string("The source can't be changed during a recording.")
-                 : AppLanguage.string("Changing the source restarts capture and clears the replay buffer."))
+                 : controller.activity.streamRuns
+                 ? AppLanguage.string("Changing the source restarts capture and clears the replay buffer.")
+                 : AppLanguage.string("The source is used once clipping or a recording starts."))
             // A saved window or app that is gone still shows as the selection.
             if !capture.sources.contains(settings.source) {
                 Toggle(AppLanguage.string("Unavailable (capturing the main display)"), isOn: .constant(true))

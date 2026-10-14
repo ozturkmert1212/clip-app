@@ -14,7 +14,7 @@ struct SettingsView: View {
                 PermissionRow(
                     icon: "rectangle.dashed.badge.record",
                     title: "Screen Recording",
-                    detail: "Required. To capture the screen and keep the last seconds in memory.",
+                    detail: "Required. To capture the screen while you clip or record.",
                     status: permissions.screenRecordingStatus,
                     action: permissions.requestScreenRecording
                 ) {
@@ -42,7 +42,7 @@ struct SettingsView: View {
                     status: permissions.notificationStatus,
                     action: permissions.requestNotifications
                 ) {
-                    Text("If no banner shows up: macOS hides banners because ClipApp captures the screen all the time. Turn on \"Allow notifications when mirroring or sharing the display\" at the top of the Notifications page.")
+                    Text("If no banner shows up: macOS hides banners while the screen is being captured, which ClipApp does while clipping or recording. Turn on \"Allow notifications when mirroring or sharing the display\" at the top of the Notifications page.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)

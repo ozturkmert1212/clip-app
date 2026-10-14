@@ -684,12 +684,12 @@
         }
       }
     },
-    "If no banner shows up: macOS hides banners because ClipApp captures the screen all the time. Turn on \"Allow notifications when mirroring or sharing the display\" at the top of the Notifications page." : {
+    "If no banner shows up: macOS hides banners while the screen is being captured, which ClipApp does while clipping or recording. Turn on \"Allow notifications when mirroring or sharing the display\" at the top of the Notifications page." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bant görünmüyorsa: ClipApp ekranı sürekli yakaladığı için macOS bantları gizler. Bildirimler sayfasının en üstündeki \"Ekran yansıtılırken veya paylaşılırken bildirimlere izin ver\" seçeneğini aç."
+            "value" : "Bant görünmüyorsa: macOS, ekran yakalanırken bantları gizler; ClipApp klip alırken ya da kayıt yaparken ekranı yakalar. Bildirimler sayfasının en üstündeki \"Ekran yansıtılırken veya paylaşılırken bildirimlere izin ver\" seçeneğini aç."
           }
         }
       }
@@ -1324,12 +1324,12 @@
         }
       }
     },
-    "Required. To capture the screen and keep the last seconds in memory." : {
+    "Required. To capture the screen while you clip or record." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zorunlu. Ekranı yakalayıp son saniyeleri bellekte tutmak için."
+            "value" : "Zorunlu. Klip alırken ve kayıt yaparken ekranı yakalamak için."
           }
         }
       }
@@ -1454,12 +1454,12 @@
         }
       }
     },
-    "Saved clips appear here. Press the clip shortcut or use the save button to keep the last seconds." : {
+    "Saved clips appear here. Start clipping, then press the clip shortcut or the save button to keep the last seconds." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kaydettiğin klipler burada görünür. Son saniyeleri saklamak için klip kısayoluna bas ya da kaydet düğmesini kullan."
+            "value" : "Kaydettiğin klipler burada görünür. Klip almayı başlat, sonra son saniyeleri saklamak için klip kısayoluna ya da kaydet düğmesine bas."
           }
         }
       }
@@ -1760,6 +1760,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kayıt sırasında kaynak değiştirilemez."
+          }
+        }
+      }
+    },
+    "The source is used once clipping or a recording starts." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaynak, klip alma ya da kayıt başlayınca kullanılır."
           }
         }
       }
