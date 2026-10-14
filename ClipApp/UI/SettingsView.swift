@@ -63,10 +63,10 @@ struct SettingsView: View {
                         )
                     }
                 }
-                Toggle("Mix audio into one track", isOn: $settings.mixAudioTracks)
-                Text(settings.mixAudioTracks
-                     ? "System audio and microphone are mixed into one audio track; both are heard everywhere, including Discord, VLC and browsers."
-                     : "Each source gets its own audio track: system audio first, then microphone. Most players only play the first one.")
+                Toggle("Keep separate audio tracks for editing", isOn: $settings.keepAudioStems)
+                Text(settings.keepAudioStems
+                     ? "Every player uses the mixed track. Game audio and microphone are also stored as separate, disabled tracks, so their levels can be changed in the editor. Adds about 1.4 MB per 30 seconds."
+                     : "Clips only get the mixed track. Game audio and microphone can't be adjusted separately afterwards.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

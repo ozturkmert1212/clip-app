@@ -23,13 +23,15 @@ enum ClipWriter {
 
     private static let queue = DispatchQueue(label: "com.mertozturk.ClipApp.clipwriter", qos: .userInitiated)
 
-    /// `mixAudio` puts all audio sources into one track instead of one each.
-    /// `info` is stored in the file, see `ClipInfo`.
+    /// With two audio sources the first audio track is their mix, the one
+    /// every player picks; `keepStems` adds each source again as a track of
+    /// its own, marked disabled, for the editor. `info` is stored in the file
+    /// together with the track layout, see `ClipInfo`.
     static func write(
         _ snapshot: RingBuffer.Snapshot,
         to directory: URL,
         name: String,
-        mixAudio: Bool,
+        keepStems: Bool,
         info: ClipInfo
     ) async throws -> URL {
         guard let first = snapshot.video.first, let format = first.formatDescription else {
@@ -54,7 +56,6 @@ enum ClipWriter {
             throw WriteError.writerFailed(error)
         }
         writer.shouldOptimizeForNetworkUse = true
-        writer.metadata = info.metadataItems
         let input = AVAssetWriterInput(mediaType: .video, outputSettings: nil, sourceFormatHint: format)
         input.expectsMediaDataInRealTime = false
         guard writer.canAdd(input) else { throw WriteError.cannotAddInput }
@@ -87,20 +88,29 @@ enum ClipWriter {
         let clipEnd = snapshot.endTime - base
         var pumps = [SamplePump(writer: writer, input: input, samples: samples)]
 
-        var audio: [(format: CMAudioFormatDescription, samples: [CMSampleBuffer])] = AudioTrack.allCases.compactMap { track in
-            guard let captured = snapshot.audio[track], let format = captured.first?.formatDescription else { return nil }
-            return (format, audioTimeline(captured, format: format, base: base, from: clipStart, to: clipEnd))
-        }
-        // Sources at different sample rates cannot be added up; they stay separate.
-        if mixAudio, audio.count > 1,
-           audio.dropFirst().allSatisfy({ CMFormatDescriptionEqual($0.format, otherFormatDescription: audio[0].format) }) {
-            audio = [(audio[0].format, mix(audio.map(\.samples), format: audio[0].format))]
+        let sources: [(role: ClipInfo.AudioRole, format: CMAudioFormatDescription, samples: [CMSampleBuffer])] =
+            AudioTrack.allCases.compactMap { track in
+                guard let captured = snapshot.audio[track], let format = captured.first?.formatDescription else { return nil }
+                let role: ClipInfo.AudioRole = track == .system ? .system : .microphone
+                return (role, format, audioTimeline(captured, format: format, base: base, from: clipStart, to: clipEnd))
+            }
+        // Sources at different sample rates cannot be added up; then there is
+        // no mix and each stays an ordinary track.
+        var audio = sources.map { (role: $0.role, format: $0.format, samples: $0.samples, enabled: true) }
+        if sources.count > 1,
+           sources.dropFirst().allSatisfy({ CMFormatDescriptionEqual($0.format, otherFormatDescription: sources[0].format) }) {
+            let mixed = mix(sources.map(\.samples), format: sources[0].format)
+            audio = [(.mix, sources[0].format, mixed, true)]
+            if keepStems {
+                audio += sources.map { ($0.role, $0.format, $0.samples, false) }
+            }
         }
 
         // One AAC track per entry. A track the writer cannot take is left out
         // rather than failing the whole clip.
-        for (format, timeline) in audio {
-            guard let description = format.audioStreamBasicDescription else { continue }
+        var roles: [ClipInfo.AudioRole] = []
+        for track in audio {
+            guard let description = track.format.audioStreamBasicDescription else { continue }
             var settings: [String: Any] = [
                 AVFormatIDKey: kAudioFormatMPEG4AAC,
                 AVSampleRateKey: description.mSampleRate,
@@ -112,12 +122,18 @@ enum ClipWriter {
                 settings[AVEncoderBitRateKey] = 96_000 * Int(description.mChannelsPerFrame)
             }
             guard writer.canApply(outputSettings: settings, forMediaType: .audio) else { continue }
-            let audioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: settings, sourceFormatHint: format)
+            let audioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: settings, sourceFormatHint: track.format)
             audioInput.expectsMediaDataInRealTime = false
+            // Players take the enabled track; the editor reads the others.
+            audioInput.marksOutputTrackAsEnabled = track.enabled
             guard writer.canAdd(audioInput) else { continue }
             writer.add(audioInput)
-            pumps.append(SamplePump(writer: writer, input: audioInput, samples: timeline))
+            roles.append(track.role)
+            pumps.append(SamplePump(writer: writer, input: audioInput, samples: track.samples))
         }
+        var info = info
+        info.audio = roles
+        writer.metadata = info.metadataItems
 
         guard writer.startWriting() else { throw WriteError.writerFailed(writer.error) }
         writer.startSession(atSourceTime: clipStart)

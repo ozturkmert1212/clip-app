@@ -47,9 +47,10 @@ final class SettingsStore: ObservableObject {
     /// Linear gain, 1 = unchanged.
     @Published var systemAudioLevel: Double { didSet { defaults.set(systemAudioLevel, forKey: Key.systemAudioLevel) } }
     @Published var microphoneLevel: Double { didSet { defaults.set(microphoneLevel, forKey: Key.microphoneLevel) } }
-    /// One mixed audio track instead of one per source. Most players other
-    /// than QuickTime only play the first audio track.
-    @Published var mixAudioTracks: Bool { didSet { defaults.set(mixAudioTracks, forKey: Key.mixAudioTracks) } }
+    /// Clips always carry a mixed audio track for players. With this on they
+    /// also carry each source as a disabled track of its own, which is what
+    /// lets the editor change the levels afterwards.
+    @Published var keepAudioStems: Bool { didSet { defaults.set(keepAudioStems, forKey: Key.keepAudioStems) } }
     @Published var saveDirectory: URL { didSet { defaults.set(saveDirectory.path, forKey: Key.saveDirectory) } }
     @Published var fileNameFormat: String { didSet { defaults.set(fileNameFormat, forKey: Key.fileNameFormat) } }
 
@@ -85,7 +86,7 @@ final class SettingsStore: ObservableObject {
         static let microphoneEnabled = "microphoneEnabled"
         static let systemAudioLevel = "systemAudioLevel"
         static let microphoneLevel = "microphoneLevel"
-        static let mixAudioTracks = "mixAudioTracks"
+        static let keepAudioStems = "keepAudioStems"
         static let saveDirectory = "saveDirectory"
         static let fileNameFormat = "fileNameFormat"
         static let showHUD = "showHUD"
@@ -114,7 +115,7 @@ final class SettingsStore: ObservableObject {
         }
         systemAudioLevel = level(Key.systemAudioLevel)
         microphoneLevel = level(Key.microphoneLevel)
-        mixAudioTracks = defaults.object(forKey: Key.mixAudioTracks) as? Bool ?? true
+        keepAudioStems = defaults.object(forKey: Key.keepAudioStems) as? Bool ?? true
         saveDirectory = defaults.string(forKey: Key.saveDirectory).map { URL(fileURLWithPath: $0, isDirectory: true) }
             ?? FileManager.default.urls(for: .moviesDirectory, in: .userDomainMask)[0]
                 .appendingPathComponent("ClipApp", isDirectory: true)

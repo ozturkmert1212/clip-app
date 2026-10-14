@@ -367,6 +367,16 @@
         }
       }
     },
+    "Clips only get the mixed track. Game audio and microphone can't be adjusted separately afterwards." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kliplere yalnızca karışık kanal yazılır. Oyun sesi ve mikrofon sonradan ayrı ayrı ayarlanamaz."
+          }
+        }
+      }
+    },
     "Copies the video as it is: instant and lossless. Because a cut can only start on a keyframe (every 2 s), the file keeps up to 2 s of hidden footage before the start; most players skip it." : {
       "localizations" : {
         "tr" : {
@@ -517,22 +527,22 @@
         }
       }
     },
-    "Each source gets its own audio track: system audio first, then microphone. Most players only play the first one." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Her kaynak ayrı bir ses track'i olur: önce sistem sesi, sonra mikrofon. Çoğu oynatıcı yalnızca ilkini çalar."
-          }
-        }
-      }
-    },
     "End %@" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bitiş %@"
+          }
+        }
+      }
+    },
+    "Every player uses the mixed track. Game audio and microphone are also stored as separate, disabled tracks, so their levels can be changed in the editor. Adds about 1.4 MB per 30 seconds." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her oynatıcı karışık kanalı kullanır. Oyun sesi ve mikrofon ayrıca devre dışı işaretli ayrı kanallar olarak saklanır; böylece düzeyleri editörde değiştirilebilir. 30 saniyede yaklaşık 1,4 MB ekler."
           }
         }
       }
@@ -637,6 +647,16 @@
         }
       }
     },
+    "Keep separate audio tracks for editing" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Düzenleme için ayrı ses kanallarını sakla"
+          }
+        }
+      }
+    },
     "Language" : {
       "localizations" : {
         "tr" : {
@@ -733,16 +753,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mikrofon seviyesi"
-          }
-        }
-      }
-    },
-    "Mix audio into one track" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sesleri tek track'te birleştir"
           }
         }
       }
@@ -1323,16 +1333,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sistem sesi"
-          }
-        }
-      }
-    },
-    "System audio and microphone are mixed into one audio track; both are heard everywhere, including Discord, VLC and browsers." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sistem sesi ve mikrofon tek ses track'ine karışır; Discord, VLC ve tarayıcılar dahil her yerde ikisi de duyulur."
           }
         }
       }

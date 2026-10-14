@@ -173,11 +173,11 @@ final class ClipController: ObservableObject {
         let directory = settings.clipsDirectory.appendingPathComponent(game.name, isDirectory: true)
         let info = ClipInfo(game: game.name, bundleID: game.bundleID, recorded: Date())
         let name = settings.clipFileName(source: sourceName)
-        let mixAudio = settings.mixAudioTracks
+        let keepStems = settings.keepAudioStems
         isSaving = true
         Task {
             do {
-                finish(.saved(try await ClipWriter.write(snapshot, to: directory, name: name, mixAudio: mixAudio, info: info)))
+                finish(.saved(try await ClipWriter.write(snapshot, to: directory, name: name, keepStems: keepStems, info: info)))
             } catch {
                 finish(.failed(error.localizedDescription))
             }
