@@ -61,15 +61,24 @@ final class CaptureManager: ObservableObject {
         }
     }
 
-    /// Our own windows that must never end up in a clip (the HUD). Only used
-    /// if ClipApp itself cannot be excluded as an application, which covers
-    /// every window it has or opens later. Read on every (re)start.
+    /// Our own windows that must never end up in a clip (the HUD). Listed by
+    /// ID while ClipApp is shown in captures, or if it cannot be excluded as
+    /// an application. Read on every (re)start and filter update.
     var excludedWindowIDs: [CGWindowID] = []
+
+    /// Whether ClipApp's own windows and menus show up in display captures.
+    /// A change is applied to the running stream with `updateContentFilter`,
+    /// so the buffer and a running recording carry on untouched.
+    var showsClipApp = CapturePrivacy.showsClipAppDefault {
+        didSet {
+            if showsClipApp != oldValue { updateFilter() }
+        }
+    }
 
     /// Draws every notification banner. Kept out of display captures so that
     /// neither our own "clip saved" banner nor anyone's messages land in a clip.
     /// It also owns the desktop widgets, which disappear from clips with it.
-    private static let notificationCenterBundleIdentifier = "com.apple.notificationcenterui"
+    private static let notificationCenterBundleIdentifier = CapturePrivacy.notificationCenterBundleIdentifier
 
     private let logger = Logger(subsystem: "com.mertozturk.ClipApp", category: "capture")
     private let captureQueue = DispatchQueue(label: "com.mertozturk.ClipApp.capture", qos: .userInteractive)
@@ -77,6 +86,12 @@ final class CaptureManager: ObservableObject {
     private let audioQueue = DispatchQueue(label: "com.mertozturk.ClipApp.capture.audio", qos: .userInteractive)
     private var stream: SCStream?
     private var output: StreamOutput?
+    /// The display the running stream shows, `nil` for a window or
+    /// application source, which has no own windows to leave out.
+    private var streamDisplay: SCDisplay?
+    /// What the running stream's filter was built for.
+    private var streamPrivacy: CapturePrivacy?
+    private var filterTask: Task<Void, Never>?
     private var wantsCapture = false
     private var restartTask: Task<Void, Never>?
     private var retryDelay: TimeInterval = 1
@@ -90,6 +105,10 @@ final class CaptureManager: ObservableObject {
         self.onVideoFrame = onVideoFrame
         self.onAudioSample = onAudioSample
         observeSystem()
+    }
+
+    private var privacy: CapturePrivacy {
+        CapturePrivacy(showsClipApp: showsClipApp, ownBundleIdentifier: Bundle.main.bundleIdentifier ?? "")
     }
 
     func start() {
@@ -129,10 +148,10 @@ final class CaptureManager: ObservableObject {
         }
 
         // Layer 0 with a real size filters out menu bar items, overlays and helpers.
-        let ownBundleIdentifier = Bundle.main.bundleIdentifier
+        let privacy = privacy
         let windows = content.windows.filter { window in
             guard let app = window.owningApplication, !app.bundleIdentifier.isEmpty,
-                  app.bundleIdentifier != ownBundleIdentifier else { return false }
+                  privacy.canBeSource(bundleIdentifier: app.bundleIdentifier) else { return false }
             return window.windowLayer == 0 && window.frame.width >= 200 && window.frame.height >= 150
         }
         result.windows = windows.compactMap { window in
@@ -168,7 +187,8 @@ final class CaptureManager: ObservableObject {
         do {
             let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
             guard !Task.isCancelled else { return }
-            let excluded = await exclusions()
+            let privacy = privacy
+            let excluded = await exclusions(for: privacy)
             guard !Task.isCancelled else { return }
             let target = try resolve(configuration.source, in: content, excluding: excluded)
             let (width, height) = outputSize(for: target.pixelSize)
@@ -205,9 +225,13 @@ final class CaptureManager: ObservableObject {
             }
             self.stream = stream
             self.output = output
+            streamDisplay = target.display
+            streamPrivacy = privacy
             retryDelay = 1
             state = .running(source: target.name, width: width, height: height, usingFallback: target.isFallback)
             logger.info("Capture started: \(target.name, privacy: .public) \(width)x\(height) @ \(self.configuration.fps) fps, system audio \(self.configuration.capturesSystemAudio ? "on" : "off", privacy: .public)\(target.isFallback ? ", fallback for missing source" : "", privacy: .public), \(excluded.windows.count) own window(s) and \(excluded.applications.count) app(s) excluded")
+            // The setting changed while the stream was being built.
+            if self.privacy != privacy { updateFilter() }
         } catch {
             guard !Task.isCancelled else { return }
             handleFailure(error)
@@ -218,6 +242,8 @@ final class CaptureManager: ObservableObject {
         guard let stream else { return }
         self.stream = nil
         output = nil
+        streamDisplay = nil
+        streamPrivacy = nil
         try? await stream.stopCapture()
     }
 
@@ -227,6 +253,8 @@ final class CaptureManager: ObservableObject {
         guard stopped === stream else { return }
         stream = nil
         output = nil
+        streamDisplay = nil
+        streamPrivacy = nil
         handleFailure(error)
     }
 
@@ -297,6 +325,32 @@ final class CaptureManager: ObservableObject {
             .store(in: &cancellables)
     }
 
+    /// Swaps the running stream's filter for one built for the current
+    /// `showsClipApp`. Size and configuration stay the same, so the encoder
+    /// session, the ring buffer and a running recording see no change. With
+    /// no stream running, the next start reads the setting anyway.
+    private func updateFilter() {
+        filterTask?.cancel()
+        filterTask = Task { [weak self] in
+            guard let self, let stream = self.stream, let display = self.streamDisplay else { return }
+            let privacy = self.privacy
+            guard privacy != self.streamPrivacy else { return }
+            let excluded = await self.exclusions(for: privacy)
+            // A restart in the meantime built its own filter from the new value.
+            guard !Task.isCancelled, stream === self.stream else { return }
+            do {
+                try await stream.updateContentFilter(self.displayTarget(display, excluding: excluded).filter)
+                guard stream === self.stream else { return }
+                self.streamPrivacy = privacy
+                self.logger.info("Capture filter updated: ClipApp \(privacy.showsClipApp ? "shown" : "hidden", privacy: .public), \(excluded.windows.count) own window(s) and \(excluded.applications.count) app(s) excluded")
+            } catch {
+                // The old filter stays; a restart builds a fresh one.
+                self.logger.error("Capture filter update failed: \(error.localizedDescription, privacy: .public)")
+                self.restartIfCapturing(after: 0)
+            }
+        }
+    }
+
     private func restartIfCapturing(after delay: TimeInterval) {
         guard wantsCapture else { return }
         restart(after: delay)
@@ -308,6 +362,8 @@ final class CaptureManager: ObservableObject {
         let filter: SCContentFilter
         let name: String
         let pixelSize: CGSize
+        /// Set for a display target, whose filter `updateFilter` can rebuild.
+        var display: SCDisplay?
         var isFallback = false
     }
 
@@ -323,8 +379,11 @@ final class CaptureManager: ObservableObject {
         let mainDisplay = content.displays.first { $0.displayID == CGMainDisplayID() } ?? content.displays.first
 
         switch source {
+        // ClipApp is never a source of its own (`CapturePrivacy.canBeSource`);
+        // one stored anyway is treated as gone.
         case .window(let windowID):
-            if let window = content.windows.first(where: { $0.windowID == windowID }) {
+            if let window = content.windows.first(where: { $0.windowID == windowID }),
+               privacy.canBeSource(bundleIdentifier: window.owningApplication?.bundleIdentifier) {
                 let filter = SCContentFilter(desktopIndependentWindow: window)
                 let scale: CGFloat
                 if #available(macOS 14.0, *) {
@@ -338,7 +397,8 @@ final class CaptureManager: ObservableObject {
                 return Target(filter: filter, name: name, pixelSize: size)
             }
         case .application(let bundleIdentifier):
-            if let app = content.applications.first(where: { $0.bundleIdentifier == bundleIdentifier }),
+            if privacy.canBeSource(bundleIdentifier: bundleIdentifier),
+               let app = content.applications.first(where: { $0.bundleIdentifier == bundleIdentifier }),
                let display = mainDisplay {
                 let filter = SCContentFilter(display: display, including: [app], exceptingWindows: [])
                 return Target(filter: filter, name: app.applicationName, pixelSize: pixelSize(of: display))
@@ -367,23 +427,26 @@ final class CaptureManager: ObservableObject {
 
     /// Looked up separately: the HUD and the banners are off screen most of the
     /// time and `run()` only lists on-screen windows.
-    private func exclusions() async -> Exclusions {
+    private func exclusions(for privacy: CapturePrivacy) async -> Exclusions {
         guard let content = try? await SCShareableContent.excludingDesktopWindows(true, onScreenWindowsOnly: false)
         else {
             logger.error("Nothing excluded from capture: shareable content unavailable")
             return Exclusions()
         }
         // Excluding ClipApp as an application keeps the main window, its
-        // sheets and menus and the HUD out of clips without tracking window IDs.
-        let own = content.applications.filter { $0.bundleIdentifier == Bundle.main.bundleIdentifier }
-        let notificationCenter = content.applications.filter {
+        // sheets and menus and the HUD out of clips without tracking window
+        // IDs. Shown in clips, it is left in and only the HUD goes, by ID.
+        let applications = content.applications.filter { privacy.excludedApplications.contains($0.bundleIdentifier) }
+        let ownFound = content.applications.contains { $0.bundleIdentifier == privacy.ownBundleIdentifier }
+        let notificationCenter = applications.filter {
             $0.bundleIdentifier == Self.notificationCenterBundleIdentifier
         }
         let result = Exclusions(
-            windows: own.isEmpty ? content.windows.filter { excludedWindowIDs.contains($0.windowID) } : [],
-            applications: own + notificationCenter
+            windows: privacy.excludesHiddenWindowsByID(ownApplicationFound: ownFound)
+                ? content.windows.filter { excludedWindowIDs.contains($0.windowID) } : [],
+            applications: applications
         )
-        if own.isEmpty {
+        if !ownFound, !privacy.showsClipApp {
             logger.error("ClipApp not found as an application; excluding \(result.windows.count) of \(self.excludedWindowIDs.count) own window(s) instead")
         }
         if notificationCenter.isEmpty {
@@ -402,7 +465,8 @@ final class CaptureManager: ObservableObject {
                 exceptingWindows: excluded.windows
             ),
             name: Self.displayName(display.displayID),
-            pixelSize: pixelSize(of: display)
+            pixelSize: pixelSize(of: display),
+            display: display
         )
     }
 
