@@ -119,17 +119,23 @@ final class ClipLibrary: ObservableObject {
     }
 
     /// Files the clips under another game by moving them into its folder.
-    /// The game recorded inside each file stays what it was.
+    /// A clip that still has its automatic name gets the new game's name in
+    /// it; one the user renamed keeps its name. The game recorded inside
+    /// each file stays what it was.
     func move(_ clips: [ClipItem], toGame name: String) throws {
         let game = GameContext.folderName(name)
         let directory = settings.clipsDirectory.appendingPathComponent(game, isDirectory: true)
         defer { scheduleReload() }
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         for clip in clips where clip.category != .game(game) && clip.category != .video {
-            var target = directory.appendingPathComponent(clip.url.lastPathComponent)
+            var name = clip.name
+            if case .game(let old) = clip.category, let automatic = ClipNaming.renamed(name, from: old, to: game) {
+                name = automatic
+            }
+            var target = directory.appendingPathComponent(name).appendingPathExtension(clip.url.pathExtension)
             var suffix = 2
             while FileManager.default.fileExists(atPath: target.path) {
-                target = directory.appendingPathComponent("\(clip.name)_\(suffix)").appendingPathExtension(clip.url.pathExtension)
+                target = directory.appendingPathComponent("\(name)_\(suffix)").appendingPathExtension(clip.url.pathExtension)
                 suffix += 1
             }
             try FileManager.default.moveItem(at: clip.url, to: target)

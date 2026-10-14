@@ -48,7 +48,6 @@ final class SettingsStore: ObservableObject {
     static let fpsOptions = [30, 60]
     static let bitrateOptions = [4, 6, 8, 12, 16, 24, 40]
     static let audioLevelRange = 0.0...2.0
-    static let defaultFileNameFormat = "Clip_{date}_{time}"
 
     @Published var bufferSeconds: Int { didSet { defaults.set(bufferSeconds, forKey: Key.bufferSeconds) } }
     @Published var resolution: Resolution { didSet { defaults.set(resolution.rawValue, forKey: Key.resolution) } }
@@ -67,7 +66,6 @@ final class SettingsStore: ObservableObject {
     /// lets the editor change the levels afterwards.
     @Published var keepAudioStems: Bool { didSet { defaults.set(keepAudioStems, forKey: Key.keepAudioStems) } }
     @Published var saveDirectory: URL { didSet { defaults.set(saveDirectory.path, forKey: Key.saveDirectory) } }
-    @Published var fileNameFormat: String { didSet { defaults.set(fileNameFormat, forKey: Key.fileNameFormat) } }
 
     @Published var editSaveMode: EditSaveMode { didSet { defaults.set(editSaveMode.rawValue, forKey: Key.editSaveMode) } }
 
@@ -105,7 +103,6 @@ final class SettingsStore: ObservableObject {
         static let microphoneLevel = "microphoneLevel"
         static let keepAudioStems = "keepAudioStems"
         static let saveDirectory = "saveDirectory"
-        static let fileNameFormat = "fileNameFormat"
         static let showHUD = "showHUD"
         static let hudCorner = "hudCorner"
         static let openWindowAtLaunch = "openWindowAtLaunch"
@@ -137,7 +134,6 @@ final class SettingsStore: ObservableObject {
         saveDirectory = defaults.string(forKey: Key.saveDirectory).map { URL(fileURLWithPath: $0, isDirectory: true) }
             ?? FileManager.default.urls(for: .moviesDirectory, in: .userDomainMask)[0]
                 .appendingPathComponent("ClipApp", isDirectory: true)
-        fileNameFormat = defaults.string(forKey: Key.fileNameFormat) ?? Self.defaultFileNameFormat
         showHUD = defaults.object(forKey: Key.showHUD) as? Bool ?? true
         hudCorner = defaults.string(forKey: Key.hudCorner).flatMap(HUD.Corner.init) ?? .topLeft
         openWindowAtLaunch = defaults.object(forKey: Key.openWindowAtLaunch) as? Bool ?? true
@@ -178,26 +174,5 @@ final class SettingsStore: ObservableObject {
             launchAtLoginError = error.localizedDescription
         }
         launchAtLogin = SMAppService.mainApp.status == .enabled
-    }
-
-    /// File name without extension. Supports `{date}`, `{time}` and `{source}`.
-    func clipFileName(date: Date = Date(), source: String) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MM-dd"
-        let day = formatter.string(from: date)
-        formatter.dateFormat = "HH-mm-ss"
-        let time = formatter.string(from: date)
-
-        let format = fileNameFormat.trimmingCharacters(in: .whitespaces).isEmpty
-            ? Self.defaultFileNameFormat : fileNameFormat
-        let name = format
-            .replacingOccurrences(of: "{date}", with: day)
-            .replacingOccurrences(of: "{time}", with: time)
-            .replacingOccurrences(of: "{source}", with: source)
-            .components(separatedBy: CharacterSet(charactersIn: "/:\\"))
-            .joined(separator: "-")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        return name.isEmpty ? "Clip" : name
     }
 }

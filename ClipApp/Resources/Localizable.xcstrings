@@ -604,32 +604,12 @@
         }
       }
     },
-    "Example: %@.mp4\n{date}, {time} and {source} can be used." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Örnek: %@.mp4\n{date}, {time} ve {source} kullanılabilir."
-          }
-        }
-      }
-    },
     "FPS" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "FPS"
-          }
-        }
-      }
-    },
-    "File name" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dosya adı"
           }
         }
       }

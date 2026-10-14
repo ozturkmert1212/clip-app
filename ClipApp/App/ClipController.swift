@@ -223,14 +223,12 @@ final class ClipController: ObservableObject {
             finish(.failed(ClipWriter.WriteError.emptyBuffer.localizedDescription))
             return
         }
-        var sourceName = AppLanguage.string("Display")
-        if case .running(let source, _, _, _) = capture.state { sourceName = source }
         // Filed under the app in front right now (not when the write finishes),
         // or the one that was in front during the clip if ClipApp is now.
         let game = games.current(within: TimeInterval(settings.bufferSeconds))
         let directory = settings.clipsDirectory.appendingPathComponent(game.name, isDirectory: true)
         let info = ClipInfo(game: game.name, bundleID: game.bundleID, recorded: Date())
-        let name = settings.clipFileName(source: sourceName)
+        let name = ClipNaming.clipName(game: game.name)
         let keepStems = settings.keepAudioStems
         isSaving = true
         Task {
@@ -324,10 +322,7 @@ final class ClipController: ObservableObject {
     }
 
     private static func recordingURL(in directory: URL) -> URL {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
-        let name = "Recording_\(formatter.string(from: Date()))"
+        let name = ClipNaming.recordingName()
         var url = directory.appendingPathComponent("\(name).mp4")
         var suffix = 2
         while FileManager.default.fileExists(atPath: url.path) {

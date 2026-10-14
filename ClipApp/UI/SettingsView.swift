@@ -125,10 +125,6 @@ struct SettingsView: View {
                     ForEach(SettingsStore.EditSaveMode.allCases) { Text($0.title).tag($0) }
                 }
                 .id(settings.language)
-                TextField("File name", text: $settings.fileNameFormat)
-                Text("Example: \(settings.clipFileName(source: AppLanguage.string("Display"))).mp4\n{date}, {time} and {source} can be used.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
 
             Section("General") {
