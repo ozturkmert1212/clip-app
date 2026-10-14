@@ -84,6 +84,16 @@
         }
       }
     },
+    "Audio was saved as a single track, so game audio and microphone can't be adjusted separately." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ses tek kanal olarak kaydedilmiş; oyun sesi ve mikrofon ayrı ayrı ayarlanamaz."
+          }
+        }
+      }
+    },
     "Bitrate" : {
       "localizations" : {
         "tr" : {
@@ -454,12 +464,12 @@
         }
       }
     },
-    "Couldn't save the trimmed clip: %@" : {
+    "Couldn't save the edited clip: %@" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kırpılmış klip kaydedilemedi: %@"
+            "value" : "Düzenlenmiş klip kaydedilemedi: %@"
           }
         }
       }
@@ -630,6 +640,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Oyun"
+          }
+        }
+      }
+    },
+    "Game audio" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oyun sesi"
           }
         }
       }
@@ -810,6 +830,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Çöp Sepetine Taşı"
+          }
+        }
+      }
+    },
+    "Mute" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessize al"
           }
         }
       }
@@ -1274,22 +1304,22 @@
         }
       }
     },
+    "Save Edited Clip" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Düzenlenmiş Klibi Kaydet"
+          }
+        }
+      }
+    },
     "Save Last %lld Seconds" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Son %lld Saniyeyi Kaydet"
-          }
-        }
-      }
-    },
-    "Save Trimmed Clip" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kırpılmış Klibi Kaydet"
           }
         }
       }
@@ -1524,12 +1554,32 @@
         }
       }
     },
+    "Trim" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kırp"
+          }
+        }
+      }
+    },
     "Unavailable (capturing the main display)" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kullanılamıyor (ana ekran yakalanıyor)"
+          }
+        }
+      }
+    },
+    "Unmute" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sesi aç"
           }
         }
       }

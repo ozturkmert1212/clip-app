@@ -11,6 +11,13 @@ enum ClipTrimmer {
         case reencode
     }
 
+    /// New levels for the two sources of a clip that carries them as separate
+    /// tracks: linear gains, 0 is muted, 1 is as recorded.
+    struct AudioEdit: Equatable {
+        var system = 1.0
+        var microphone = 1.0
+    }
+
     enum TrimError: LocalizedError {
         case unsupported
         case directoryUnavailable(String)
@@ -27,20 +34,29 @@ enum ClipTrimmer {
         }
     }
 
-    /// `progress` gets 0...1 while the clip is written. Cancelling the task
-    /// stops it, removes the partial file and throws `CancellationError`.
+    /// With `audio` the mixed track is made again from the two source tracks
+    /// at the given levels; the source tracks themselves are copied, so the
+    /// edit can be redone later. `progress` gets 0...1 while the clip is
+    /// written. Cancelling the task stops it, removes the partial file and
+    /// throws `CancellationError`.
     static func trim(
         _ source: URL,
         range: CMTimeRange,
         mode: Mode,
+        audio: AudioEdit? = nil,
+        isFullLength: Bool = false,
         progress: @escaping @MainActor (Double) -> Void
     ) async throws -> URL {
         let asset = AVURLAsset(url: source, options: [AVURLAssetPreferPreciseDurationAndTimingKey: true])
-        let output = outputURL(for: source)
+        let output = outputURL(for: source, suffix: isFullLength ? "edited" : "trimmed")
         do {
-            switch mode {
-            case .passthrough: try await copy(asset, range: range, to: output, progress: progress)
-            case .reencode: try await reencode(asset, range: range, to: output, progress: progress)
+            // An export session copies samples but ignores an audio mix
+            // (measured), so anything beyond a plain cut goes through the
+            // reader and writer.
+            if mode == .passthrough, audio == nil {
+                try await copy(asset, range: range, to: output, progress: progress)
+            } else {
+                try await rewrite(asset, range: range, reencodesVideo: mode == .reencode, audio: audio, to: output, progress: progress)
             }
         } catch {
             try? FileManager.default.removeItem(at: output)
@@ -111,13 +127,18 @@ enum ClipTrimmer {
         let input: AVAssetWriterInput
     }
 
-    /// Decodes the range and encodes it again as H.264 at the source's own
-    /// bitrate, size and frame timing. Export presets pick their own bitrate
-    /// (15 Mbps for a 40 Mbps 1080p60 clip), hence reader and writer. Audio
-    /// is copied as it is, track by track.
-    private static func reencode(
+    /// Reads the range and writes it again. The video is either copied (the
+    /// reader then also delivers the frames back to the previous keyframe,
+    /// marked as not to be displayed) or decoded and encoded as H.264 at the
+    /// source's own bitrate, size and frame timing; export presets pick
+    /// their own bitrate (15 Mbps for a 40 Mbps 1080p60 clip). Audio tracks
+    /// are copied as they are, and with `audio` a new mix is put in front of
+    /// the two source tracks.
+    private static func rewrite(
         _ asset: AVURLAsset,
         range: CMTimeRange,
+        reencodesVideo: Bool,
+        audio: AudioEdit?,
         to output: URL,
         progress: @escaping @MainActor (Double) -> Void
     ) async throws {
@@ -135,34 +156,90 @@ enum ClipTrimmer {
         // Carries the clip's own record (game, time) over, see `ClipInfo`.
         writer.metadata = try await asset.load(.metadata)
 
-        var compression: [String: Any] = [
-            AVVideoAverageBitRateKey: Int(dataRate),
-            AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel,
-            AVVideoMaxKeyFrameIntervalDurationKey: 2,
-        ]
-        if frameRate > 0 { compression[AVVideoExpectedSourceFrameRateKey] = Int(frameRate.rounded()) }
-        var settings: [String: Any] = [
-            AVVideoCodecKey: AVVideoCodecType.h264,
-            AVVideoWidthKey: Int(size.width),
-            AVVideoHeightKey: Int(size.height),
-            AVVideoCompressionPropertiesKey: compression,
-        ]
-        if let color = formats.first.flatMap(colorProperties) { settings[AVVideoColorPropertiesKey] = color }
-
-        let videoOutput = AVAssetReaderTrackOutput(
-            track: video,
-            outputSettings: [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange]
-        )
+        let videoOutput: AVAssetReaderTrackOutput
+        let videoInput: AVAssetWriterInput
+        if reencodesVideo {
+            var compression: [String: Any] = [
+                AVVideoAverageBitRateKey: Int(dataRate),
+                AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel,
+                AVVideoMaxKeyFrameIntervalDurationKey: 2,
+            ]
+            if frameRate > 0 { compression[AVVideoExpectedSourceFrameRateKey] = Int(frameRate.rounded()) }
+            var settings: [String: Any] = [
+                AVVideoCodecKey: AVVideoCodecType.h264,
+                AVVideoWidthKey: Int(size.width),
+                AVVideoHeightKey: Int(size.height),
+                AVVideoCompressionPropertiesKey: compression,
+            ]
+            if let color = formats.first.flatMap(colorProperties) { settings[AVVideoColorPropertiesKey] = color }
+            videoOutput = AVAssetReaderTrackOutput(
+                track: video,
+                outputSettings: [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange]
+            )
+            videoInput = AVAssetWriterInput(mediaType: .video, outputSettings: settings)
+        } else {
+            videoOutput = AVAssetReaderTrackOutput(track: video, outputSettings: nil)
+            videoInput = AVAssetWriterInput(mediaType: .video, outputSettings: nil, sourceFormatHint: formats.first)
+        }
         videoOutput.alwaysCopiesSampleData = false
-        let videoInput = AVAssetWriterInput(mediaType: .video, outputSettings: settings)
         videoInput.transform = transform
         videoInput.expectsMediaDataInRealTime = false
         guard reader.canAdd(videoOutput), writer.canAdd(videoInput) else { throw TrimError.unsupported }
         reader.add(videoOutput)
         writer.add(videoInput)
         var lanes = [Lane(output: videoOutput, input: videoInput)]
+        var readers = [reader]
 
-        for track in try await asset.loadTracks(withMediaType: .audio) {
+        let audioTracks = try await asset.loadTracks(withMediaType: .audio)
+        var copied = audioTracks
+        if let audio {
+            // The mix comes from the two source tracks, read a second time
+            // through their own reader, and goes in as the first audio track.
+            guard var info = await ClipInfo.read(from: asset), let roles = info.audio, roles.count == audioTracks.count,
+                  let system = roles.firstIndex(of: .system), let microphone = roles.firstIndex(of: .microphone),
+                  let description = try await audioTracks[system].load(.formatDescriptions).first?.audioStreamBasicDescription
+            else { throw TrimError.unsupported }
+            copied = [audioTracks[system], audioTracks[microphone]]
+
+            let mix = AVMutableAudioMix()
+            mix.inputParameters = zip(copied, [audio.system, audio.microphone]).map { track, level in
+                let parameters = AVMutableAudioMixInputParameters(track: track)
+                parameters.setVolume(Float(level), at: .zero)
+                return parameters
+            }
+            let mixOutput = AVAssetReaderAudioMixOutput(audioTracks: copied, audioSettings: [
+                AVFormatIDKey: kAudioFormatLinearPCM,
+                AVLinearPCMBitDepthKey: 16,
+                AVLinearPCMIsFloatKey: false,
+                AVLinearPCMIsBigEndianKey: false,
+                AVLinearPCMIsNonInterleaved: false,
+                AVSampleRateKey: description.mSampleRate,
+                AVNumberOfChannelsKey: 2,
+            ])
+            mixOutput.audioMix = mix
+            mixOutput.alwaysCopiesSampleData = false
+            var settings: [String: Any] = [
+                AVFormatIDKey: kAudioFormatMPEG4AAC,
+                AVSampleRateKey: description.mSampleRate,
+                AVNumberOfChannelsKey: 2,
+            ]
+            if description.mSampleRate >= 44_100 { settings[AVEncoderBitRateKey] = 192_000 }
+            let mixInput = AVAssetWriterInput(mediaType: .audio, outputSettings: settings)
+            mixInput.expectsMediaDataInRealTime = false
+            let mixReader = try AVAssetReader(asset: asset)
+            mixReader.timeRange = range
+            guard mixReader.canAdd(mixOutput), writer.canAdd(mixInput) else { throw TrimError.unsupported }
+            mixReader.add(mixOutput)
+            writer.add(mixInput)
+            lanes.append(Lane(output: mixOutput, input: mixInput))
+            readers.append(mixReader)
+
+            info.audio = [.mix, .system, .microphone]
+            info.levels = [ClipInfo.AudioRole.system.rawValue: audio.system, ClipInfo.AudioRole.microphone.rawValue: audio.microphone]
+            writer.metadata = info.metadataItems
+        }
+
+        for track in copied {
             let audioOutput = AVAssetReaderTrackOutput(track: track, outputSettings: nil)
             audioOutput.alwaysCopiesSampleData = false
             let audioInput = AVAssetWriterInput(
@@ -171,13 +248,18 @@ enum ClipTrimmer {
                 sourceFormatHint: try await track.load(.formatDescriptions).first
             )
             audioInput.expectsMediaDataInRealTime = false
+            // Beside a new mix the source tracks are the disabled ones;
+            // otherwise each track keeps the state it had.
+            audioInput.marksOutputTrackAsEnabled = audio == nil ? try await track.load(.isEnabled) : false
             guard reader.canAdd(audioOutput), writer.canAdd(audioInput) else { continue }
             reader.add(audioOutput)
             writer.add(audioInput)
             lanes.append(Lane(output: audioOutput, input: audioInput))
         }
 
-        guard reader.startReading() else { throw classify(reader.error, directory: output.deletingLastPathComponent()) }
+        for reader in readers {
+            guard reader.startReading() else { throw classify(reader.error, directory: output.deletingLastPathComponent()) }
+        }
         guard writer.startWriting() else { throw classify(writer.error, directory: output.deletingLastPathComponent()) }
         writer.startSession(atSourceTime: range.start)
 
@@ -188,7 +270,8 @@ enum ClipTrimmer {
                 for (index, lane) in lanes.enumerated() {
                     group.addTask {
                         await pump(lane, cancelled: cancelled) { time in
-                            guard index == 0 else { return }
+                            // Markers between edits carry no time.
+                            guard index == 0, time.isNumeric else { return }
                             let fraction = min(max(0, (time - range.start).seconds / seconds), 1)
                             Task { @MainActor in progress(fraction) }
                         }
@@ -200,13 +283,13 @@ enum ClipTrimmer {
         }
 
         if cancelled.isSet {
-            reader.cancelReading()
+            readers.forEach { $0.cancelReading() }
             writer.cancelWriting()
             throw CancellationError()
         }
-        guard reader.status == .completed else {
+        if let failed = readers.first(where: { $0.status != .completed }) {
             writer.cancelWriting()
-            throw classify(reader.error ?? writer.error, directory: output.deletingLastPathComponent())
+            throw classify(failed.error ?? writer.error, directory: output.deletingLastPathComponent())
         }
         writer.endSession(atSourceTime: range.end)
         await writer.finishWriting()
@@ -252,13 +335,13 @@ enum ClipTrimmer {
     }
 
     /// `<name> (trimmed).mp4`, then `(trimmed 2)`, `(trimmed 3)`…
-    private static func outputURL(for source: URL) -> URL {
+    private static func outputURL(for source: URL, suffix: String) -> URL {
         let directory = source.deletingLastPathComponent()
         let name = source.deletingPathExtension().lastPathComponent
-        var candidate = directory.appendingPathComponent("\(name) (trimmed)").appendingPathExtension("mp4")
+        var candidate = directory.appendingPathComponent("\(name) (\(suffix))").appendingPathExtension("mp4")
         var index = 2
         while FileManager.default.fileExists(atPath: candidate.path) {
-            candidate = directory.appendingPathComponent("\(name) (trimmed \(index))").appendingPathExtension("mp4")
+            candidate = directory.appendingPathComponent("\(name) (\(suffix) \(index))").appendingPathExtension("mp4")
             index += 1
         }
         return candidate
