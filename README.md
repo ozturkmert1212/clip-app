@@ -61,7 +61,7 @@ English is the default, regardless of the system language. Turkish can be select
 ## Known limits
 
 - To keep notifications out of clips, Notification Center is excluded from capture; desktop widgets belong to it too, so they do not appear in display clips. With a single window or application as the source, only that application is captured anyway.
-- The global shortcut does not fire in full screen (exclusive) games; it works in borderless or windowed mode.
+- The global shortcut may not work in games that run in exclusive fullscreen. Use borderless or windowed mode in the game's display settings.
 - With separate audio tracks, QuickTime plays both together; VLC, browsers and Discord only play the first one (system audio).
 - On content that is very hard to compress (heavy noise, grainy footage) the encoder overshoots the target bitrate. Memory is capped at buffer length × bitrate × 3; once the cap is hit, clips come out shorter than configured and the menu shows an info line.
 - If microphone and system audio arrive at different sample rates they cannot be mixed and are written as separate tracks.
