@@ -148,6 +148,16 @@ final class RingBuffer {
         return (video.last?.sample.formatDescription, audio.compactMapValues { $0.last?.sample.formatDescription })
     }
 
+    /// Drops everything, so the next clip only holds what comes after.
+    func reset() {
+        lock.lock()
+        defer { lock.unlock() }
+        video.removeAll()
+        videoBytes = 0
+        isByteLimited = false
+        audio.removeAll()
+    }
+
     func removeAudio(_ track: AudioTrack) {
         lock.lock()
         defer { lock.unlock() }

@@ -18,7 +18,7 @@ struct SourceOption: Identifiable, Hashable {
     var id: CaptureSource { source }
 }
 
-struct AvailableSources {
+struct AvailableSources: Equatable {
     var displays: [SourceOption]
     var applications: [SourceOption] = []
     var windows: [SourceOption] = []
@@ -51,6 +51,9 @@ final class CaptureManager: ObservableObject {
 
     @Published private(set) var state: State = .idle
     @Published private(set) var framesLastSecond = 0
+    /// What can be captured right now, kept current for the menu bar menu,
+    /// which has no moment of its own to ask.
+    @Published private(set) var sources = AvailableSources(displays: [])
 
     var configuration = CaptureConfiguration() {
         didSet {
@@ -102,6 +105,15 @@ final class CaptureManager: ObservableObject {
             await self?.teardown()
         }
         state = .idle
+    }
+
+    /// Brings `sources` up to date; cheap enough to call on any hint that
+    /// windows or displays may have changed.
+    func refreshSources() {
+        Task {
+            let current = await availableSources()
+            if current != sources { sources = current }
+        }
     }
 
     /// What the settings picker offers. Asking ScreenCaptureKit without the
@@ -233,6 +245,20 @@ final class CaptureManager: ObservableObject {
     }
 
     private func observeSystem() {
+        // Windows come and go without any notification of their own; app
+        // activations catch most of it and the timer the rest.
+        NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didActivateApplicationNotification)
+            .merge(with: NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didLaunchApplicationNotification))
+            .merge(with: NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didTerminateApplicationNotification))
+            .merge(with: NotificationCenter.default.publisher(for: NSApplication.didChangeScreenParametersNotification))
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.refreshSources() }
+            .store(in: &cancellables)
+        Timer.publish(every: 10, on: .main, in: .common).autoconnect()
+            .sink { [weak self] _ in self?.refreshSources() }
+            .store(in: &cancellables)
+        refreshSources()
+
         // Resolution changes and display (dis)connects invalidate the stream geometry.
         NotificationCenter.default.publisher(for: NSApplication.didChangeScreenParametersNotification)
             .sink { [weak self] _ in self?.restartIfCapturing(after: 0.5) }

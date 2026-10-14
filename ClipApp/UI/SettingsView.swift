@@ -71,9 +71,6 @@ struct SettingsView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            .onChange(of: settings.microphoneEnabled) { enabled in
-                if enabled, permissions.microphoneStatus == .notDetermined { permissions.requestMicrophone() }
-            }
 
             Section("Saving") {
                 LabeledContent("Folder") {

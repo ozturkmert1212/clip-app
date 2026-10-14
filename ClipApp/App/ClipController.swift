@@ -36,6 +36,9 @@ final class ClipController: ObservableObject {
     private let recording = RecordingTap()
     private var recordingStart: Date?
     private var isEndingRecording = false
+    private var askedForMicrophone = false
+    private var appliedSource: CaptureSource?
+    private var appliedLanguage: AppLanguage?
     private let notifier = Notifier()
     private let games = GameTracker()
     private let hud = HUD()
@@ -167,10 +170,23 @@ final class ClipController: ObservableObject {
         ringBuffer.setDuration(TimeInterval(settings.bufferSeconds))
         ringBuffer.setByteLimit(settings.bufferByteLimit)
         encoder.configure(fps: settings.fps, bitrate: settings.bitrate)
+        // A clip never mixes two sources: what the old one left goes.
+        if let appliedSource, appliedSource != settings.source { ringBuffer.reset() }
+        appliedSource = settings.source
         capture.configuration = settings.captureConfiguration
+        // The source list holds finished titles.
+        if appliedLanguage != settings.language {
+            appliedLanguage = settings.language
+            capture.refreshSources()
+        }
 
         systemAudio.setGain(Float(settings.systemAudioLevel))
         microphoneAudio.setGain(Float(settings.microphoneLevel))
+        // Switched on from Settings or the menu before it was ever asked for.
+        if settings.microphoneEnabled, permissions.microphoneStatus == .notDetermined, !askedForMicrophone {
+            askedForMicrophone = true
+            permissions.requestMicrophone()
+        }
         let microphoneOn = settings.microphoneEnabled && permissions.microphoneStatus == .granted
         microphone.setEnabled(microphoneOn)
         // A source that was just switched off must not show up in the next clip.
@@ -313,11 +329,6 @@ final class ClipController: ObservableObject {
     private func fail(title: String, message: String, identifier: String) {
         NSSound.beep()
         report(title: title, body: message, identifier: identifier)
-    }
-
-    func openClipDirectory() {
-        try? FileManager.default.createDirectory(at: settings.saveDirectory, withIntermediateDirectories: true)
-        NSWorkspace.shared.open(settings.saveDirectory)
     }
 
     private func finish(_ result: SaveResult) {

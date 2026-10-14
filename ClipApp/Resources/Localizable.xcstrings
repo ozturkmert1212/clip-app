@@ -4,6 +4,26 @@
     "" : {
       "shouldTranslate" : false
     },
+    "%@ · %lld s buffered" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · tamponda %lld sn"
+          }
+        }
+      }
+    },
+    "%@ · %lld s buffered (selected source unavailable)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · tamponda %lld sn (seçili kaynak kullanılamıyor)"
+          }
+        }
+      }
+    },
     "%lld seconds" : {
       "localizations" : {
         "tr" : {
@@ -194,16 +214,6 @@
         }
       }
     },
-    "Capture error, retrying: %@" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yakalama hatası, yeniden deneniyor: %@"
-          }
-        }
-      }
-    },
     "Capture off" : {
       "localizations" : {
         "tr" : {
@@ -284,22 +294,12 @@
         }
       }
     },
-    "Capturing: %@ · %lld×%lld" : {
+    "Changing the source restarts capture and clears the replay buffer." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yakalanıyor: %@ · %lld×%lld"
-          }
-        }
-      }
-    },
-    "Capturing: %@ · %lld×%lld (selected source unavailable)" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yakalanıyor: %@ · %lld×%lld (seçili kaynak yok)"
+            "value" : "Kaynağı değiştirmek yakalamayı yeniden başlatır ve tekrar tamponunu temizler."
           }
         }
       }
@@ -494,16 +494,6 @@
         }
       }
     },
-    "Couldn't save clip: %@" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klip kaydedilemedi: %@"
-          }
-        }
-      }
-    },
     "Couldn't save the edited clip: %@" : {
       "localizations" : {
         "tr" : {
@@ -684,16 +674,6 @@
         }
       }
     },
-    "Frames in the last second: %lld" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Son saniye: %lld kare"
-          }
-        }
-      }
-    },
     "Game" : {
       "localizations" : {
         "tr" : {
@@ -760,16 +740,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dil"
-          }
-        }
-      }
-    },
-    "Last clip: %@" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Son klip: %@"
           }
         }
       }
@@ -850,6 +820,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mikrofon seviyesi"
+          }
+        }
+      }
+    },
+    "Microphone permission needed" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mikrofon izni gerekli"
           }
         }
       }
@@ -964,16 +944,6 @@
         }
       }
     },
-    "No microphone permission, clips have no microphone" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mikrofon izni yok, klipler mikrofonsuz"
-          }
-        }
-      }
-    },
     "No microphone permission; clips are saved without the microphone." : {
       "localizations" : {
         "tr" : {
@@ -1050,16 +1020,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ClipApp'i Aç"
-          }
-        }
-      }
-    },
-    "Open Clips Folder" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klip Klasörünü Aç"
           }
         }
       }
@@ -1504,6 +1464,16 @@
         }
       }
     },
+    "Screen Recording permission needed" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekran Kaydı izni gerekli"
+          }
+        }
+      }
+    },
     "Screen Recording permission required" : {
       "localizations" : {
         "tr" : {
@@ -1574,6 +1544,16 @@
         }
       }
     },
+    "Source" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaynak"
+          }
+        }
+      }
+    },
     "Start %@" : {
       "localizations" : {
         "tr" : {
@@ -1610,6 +1590,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kaydı Durdur (%@)"
+          }
+        }
+      }
+    },
+    "System Audio" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sistem Sesi"
           }
         }
       }
@@ -1680,6 +1670,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Orijinalin üzerine yazıldı"
+          }
+        }
+      }
+    },
+    "The source can't be changed during a recording." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıt sırasında kaynak değiştirilemez."
           }
         }
       }

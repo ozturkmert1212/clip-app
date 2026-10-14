@@ -182,6 +182,12 @@ private struct CaptureStatusView: View {
                 .font(.caption)
                 .monospacedDigit()
                 .foregroundStyle(.secondary)
+            if let seconds = controller.byteLimitedSeconds {
+                Text("Memory cap active: content exceeds the target bitrate, keeping the last ~\(seconds) s")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             Button {
                 controller.saveClip()
             } label: {

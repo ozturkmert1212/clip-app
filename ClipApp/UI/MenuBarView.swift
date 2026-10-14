@@ -1,5 +1,7 @@
 import SwiftUI
 
+/// The menu bar menu: the controls that are wanted in the middle of a game.
+/// Everything that is a preference lives in the Settings tab.
 struct MenuBarView: View {
     @ObservedObject var permissions: PermissionManager
     @ObservedObject var settings: SettingsStore
@@ -10,15 +12,14 @@ struct MenuBarView: View {
     // Menu items are AppKit in the end, so every title is looked up in the
     // chosen language here instead of relying on the environment.
     var body: some View {
-        Text(verbatim: statusText)
-        if case .running = capture.state {
-            Text(verbatim: AppLanguage.string("Frames in the last second: \(capture.framesLastSecond)"))
-        }
-        if let seconds = controller.byteLimitedSeconds {
-            Text(verbatim: AppLanguage.string("Memory cap active: content exceeds the target bitrate, keeping the last ~\(seconds) s"))
-        }
-        if settings.microphoneEnabled, permissions.microphoneStatus != .granted {
-            Text(verbatim: AppLanguage.string("No microphone permission, clips have no microphone"))
+        // A missing permission takes the place of the status and leads to where it is fixed.
+        if !permissions.screenRecordingGranted {
+            Button(AppLanguage.string("Screen Recording permission needed")) { windows.showMain(.settings) }
+        } else {
+            Text(verbatim: statusText)
+            if settings.microphoneEnabled, permissions.microphoneStatus != .granted {
+                Button(AppLanguage.string("Microphone permission needed")) { windows.showMain(.settings) }
+            }
         }
         Divider()
         Button(controller.isSaving
@@ -31,14 +32,23 @@ struct MenuBarView: View {
                ?? AppLanguage.string("Start Recording")) {
             controller.toggleRecording()
         }
-        switch controller.lastResult {
-        case .saved(let url): Text(verbatim: AppLanguage.string("Last clip: \(url.lastPathComponent)"))
-        case .failed(let message): Text(verbatim: AppLanguage.string("Couldn't save clip: \(message)"))
-        case nil: EmptyView()
+        Divider()
+        Menu(AppLanguage.string("Source")) {
+            Text(verbatim: controller.isRecording
+                 ? AppLanguage.string("The source can't be changed during a recording.")
+                 : AppLanguage.string("Changing the source restarts capture and clears the replay buffer."))
+            // A saved window or app that is gone still shows as the selection.
+            if !capture.sources.contains(settings.source) {
+                Toggle(AppLanguage.string("Unavailable (capturing the main display)"), isOn: .constant(true))
+                    .disabled(true)
+            }
+            sourceSection(AppLanguage.string("Displays"), capture.sources.displays)
+            sourceSection(AppLanguage.string("Applications"), capture.sources.applications)
+            sourceSection(AppLanguage.string("Windows"), capture.sources.windows)
         }
-        Button(AppLanguage.string("Open Clips Folder")) {
-            controller.openClipDirectory()
-        }
+        // The same switches as in Settings: both sit on the same stored values.
+        Toggle(AppLanguage.string("Microphone"), isOn: $settings.microphoneEnabled)
+        Toggle(AppLanguage.string("System Audio"), isOn: $settings.systemAudioEnabled)
         Divider()
         Button(AppLanguage.string("Open ClipApp")) {
             windows.showMain(.allClips)
@@ -47,9 +57,6 @@ struct MenuBarView: View {
             windows.showMain(.settings)
         }
         .keyboardShortcut(",")
-        Button(AppLanguage.string("Permissions…")) {
-            windows.showPermissions()
-        }
         Divider()
         Button(AppLanguage.string("Quit ClipApp")) {
             NSApp.terminate(nil)
@@ -57,16 +64,31 @@ struct MenuBarView: View {
         .keyboardShortcut("q")
     }
 
+    @ViewBuilder
+    private func sourceSection(_ title: String, _ options: [SourceOption]) -> some View {
+        if !options.isEmpty {
+            Section(title) {
+                ForEach(options) { option in
+                    Toggle(option.title, isOn: Binding(
+                        get: { settings.source == option.source },
+                        set: { if $0 { settings.source = option.source } }
+                    ))
+                    // Another source can have another size, which would end the recording.
+                    .disabled(controller.isRecording)
+                }
+            }
+        }
+    }
+
     private var statusText: String {
-        guard permissions.screenRecordingGranted else { return AppLanguage.string("Screen Recording permission required") }
         switch capture.state {
         case .idle: return AppLanguage.string("Capture off")
         case .starting: return AppLanguage.string("Starting capture…")
-        case .running(let source, let width, let height, let usingFallback):
+        case .running(let source, _, _, let usingFallback):
             return usingFallback
-                ? AppLanguage.string("Capturing: \(source) · \(width)×\(height) (selected source unavailable)")
-                : AppLanguage.string("Capturing: \(source) · \(width)×\(height)")
-        case .failed(let message): return AppLanguage.string("Capture error, retrying: \(message)")
+                ? AppLanguage.string("\(source) · \(controller.bufferedSeconds) s buffered (selected source unavailable)")
+                : AppLanguage.string("\(source) · \(controller.bufferedSeconds) s buffered")
+        case .failed: return AppLanguage.string("Capture error, retrying")
         case .permissionDenied: return AppLanguage.string("No Screen Recording permission, capture stopped")
         }
     }
