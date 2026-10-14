@@ -43,10 +43,10 @@ final class WindowManager: NSObject, NSWindowDelegate {
         }
     }
 
-    /// Brings the main window forward; `tab` nil keeps the one it was on.
+    /// Brings the main window forward; `item` nil keeps what it was showing.
     /// While it is open the app has a Dock icon, see `windowWillClose`.
-    func showMain(_ tab: MainTab? = nil) {
-        if let tab { navigation.tab = tab }
+    func showMain(_ item: SidebarItem? = nil) {
+        if let item { navigation.selection = item }
         if windows[Self.mainID] == nil { windows[Self.mainID] = makeMainWindow() }
         NSApp.setActivationPolicy(.regular)
         show(windows[Self.mainID]!)

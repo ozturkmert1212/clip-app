@@ -1,29 +1,19 @@
 import SwiftUI
 
-enum MainTab: String, CaseIterable, Identifiable {
-    case clips, settings
-
-    var id: String { rawValue }
-
-    var title: LocalizedStringKey {
-        switch self {
-        case .clips: return "Clips"
-        case .settings: return "Settings"
-        }
-    }
-
-    var systemImage: String {
-        switch self {
-        case .clips: return "film.stack"
-        case .settings: return "gearshape"
-        }
-    }
+/// What the sidebar can show in the detail area.
+enum SidebarItem: Hashable {
+    case allClips
+    case game(String)
+    /// Clips from before the folder layout.
+    case other
+    case videos
+    case settings
 }
 
-/// Which tab the main window shows; the menu switches it from outside.
+/// The sidebar selection; the menu switches it from outside.
 @MainActor
 final class MainNavigation: ObservableObject {
-    @Published var tab: MainTab = .clips
+    @Published var selection: SidebarItem = .allClips
 }
 
 struct MainWindowView: View {
@@ -36,16 +26,7 @@ struct MainWindowView: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            List(selection: Binding<MainTab?>(
-                get: { navigation.tab },
-                set: { if let tab = $0 { navigation.tab = tab } }
-            )) {
-                ForEach(MainTab.allCases) { tab in
-                    Label(tab.title, systemImage: tab.systemImage).tag(tab)
-                }
-            }
-            .listStyle(.sidebar)
-            .safeAreaInset(edge: .bottom, spacing: 0) {
+            Sidebar(navigation: navigation, library: library) {
                 CaptureStatusView(
                     permissions: permissions,
                     settings: settings,
@@ -58,15 +39,113 @@ struct MainWindowView: View {
             Divider()
 
             Group {
-                switch navigation.tab {
-                case .clips:
-                    ClipsView(library: library)
-                case .settings:
+                if navigation.selection == .settings {
                     SettingsView(settings: settings, permissions: permissions, capture: capture)
+                } else {
+                    ClipsView(library: library, filter: navigation.selection)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+    }
+}
+
+/// Clips by game and the recordings on top; Settings and the capture status
+/// pinned to the bottom.
+private struct Sidebar<Status: View>: View {
+    @ObservedObject var navigation: MainNavigation
+    @ObservedObject var library: ClipLibrary
+    @ViewBuilder let status: () -> Status
+
+    var body: some View {
+        List(selection: Binding<SidebarItem?>(
+            get: { navigation.selection },
+            set: { if let item = $0 { navigation.selection = item } }
+        )) {
+            Section("Clips") {
+                Label("All Clips", systemImage: "film.stack")
+                    .badge(library.clips.count)
+                    .tag(SidebarItem.allClips)
+                ForEach(library.games) { game in
+                    Label {
+                        Text(verbatim: game.name)
+                    } icon: {
+                        GameIcon(bundleID: game.bundleID)
+                    }
+                    .badge(game.count)
+                    .tag(SidebarItem.game(game.name))
+                }
+                if library.otherCount > 0 {
+                    Label("Other", systemImage: "tray")
+                        .badge(library.otherCount)
+                        .tag(SidebarItem.other)
+                }
+            }
+            Section("Videos") {
+                Label("Recordings", systemImage: "video")
+                    .badge(library.videos.count)
+                    .tag(SidebarItem.videos)
+            }
+        }
+        .listStyle(.sidebar)
+        // A game whose last clip was moved or deleted has no row left to sit on.
+        .onChange(of: library.games) { games in
+            if case .game(let name) = navigation.selection, !games.contains(where: { $0.name == name }) {
+                navigation.selection = .allClips
+            }
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            VStack(spacing: 0) {
+                settingsRow
+                status()
+            }
+        }
+    }
+
+    private var settingsRow: some View {
+        let isSelected = navigation.selection == .settings
+        return Button {
+            navigation.selection = .settings
+        } label: {
+            Label("Settings", systemImage: "gearshape")
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
+                .background(
+                    isSelected ? Color.accentColor.opacity(0.3) : Color.clear,
+                    in: RoundedRectangle(cornerRadius: 6, style: .continuous)
+                )
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 10)
+        .padding(.bottom, 8)
+    }
+}
+
+/// The icon of the app a game's clips were recorded in, if it is installed.
+struct GameIcon: View {
+    let bundleID: String?
+
+    private static var cache: [String: NSImage] = [:]
+
+    var body: some View {
+        if let image = Self.image(for: bundleID) {
+            Image(nsImage: image)
+                .resizable()
+                .frame(width: 18, height: 18)
+        } else {
+            Image(systemName: "gamecontroller")
+        }
+    }
+
+    private static func image(for bundleID: String?) -> NSImage? {
+        guard let bundleID else { return nil }
+        if let cached = cache[bundleID] { return cached }
+        guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) else { return nil }
+        let image = NSWorkspace.shared.icon(forFile: url.path)
+        cache[bundleID] = image
+        return image
     }
 }
 

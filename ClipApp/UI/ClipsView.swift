@@ -2,6 +2,8 @@ import SwiftUI
 
 struct ClipsView: View {
     @ObservedObject var library: ClipLibrary
+    /// The sidebar row this list belongs to; never `.settings`.
+    let filter: SidebarItem
 
     @State private var selection: URL?
     @State private var playing: ClipItem?
@@ -14,6 +16,7 @@ struct ClipsView: View {
 
     var body: some View {
         content
+            .onChange(of: filter) { _ in playing = nil }
             // A clip deleted or renamed behind the player's back closes it.
             .onChange(of: library.items) { items in
                 if let playing, !items.contains(where: { $0.url == playing.url }) { self.playing = nil }
@@ -30,7 +33,7 @@ struct ClipsView: View {
                 .id(playing.url)
         } else if !library.isLoaded {
             ProgressView()
-        } else if library.items.isEmpty {
+        } else if shown.isEmpty {
             emptyState
         } else {
             grid
@@ -40,8 +43,8 @@ struct ClipsView: View {
     private var grid: some View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 210, maximum: 340), spacing: 12)], spacing: 12) {
-                ForEach(library.items) { clip in
-                    ClipCard(clip: clip, isSelected: selection == clip.url) {
+                ForEach(shown) { clip in
+                    ClipCard(clip: clip, showsGame: filter == .allClips, isSelected: selection == clip.url) {
                         actions(for: clip)
                     }
                     .onTapGesture { selection = clip.url }
@@ -53,14 +56,25 @@ struct ClipsView: View {
         }
     }
 
+    private var shown: [ClipItem] {
+        switch filter {
+        case .allClips, .settings: return library.clips
+        case .game(let name): return library.items.filter { $0.category == .game(name) }
+        case .other: return library.items.filter { $0.category == .other }
+        case .videos: return library.videos
+        }
+    }
+
     private var emptyState: some View {
         VStack(spacing: 8) {
-            Image(systemName: "film.stack")
+            Image(systemName: filter == .videos ? "video" : "film.stack")
                 .font(.system(size: 40))
                 .foregroundStyle(.secondary)
-            Text("No clips yet")
+            Text(filter == .videos ? "No recordings yet" : "No clips yet")
                 .font(.title3)
-            Text("Saved clips appear here. Press the clip shortcut or use the save button to keep the last seconds.")
+            Text(filter == .videos
+                 ? "Recordings appear here. Start one from the sidebar, the menu or with the recording shortcut."
+                 : "Saved clips appear here. Press the clip shortcut or use the save button to keep the last seconds.")
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 360)
@@ -164,6 +178,8 @@ private struct FailureAlert: ViewModifier {
 
 private struct ClipCard<Actions: View>: View {
     let clip: ClipItem
+    /// In lists that mix games, the card says which one it belongs to.
+    let showsGame: Bool
     let isSelected: Bool
     @ViewBuilder let actions: () -> Actions
 
@@ -178,7 +194,7 @@ private struct ClipCard<Actions: View>: View {
                         .lineLimit(1)
                         .truncationMode(.middle)
                         .help(clip.name)
-                    Text(verbatim: clip.date.formatted(.dateTime.day().month(.abbreviated).year().hour().minute().locale(locale)))
+                    Text(verbatim: subtitle)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Text(verbatim: details)
@@ -201,6 +217,12 @@ private struct ClipCard<Actions: View>: View {
             in: RoundedRectangle(cornerRadius: 10, style: .continuous)
         )
         .contentShape(Rectangle())
+    }
+
+    private var subtitle: String {
+        let date = clip.date.formatted(.dateTime.day().month(.abbreviated).year().hour().minute().locale(locale))
+        guard showsGame, case .game(let name) = clip.category else { return date }
+        return "\(name) · \(date)"
     }
 
     private var details: String {

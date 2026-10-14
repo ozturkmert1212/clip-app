@@ -34,6 +34,16 @@
         }
       }
     },
+    "All Clips" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm Klipler"
+          }
+        }
+      }
+    },
     "Allow" : {
       "localizations" : {
         "tr" : {
@@ -857,6 +867,16 @@
         }
       }
     },
+    "No recordings yet" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Henüz kayıt yok"
+          }
+        }
+      }
+    },
     "Nothing in the buffer yet" : {
       "localizations" : {
         "tr" : {
@@ -957,6 +977,16 @@
         }
       }
     },
+    "Other" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diğer"
+          }
+        }
+      }
+    },
     "Permissions…" : {
       "localizations" : {
         "tr" : {
@@ -1013,6 +1043,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dosya tam olarak seçili aralığı içersin diye videoyu kaynağın bitrate'iyle yeniden kodlar. Daha yavaştır, kalitede hafif kayıp olur."
+          }
+        }
+      }
+    },
+    "Recordings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıtlar"
+          }
+        }
+      }
+    },
+    "Recordings appear here. Start one from the sidebar, the menu or with the recording shortcut." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıtlar burada görünür. Kenar çubuğundan, menüden ya da kayıt kısayoluyla bir kayıt başlat."
           }
         }
       }
@@ -1353,6 +1403,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Video"
+          }
+        }
+      }
+    },
+    "Videos" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videolar"
           }
         }
       }

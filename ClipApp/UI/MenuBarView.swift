@@ -37,7 +37,7 @@ struct MenuBarView: View {
         }
         Divider()
         Button(AppLanguage.string("Open ClipApp")) {
-            windows.showMain(.clips)
+            windows.showMain(.allClips)
         }
         Button(AppLanguage.string("Settings…")) {
             windows.showMain(.settings)

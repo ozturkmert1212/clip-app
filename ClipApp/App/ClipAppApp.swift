@@ -49,7 +49,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         permissions.requestNotificationsIfUndetermined()
         // Started by the system at login, the app stays in the menu bar.
         if settings.openWindowAtLaunch, !Self.launchedAsLoginItem {
-            windows.showMain(.clips)
+            windows.showMain(.allClips)
         }
         if !permissions.screenRecordingGranted {
             windows.showPermissions()
