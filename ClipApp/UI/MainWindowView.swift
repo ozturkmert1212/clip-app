@@ -152,7 +152,7 @@ private struct SidebarRow<Title: View, Icon: View>: View {
             .padding(.horizontal, Brand.Space.one)
             .padding(.vertical, Brand.Space.one - 2)
             .background(
-                isSelected ? Brand.accent : Color.clear,
+                isSelected ? Brand.fill : Color.clear,
                 in: RoundedRectangle(cornerRadius: Brand.Radius.row, style: .continuous)
             )
             .contentShape(Rectangle())

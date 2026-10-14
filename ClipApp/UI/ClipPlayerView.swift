@@ -417,7 +417,7 @@ private struct TrimPanel: View {
                     Button("Cancel", action: model.cancelExport)
                 } else {
                     Button("Save Edited Clip", action: save)
-                        .buttonStyle(.borderedProminent)
+                        .buttonStyle(PrimaryButtonStyle(isCompact: true))
                         .disabled(!model.canSave)
                 }
             }
@@ -508,6 +508,7 @@ private struct TrimPanel: View {
                         dismiss()
                         onChoose(choice, remember)
                     }
+                    .buttonStyle(PrimaryButtonStyle(isCompact: true))
                     .keyboardShortcut(.defaultAction)
                 }
             }

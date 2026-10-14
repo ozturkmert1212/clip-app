@@ -328,7 +328,7 @@ private struct ClipCard<Actions: View>: View {
             }
         }
         .padding(Brand.Space.one)
-        .background(shape.fill(isSelected ? Brand.accent.opacity(0.16) : Color(nsColor: .controlBackgroundColor)))
+        .background(shape.fill(isSelected ? Brand.fill.opacity(0.18) : Color(nsColor: .controlBackgroundColor)))
         .overlay(shape.strokeBorder(border, lineWidth: isSelected ? 2 : 1))
         .shadow(color: Color.black.opacity(isHovered ? 0.2 : 0), radius: isHovered ? 8 : 0, y: isHovered ? 3 : 0)
         .offset(y: isHovered && !reduceMotion ? -1 : 0)

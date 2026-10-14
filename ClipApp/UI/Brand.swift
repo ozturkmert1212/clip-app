@@ -19,14 +19,20 @@ enum Brand {
         static let recordDeep = Color(hex: 0xD3112B)
     }
 
-    /// Fills that carry white text or stand alone as a control's color:
-    /// #4B3FD1 in light mode, #6A5FF0 in dark mode (white on them is 7.2:1
-    /// and 4.7:1). The same pair is the asset catalog's `AccentColor`.
-    static let accent = Color(light: 0x4B3FD1, dark: 0x6A5FF0)
+    /// The tint of the standard controls, and the asset catalog's
+    /// `AccentColor`: #4B3FD1 in light mode, a lightened #8F87FF in dark mode.
+    /// macOS writes picker values and button titles in the tint, so it has to
+    /// work as text: 5.6:1 or more on the light backgrounds, 4.7:1 on the
+    /// dark grouped background and 5.6:1 on the dark window.
+    static let accent = Color(light: 0x4B3FD1, dark: 0x8F87FF)
 
-    /// Indigo used as text or as an icon's color on the window background:
-    /// the dark mode fill is too dim for that (3.6:1), so there it is
-    /// lavender (#4B3FD1 on light gives at least 5.6:1, #C9C4FF on dark 8.5:1).
+    /// Shapes of our own that carry white text (the selected sidebar row):
+    /// the dark mode tint is too light for that (3:1), these give 7.2:1 and 6.1:1.
+    static let fill = Color(light: 0x4B3FD1, dark: 0x574BDB)
+
+    /// Our own indigo marks on the window background: icons, the status
+    /// dot, frames, the timeline. Lavender in dark mode, as in the icon
+    /// (#C9C4FF on the dark backgrounds is 8.5:1 or more).
     static let accentText = Color(light: 0x4B3FD1, dark: 0xC9C4FF)
 
     /// The quieter partner of `accentText`, for the second of two series.
@@ -107,16 +113,19 @@ enum Brand {
 
 // MARK: - Buttons
 
-/// "Save Last N Seconds": the one filled, indigo button.
+/// The filled, indigo button: "Save Last N Seconds", and the one action a
+/// sheet or panel is there for. `isCompact` sizes it like a standard button.
 struct PrimaryButtonStyle: ButtonStyle {
+    var isCompact = false
+
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.body.weight(.semibold))
             .foregroundStyle(.white)
-            .padding(.vertical, Brand.Space.one)
-            .padding(.horizontal, Brand.Space.two)
+            .padding(.vertical, isCompact ? Brand.Space.half : Brand.Space.one)
+            .padding(.horizontal, isCompact ? Brand.Space.one + Brand.Space.half : Brand.Space.two)
             .background(Brand.primaryGradient, in: RoundedRectangle(cornerRadius: Brand.Radius.control, style: .continuous))
             .overlay(Color.black.opacity(configuration.isPressed ? 0.18 : 0).clipShape(RoundedRectangle(cornerRadius: Brand.Radius.control, style: .continuous)))
             .opacity(isEnabled ? 1 : 0.5)
