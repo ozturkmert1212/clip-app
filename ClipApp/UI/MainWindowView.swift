@@ -168,6 +168,16 @@ private struct CaptureStatusView: View {
                     .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            if let seconds = controller.recordingSeconds {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Circle()
+                        .fill(Color.red)
+                        .frame(width: 8, height: 8)
+                    Text("Recording · \(ClipFormat.duration(TimeInterval(seconds)))")
+                        .font(.callout)
+                        .monospacedDigit()
+                }
+            }
             Text("Buffer: \(controller.bufferedSeconds) of \(settings.bufferSeconds) s")
                 .font(.caption)
                 .monospacedDigit()
@@ -183,6 +193,19 @@ private struct CaptureStatusView: View {
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
             .disabled(controller.isSaving)
+            Button {
+                controller.toggleRecording()
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: controller.isRecording ? "stop.fill" : "record.circle")
+                    Text(controller.recordingSeconds.map { AppLanguage.string("Stop Recording (\(ClipFormat.duration(TimeInterval($0))))") }
+                         ?? AppLanguage.string("Start Recording"))
+                        .monospacedDigit()
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .controlSize(.large)
+            .tint(controller.isRecording ? .red : nil)
         }
         .padding([.horizontal, .bottom], 12)
     }

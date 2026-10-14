@@ -14,7 +14,7 @@ struct ClipAppApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
-        MenuBarExtra("ClipApp", systemImage: "record.circle") {
+        MenuBarExtra {
             LanguageRoot(settings: appDelegate.settings) {
                 MenuBarView(
                     permissions: appDelegate.permissions,
@@ -24,6 +24,30 @@ struct ClipAppApp: App {
                     windows: appDelegate.windows
                 )
             }
+        } label: {
+            MenuBarLabel(controller: appDelegate.controller)
+        }
+    }
+}
+
+/// The menu bar icon; red with a running time while a recording is going.
+private struct MenuBarLabel: View {
+    @ObservedObject var controller: ClipController
+
+    private static let recordingIcon: NSImage = {
+        let image = NSImage(systemSymbolName: "record.circle.fill", accessibilityDescription: nil)?
+            .withSymbolConfiguration(NSImage.SymbolConfiguration(paletteColors: [.systemRed])) ?? NSImage()
+        // A template image would be drawn in the menu bar's own color.
+        image.isTemplate = false
+        return image
+    }()
+
+    var body: some View {
+        if let seconds = controller.recordingSeconds {
+            Image(nsImage: Self.recordingIcon)
+            Text(verbatim: ClipFormat.duration(TimeInterval(seconds)))
+        } else {
+            Image(systemName: "record.circle")
         }
     }
 }
@@ -72,6 +96,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Closing the window leaves capture running; only Quit ends the app.
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         false
+    }
+
+    /// A running recording is closed properly before the app goes away.
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard controller.isRecording else { return .terminateNow }
+        Task {
+            await controller.stopRecording()
+            sender.reply(toApplicationShouldTerminate: true)
+        }
+        return .terminateLater
     }
 
     /// The launch Apple event says whether the system started the app as a

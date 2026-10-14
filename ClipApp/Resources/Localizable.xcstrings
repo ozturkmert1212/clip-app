@@ -324,9 +324,6 @@
         }
       }
     },
-    "ClipApp" : {
-      "shouldTranslate" : false
-    },
     "ClipApp Permissions" : {
       "localizations" : {
         "tr" : {
@@ -467,12 +464,32 @@
         }
       }
     },
+    "Couldn't start recording" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıt başlatılamadı"
+          }
+        }
+      }
+    },
     "Couldn't write the clip" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Klip yazılamadı"
+          }
+        }
+      }
+    },
+    "Couldn't write the recording" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıt yazılamadı"
           }
         }
       }
@@ -887,12 +904,32 @@
         }
       }
     },
+    "Nothing has been captured yet" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Henüz hiçbir şey yakalanmadı"
+          }
+        }
+      }
+    },
     "Nothing in the buffer yet" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Buffer'da henüz görüntü yok"
+          }
+        }
+      }
+    },
+    "Nothing was captured during the recording" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıt sırasında hiçbir şey yakalanmadı"
           }
         }
       }
@@ -1053,6 +1090,66 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dosya tam olarak seçili aralığı içersin diye videoyu kaynağın bitrate'iyle yeniden kodlar. Daha yavaştır, kalitede hafif kayıp olur."
+          }
+        }
+      }
+    },
+    "Recording ended early" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıt erken bitti"
+          }
+        }
+      }
+    },
+    "Recording failed" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıt başarısız oldu"
+          }
+        }
+      }
+    },
+    "Recording saved" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıt kaydedildi"
+          }
+        }
+      }
+    },
+    "Recording shortcut" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıt kısayolu"
+          }
+        }
+      }
+    },
+    "Recording started" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıt başladı"
+          }
+        }
+      }
+    },
+    "Recording · %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıt · %@"
           }
         }
       }
@@ -1317,12 +1414,32 @@
         }
       }
     },
+    "Start Recording" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydı Başlat"
+          }
+        }
+      }
+    },
     "Starting capture…" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yakalama başlatılıyor…"
+          }
+        }
+      }
+    },
+    "Stop Recording (%@)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydı Durdur (%@)"
           }
         }
       }
@@ -1353,6 +1470,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uygulama menüsü ve kısayol alanı gibi macOS tarafından sağlanan metinler, ClipApp yeniden başlatılınca değişir."
+          }
+        }
+      }
+    },
+    "The capture size changed, so the recording was ended" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakalama boyutu değişti, bu yüzden kayıt sonlandırıldı"
+          }
+        }
+      }
+    },
+    "The disk couldn't keep up with the recording" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disk kayda yetişemedi"
           }
         }
       }

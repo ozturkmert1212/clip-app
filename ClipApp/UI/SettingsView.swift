@@ -15,6 +15,7 @@ struct SettingsView: View {
                     ForEach(SettingsStore.bufferOptions, id: \.self) { Text("\($0) seconds").tag($0) }
                 }
                 KeyboardShortcuts.Recorder("Clip shortcut", name: .saveClip)
+                KeyboardShortcuts.Recorder("Recording shortcut", name: .toggleRecording)
             }
 
             Section("Video") {

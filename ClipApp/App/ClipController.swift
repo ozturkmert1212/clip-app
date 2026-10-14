@@ -19,6 +19,8 @@ final class ClipController: ObservableObject {
     @Published private(set) var byteLimitedSeconds: Int?
     /// How far back a clip saved right now would reach, for the status strip.
     @Published private(set) var bufferedSeconds = 0
+    /// How long the running recording has been going; `nil` when there is none.
+    @Published private(set) var recordingSeconds: Int?
 
     let capture: CaptureManager
 
@@ -30,6 +32,10 @@ final class ClipController: ObservableObject {
     private let microphoneAudio: AudioPipeline
     private let microphone: MicrophoneCapture
     private var hotkeys: HotkeyManager?
+    /// Where the pipeline's output is copied to while a recording runs.
+    private let recording = RecordingTap()
+    private var recordingStart: Date?
+    private var isEndingRecording = false
     private let notifier = Notifier()
     private let hud = HUD()
     private let logger = Logger(subsystem: "com.mertozturk.ClipApp", category: "clip")
@@ -43,9 +49,21 @@ final class ClipController: ObservableObject {
             duration: TimeInterval(settings.bufferSeconds),
             byteLimit: settings.bufferByteLimit
         )
-        let encoder = EncoderPipeline(fps: settings.fps, bitrate: settings.bitrate) { ringBuffer.append($0) }
-        let systemAudio = AudioPipeline { ringBuffer.append($0, to: .system) }
-        let microphoneAudio = AudioPipeline { ringBuffer.append($0, to: .microphone) }
+        // The replay buffer keeps filling during a recording; the recording
+        // gets the same samples on the side.
+        let recording = self.recording
+        let encoder = EncoderPipeline(fps: settings.fps, bitrate: settings.bitrate) {
+            ringBuffer.append($0)
+            recording.writer?.appendVideo($0)
+        }
+        let systemAudio = AudioPipeline {
+            ringBuffer.append($0, to: .system)
+            recording.writer?.appendAudio($0, from: .system)
+        }
+        let microphoneAudio = AudioPipeline {
+            ringBuffer.append($0, to: .microphone)
+            recording.writer?.appendAudio($0, from: .microphone)
+        }
         self.settings = settings
         self.permissions = permissions
         self.ringBuffer = ringBuffer
@@ -59,7 +77,10 @@ final class ClipController: ObservableObject {
         microphone = MicrophoneCapture { microphoneAudio.process($0, at: $1) }
         capture.excludedWindowIDs = [hud.windowID]
         applySettings()
-        hotkeys = HotkeyManager { [weak self] in self?.saveClip() }
+        hotkeys = HotkeyManager(
+            onSaveClip: { [weak self] in self?.saveClip() },
+            onToggleRecording: { [weak self] in self?.toggleRecording() }
+        )
 
         // `objectWillChange` fires before the new value is stored, hence the hop.
         // The microphone depends on its permission as well as on the setting.
@@ -78,6 +99,9 @@ final class ClipController: ObservableObject {
                 let reach = status.oldest.map { (CMClockGetTime(CMClockGetHostTimeClock()) - $0).seconds } ?? 0
                 let buffered = min(self.settings.bufferSeconds, max(0, Int(reach)))
                 if buffered != self.bufferedSeconds { self.bufferedSeconds = buffered }
+                if let start = self.recordingStart {
+                    self.recordingSeconds = Int(Date().timeIntervalSince(start))
+                }
             }
             .store(in: &cancellables)
         capture.$state
@@ -184,6 +208,111 @@ final class ClipController: ObservableObject {
         }
     }
 
+    // MARK: - Recording
+
+    var isRecording: Bool { recordingSeconds != nil }
+
+    func toggleRecording() {
+        if isRecording {
+            Task { await stopRecording() }
+        } else {
+            startRecording()
+        }
+    }
+
+    func startRecording() {
+        guard !isRecording else { return }
+        let formats = ringBuffer.formats()
+        guard capture.state != .permissionDenied, permissions.screenRecordingGranted, let videoFormat = formats.video else {
+            let reason = permissions.screenRecordingGranted
+                ? AppLanguage.string("Nothing has been captured yet")
+                : AppLanguage.string("No Screen Recording permission")
+            fail(title: AppLanguage.string("Couldn't start recording"), message: reason, identifier: "recording")
+            return
+        }
+        // Only the sources that are on, in the order of the tracks.
+        let microphoneOn = settings.microphoneEnabled && permissions.microphoneStatus == .granted
+        let audioFormats = AudioTrack.allCases.compactMap { track -> (track: AudioTrack, format: CMAudioFormatDescription)? in
+            guard track == .system ? settings.systemAudioEnabled : microphoneOn, let format = formats.audio[track] else { return nil }
+            return (track, format)
+        }
+        let game = GameContext.current()
+        let directory = settings.videosDirectory
+        do {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            let writer = try RecordingWriter(
+                url: Self.recordingURL(in: directory),
+                videoFormat: videoFormat,
+                audioFormats: audioFormats,
+                keepStems: settings.keepAudioStems,
+                info: ClipInfo(game: game.name, bundleID: game.bundleID, recorded: Date())
+            ) { [weak self] _ in
+                // The writer cannot go on; what it has is closed as the result.
+                Task { @MainActor in await self?.stopRecording() }
+            }
+            recording.writer = writer
+        } catch {
+            fail(title: AppLanguage.string("Couldn't start recording"), message: error.localizedDescription, identifier: "recording")
+            return
+        }
+        // The file can only begin with a keyframe.
+        encoder.requestKeyframe()
+        recordingStart = Date()
+        recordingSeconds = 0
+        logger.notice("Recording started")
+        announce(AppLanguage.string("Recording started"), detail: nil, identifier: "recording")
+    }
+
+    /// Returns once the file is closed.
+    func stopRecording() async {
+        guard let writer = recording.writer, !isEndingRecording else { return }
+        isEndingRecording = true
+        recording.writer = nil
+        let outcome = await writer.finish(at: CMClockGetTime(CMClockGetHostTimeClock()))
+        isEndingRecording = false
+        recordingStart = nil
+        recordingSeconds = nil
+        if let url = outcome.url {
+            logger.notice("Recording saved: \(url.path, privacy: .public)")
+            notifier.saved(url, title: AppLanguage.string("Recording saved"))
+            if settings.showHUD {
+                hud.show(.success, title: AppLanguage.string("Recording saved"), detail: url.lastPathComponent, in: settings.hudCorner)
+            }
+        }
+        if let error = outcome.error {
+            logger.error("Recording ended with an error: \(error.localizedDescription, privacy: .public)")
+            fail(
+                title: outcome.url == nil ? AppLanguage.string("Recording failed") : AppLanguage.string("Recording ended early"),
+                message: error.localizedDescription,
+                identifier: "recordingFailed"
+            )
+        }
+    }
+
+    private static func recordingURL(in directory: URL) -> URL {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
+        let name = "Recording_\(formatter.string(from: Date()))"
+        var url = directory.appendingPathComponent("\(name).mp4")
+        var suffix = 2
+        while FileManager.default.fileExists(atPath: url.path) {
+            url = directory.appendingPathComponent("\(name)_\(suffix).mp4")
+            suffix += 1
+        }
+        return url
+    }
+
+    private func announce(_ title: String, detail: String?, identifier: String) {
+        notifier.show(title: title, body: detail ?? "", identifier: identifier)
+        if settings.showHUD { hud.show(.success, title: title, detail: detail, in: settings.hudCorner) }
+    }
+
+    private func fail(title: String, message: String, identifier: String) {
+        NSSound.beep()
+        report(title: title, body: message, identifier: identifier)
+    }
+
     func openClipDirectory() {
         try? FileManager.default.createDirectory(at: settings.saveDirectory, withIntermediateDirectories: true)
         NSWorkspace.shared.open(settings.saveDirectory)
@@ -196,7 +325,7 @@ final class ClipController: ObservableObject {
         case .saved(let url):
             logger.notice("Clip saved: \(url.path, privacy: .public)")
             NSSound(named: "Glass")?.play()
-            notifier.clipSaved(url)
+            notifier.saved(url, title: AppLanguage.string("Clip saved"))
             if settings.showHUD {
                 hud.show(.success, title: AppLanguage.string("Clip saved"), detail: url.lastPathComponent, in: settings.hudCorner)
             }
@@ -204,6 +333,25 @@ final class ClipController: ObservableObject {
             logger.error("Clip failed: \(message, privacy: .public)")
             NSSound.beep()
             report(title: AppLanguage.string("Couldn't save clip"), body: message, identifier: "clipFailed")
+        }
+    }
+}
+
+/// The running recording, if any, as seen from the capture threads.
+private final class RecordingTap: @unchecked Sendable {
+    private let lock = NSLock()
+    private var current: RecordingWriter?
+
+    var writer: RecordingWriter? {
+        get {
+            lock.lock()
+            defer { lock.unlock() }
+            return current
+        }
+        set {
+            lock.lock()
+            current = newValue
+            lock.unlock()
         }
     }
 }

@@ -27,6 +27,10 @@ struct MenuBarView: View {
             controller.saveClip()
         }
         .disabled(controller.isSaving)
+        Button(controller.recordingSeconds.map { AppLanguage.string("Stop Recording (\(ClipFormat.duration(TimeInterval($0))))") }
+               ?? AppLanguage.string("Start Recording")) {
+            controller.toggleRecording()
+        }
         switch controller.lastResult {
         case .saved(let url): Text(verbatim: AppLanguage.string("Last clip: \(url.lastPathComponent)"))
         case .failed(let message): Text(verbatim: AppLanguage.string("Couldn't save clip: \(message)"))

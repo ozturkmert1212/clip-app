@@ -27,10 +27,11 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
         ])
     }
 
-    func clipSaved(_ url: URL) {
+    /// A saved clip or recording; the notification reveals the file.
+    func saved(_ url: URL, title: String) {
         registerActions()
         let content = UNMutableNotificationContent()
-        content.title = AppLanguage.string("Clip saved")
+        content.title = title
         content.body = url.lastPathComponent
         content.categoryIdentifier = Self.clipCategory
         content.userInfo = [Self.pathKey: url.path]

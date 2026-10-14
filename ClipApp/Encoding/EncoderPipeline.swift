@@ -16,6 +16,7 @@ final class EncoderPipeline {
     private var width: Int32 = 0
     private var height: Int32 = 0
     private var lastStatus = noErr
+    private var keyframeRequested = false
 
     /// Keyframes bound how far back a clip has to start and how coarsely the
     /// ring buffer can prune.
@@ -41,6 +42,13 @@ final class EncoderPipeline {
         invalidateSession()
     }
 
+    /// Makes the next frame a keyframe, so a recording can start with it.
+    func requestKeyframe() {
+        lock.lock()
+        defer { lock.unlock() }
+        keyframeRequested = true
+    }
+
     func encode(_ sampleBuffer: CMSampleBuffer) {
         guard let imageBuffer = sampleBuffer.imageBuffer else { return }
         let frameWidth = Int32(CVPixelBufferGetWidth(imageBuffer))
@@ -55,13 +63,15 @@ final class EncoderPipeline {
             makeSession(width: frameWidth, height: frameHeight)
         }
         guard let session else { return }
+        let properties = keyframeRequested ? [kVTEncodeFrameOptionKey_ForceKeyFrame: true] as CFDictionary : nil
+        keyframeRequested = false
 
         let status = VTCompressionSessionEncodeFrame(
             session,
             imageBuffer: imageBuffer,
             presentationTimeStamp: sampleBuffer.presentationTimeStamp,
             duration: .invalid,
-            frameProperties: nil,
+            frameProperties: properties,
             infoFlagsOut: nil
         ) { [onEncoded] status, flags, encoded in
             guard status == noErr, let encoded, !flags.contains(.frameDropped) else { return }

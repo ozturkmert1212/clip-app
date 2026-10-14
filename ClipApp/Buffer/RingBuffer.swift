@@ -140,6 +140,14 @@ final class RingBuffer {
         }
     }
 
+    /// What the pipeline is currently putting out: the newest video sample's
+    /// format and the newest format of each audio source.
+    func formats() -> (video: CMFormatDescription?, audio: [AudioTrack: CMAudioFormatDescription]) {
+        lock.lock()
+        defer { lock.unlock() }
+        return (video.last?.sample.formatDescription, audio.compactMapValues { $0.last?.sample.formatDescription })
+    }
+
     func removeAudio(_ track: AudioTrack) {
         lock.lock()
         defer { lock.unlock() }
@@ -175,7 +183,7 @@ final class RingBuffer {
         video.removeFirst(count)
     }
 
-    private static func isKeyframe(_ sample: CMSampleBuffer) -> Bool {
+    static func isKeyframe(_ sample: CMSampleBuffer) -> Bool {
         guard let attachments = CMSampleBufferGetSampleAttachmentsArray(sample, createIfNecessary: false)
                 as? [[CFString: Any]],
               let notSync = attachments.first?[kCMSampleAttachmentKey_NotSync] as? Bool else { return true }
