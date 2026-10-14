@@ -214,7 +214,7 @@ private struct TrimPanel: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Toggle("Precise (re-encode)", isOn: $model.precise)
                     Text(model.precise
-                         ? "Re-encodes so the file holds exactly the selected range. Slower, smaller, with a slight loss in quality."
+                         ? "Re-encodes the video at the source's bitrate so the file holds exactly the selected range. Slower, with a slight loss in quality."
                          : "Copies the video as it is: instant and lossless. Because a cut can only start on a keyframe (every 2 s), the file keeps up to 2 s of hidden footage before the start; most players skip it.")
                         .font(.caption)
                         .foregroundStyle(.secondary)

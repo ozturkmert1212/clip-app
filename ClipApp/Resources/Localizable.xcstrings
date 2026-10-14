@@ -947,12 +947,12 @@
         }
       }
     },
-    "Re-encodes so the file holds exactly the selected range. Slower, smaller, with a slight loss in quality." : {
+    "Re-encodes the video at the source's bitrate so the file holds exactly the selected range. Slower, with a slight loss in quality." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dosya tam olarak seçili aralığı içersin diye yeniden kodlar. Daha yavaş, daha küçük, kalitede hafif kayıp olur."
+            "value" : "Dosya tam olarak seçili aralığı içersin diye videoyu kaynağın bitrate'iyle yeniden kodlar. Daha yavaştır, kalitede hafif kayıp olur."
           }
         }
       }
