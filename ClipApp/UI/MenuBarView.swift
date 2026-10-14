@@ -27,16 +27,26 @@ struct MenuBarView: View {
             }
         }
         Divider()
-        Button(controller.isSaving
-               ? AppLanguage.string("Saving Clip…")
-               : AppLanguage.string("Save Last \(settings.bufferSeconds) Seconds")) {
-            controller.saveClip()
+        // The same choice as in the window: start clipping, or save and stop once it is on.
+        switch controller.activity.primaryAction {
+        case .startClipping:
+            Button(AppLanguage.string("Start Clipping")) { controller.startClipping() }
+        case .saveClip:
+            Button(controller.isSaving
+                   ? AppLanguage.string("Saving Clip…")
+                   : AppLanguage.string("Save Last \(settings.bufferSeconds) Seconds")) {
+                controller.saveClip()
+            }
+            .disabled(controller.isSaving)
         }
-        .disabled(controller.isSaving)
+        if controller.activity.offersStopClipping {
+            Button(AppLanguage.string("Stop Clipping")) { controller.stopClipping() }
+        }
         Button(controller.recordingSeconds.map { AppLanguage.string("Stop Recording (\(ClipFormat.duration(TimeInterval($0))))") }
                ?? AppLanguage.string("Start Recording")) {
             controller.toggleRecording()
         }
+        .disabled(controller.isStartingRecording)
         Divider()
         Menu(AppLanguage.string("Source")) {
             Text(verbatim: controller.isRecording
@@ -87,6 +97,7 @@ struct MenuBarView: View {
 
     private var status: Brand.Status {
         if controller.isRecording { return .recording }
+        guard controller.activity.streamRuns else { return .idle }
         switch capture.state {
         case .running: return .capturing
         case .starting, .idle: return .idle
@@ -95,13 +106,15 @@ struct MenuBarView: View {
     }
 
     private var statusText: String {
+        guard controller.activity.streamRuns else { return AppLanguage.string("Clipping off") }
         switch capture.state {
-        case .idle: return AppLanguage.string("Capture off")
-        case .starting: return AppLanguage.string("Starting capture…")
+        case .idle, .starting: return AppLanguage.string("Starting capture…")
         case .running(let source, _, _, let usingFallback):
+            // Running for a recording alone.
+            guard controller.isClipping else { return AppLanguage.string("Recording · \(source)") }
             return usingFallback
-                ? AppLanguage.string("\(source) · \(controller.bufferedSeconds) s buffered (selected source unavailable)")
-                : AppLanguage.string("\(source) · \(controller.bufferedSeconds) s buffered")
+                ? AppLanguage.string("Clipping · \(source) · \(controller.bufferedSeconds) s buffered (selected source unavailable)")
+                : AppLanguage.string("Clipping · \(source) · \(controller.bufferedSeconds) s buffered")
         case .failed: return AppLanguage.string("Capture error, retrying")
         case .permissionDenied: return AppLanguage.string("No Screen Recording permission, capture stopped")
         }

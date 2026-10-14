@@ -4,26 +4,6 @@
     "" : {
       "shouldTranslate" : false
     },
-    "%@ · %lld s buffered" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · tamponda %lld sn"
-          }
-        }
-      }
-    },
-    "%@ · %lld s buffered (selected source unavailable)" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · tamponda %lld sn (seçili kaynak kullanılamıyor)"
-          }
-        }
-      }
-    },
     "%lld seconds" : {
       "localizations" : {
         "tr" : {
@@ -204,16 +184,6 @@
         }
       }
     },
-    "Capture off" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yakalama kapalı"
-          }
-        }
-      }
-    },
     "Capture source" : {
       "localizations" : {
         "tr" : {
@@ -380,6 +350,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Klip alma · %@ · tamponda %lld sn"
+          }
+        }
+      }
+    },
+    "Clipping · %@ · %lld s buffered (selected source unavailable)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip alma · %@ · tamponda %lld sn (seçili kaynak kullanılamıyor)"
           }
         }
       }

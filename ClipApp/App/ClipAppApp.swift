@@ -33,8 +33,9 @@ struct ClipAppApp: App {
     }
 }
 
-/// The menu bar icon, and nothing else: normal while capturing, with a red
-/// dot while a recording runs, faded when capture is off or not permitted.
+/// The menu bar icon, and nothing else: normal while clipping, with a red
+/// dot while a recording runs, faded while clipping is off, failing or not
+/// permitted (see `CaptureActivity.icon`).
 private struct MenuBarLabel: View {
     @ObservedObject var controller: ClipController
     @ObservedObject var capture: CaptureManager
@@ -46,11 +47,22 @@ private struct MenuBarLabel: View {
     }
 
     private var icon: NSImage {
-        if controller.isRecording { return MenuBarIcon.shared.recording }
-        guard permissions.screenRecordingGranted else { return MenuBarIcon.shared.dimmed }
+        // Recording only once the file is open, like the rest of the interface.
+        var activity = controller.activity
+        activity.isRecording = controller.isRecording
+        switch activity.icon(captureWorks: captureWorks) {
+        case .recording: return MenuBarIcon.shared.recording
+        case .normal: return MenuBarIcon.shared.normal
+        case .dimmed: return MenuBarIcon.shared.dimmed
+        }
+    }
+
+    /// `.idle` only lasts until a stream that was just asked for begins starting.
+    private var captureWorks: Bool {
+        guard permissions.screenRecordingGranted else { return false }
         switch capture.state {
-        case .running, .starting: return MenuBarIcon.shared.normal
-        case .idle, .failed, .permissionDenied: return MenuBarIcon.shared.dimmed
+        case .idle, .starting, .running: return true
+        case .failed, .permissionDenied: return false
         }
     }
 }
