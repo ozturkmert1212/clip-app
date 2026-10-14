@@ -54,15 +54,23 @@ struct MainWindowView: View {
 }
 
 /// Clips by game and the recordings on top; Settings and the capture status
-/// pinned to the bottom. The rows draw their own selection, so it is indigo
-/// whatever accent color the system is set to.
+/// pinned to the bottom. The list is an ordinary selectable list: arrow keys
+/// move the selection and VoiceOver announces it. Its highlight is drawn by
+/// AppKit in the app's accent color (see `Brand.fill`).
 private struct Sidebar<Status: View>: View {
     @ObservedObject var navigation: MainNavigation
     @ObservedObject var library: ClipLibrary
     @ViewBuilder let status: () -> Status
 
+    @FocusState private var isListFocused: Bool
+    @State private var keyMonitor: Any?
+
     var body: some View {
-        List {
+        // Settings sits below the list, so for the list it is "nothing selected".
+        List(selection: Binding<SidebarItem?>(
+            get: { navigation.selection == .settings ? nil : navigation.selection },
+            set: { if let item = $0 { navigation.selection = item } }
+        )) {
             Section("Clips") {
                 row(.allClips, count: library.clips.count) {
                     Text("All Clips")
@@ -93,6 +101,7 @@ private struct Sidebar<Status: View>: View {
             }
         }
         .listStyle(.sidebar)
+        .focused($isListFocused)
         // A game whose last clip was moved or deleted has no row left to sit on.
         .onChange(of: library.games) { games in
             if case .game(let name) = navigation.selection, !games.contains(where: { $0.name == name }) {
@@ -101,64 +110,132 @@ private struct Sidebar<Status: View>: View {
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 0) {
-                row(.settings, count: nil) {
-                    Text("Settings")
-                } icon: {
-                    Image(systemName: "gearshape")
-                }
-                .padding(.horizontal, Brand.Space.one)
-                .padding(.bottom, Brand.Space.one)
+                settingsRow
                 status()
             }
         }
+        .onAppear(perform: startKeyMonitor)
+        .onDisappear(perform: stopKeyMonitor)
     }
 
     private func row<Title: View, Icon: View>(
         _ item: SidebarItem, count: Int?,
         @ViewBuilder title: () -> Title, @ViewBuilder icon: () -> Icon
     ) -> some View {
-        SidebarRow(isSelected: navigation.selection == item, count: count, title: title(), icon: icon()) {
-            navigation.selection = item
-        }
-        .listRowInsets(EdgeInsets(top: 1, leading: 0, bottom: 1, trailing: 0))
+        SidebarLabel(isSelected: navigation.selection == item, count: count, title: title(), icon: icon())
+            .tag(item)
     }
-}
 
-private struct SidebarRow<Title: View, Icon: View>: View {
-    let isSelected: Bool
-    let count: Int?
-    let title: Title
-    let icon: Icon
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: Brand.Space.one) {
-                icon
-                    .foregroundStyle(isSelected ? Color.white : Brand.accentText)
-                    .frame(width: 20)
-                title
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                Spacer(minLength: Brand.Space.half)
-                if let count {
-                    Text(verbatim: "\(count)")
-                        .font(.caption)
-                        .monospacedDigit()
-                        .foregroundStyle(isSelected ? Color.white.opacity(0.85) : Color.secondary)
-                }
-            }
-            .foregroundStyle(isSelected ? Color.white : Color.primary)
-            .padding(.horizontal, Brand.Space.one)
-            .padding(.vertical, Brand.Space.one - 2)
-            .background(
-                isSelected ? Brand.fill : Color.clear,
-                in: RoundedRectangle(cornerRadius: Brand.Radius.row, style: .continuous)
+    /// Looks and reads like a row of the list above it, and is one more stop
+    /// for the arrow keys (see `startKeyMonitor`).
+    private var settingsRow: some View {
+        let isSelected = navigation.selection == .settings
+        return Button {
+            navigation.selection = .settings
+        } label: {
+            SidebarLabel(
+                isSelected: isSelected, followsListHighlight: false, count: nil,
+                title: Text("Settings"), icon: Image(systemName: "gearshape")
             )
-            .contentShape(Rectangle())
+                .padding(.horizontal, Brand.Space.one)
+                .padding(.vertical, Brand.Space.one - 2)
+                .background(
+                    isSelected ? Brand.fill : Color.clear,
+                    in: RoundedRectangle(cornerRadius: Brand.Radius.row, style: .continuous)
+                )
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .padding(.horizontal, Brand.Space.one)
+        .padding(.bottom, Brand.Space.one)
+    }
+
+    /// The rows the arrow keys walk through, top to bottom, ending with Settings.
+    private var order: [SidebarItem] {
+        var items: [SidebarItem] = [.allClips] + library.games.map { .game($0.name) }
+        if library.otherCount > 0 { items.append(.other) }
+        return items + [.videos, .settings]
+    }
+
+    /// The list handles the arrow keys itself, but it ends at its last row.
+    /// This carries Down on from there to Settings and Up back from it, so
+    /// the whole sidebar is one run for the keyboard.
+    private func startKeyMonitor() {
+        guard keyMonitor == nil else { return }
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            let down: UInt16 = 125, up: UInt16 = 126
+            guard isListFocused, event.keyCode == down || event.keyCode == up,
+                  event.modifierFlags.intersection([.command, .option, .control, .shift]).isEmpty else { return event }
+            let items = order
+            guard let index = items.firstIndex(of: navigation.selection) else { return event }
+            if event.keyCode == down, index >= items.count - 2 {
+                // On the list's last row: step down to Settings. On Settings: nothing below.
+                navigation.selection = .settings
+                return nil
+            }
+            if event.keyCode == up, navigation.selection == .settings {
+                navigation.selection = items[items.count - 2]
+                return nil
+            }
+            return event
+        }
+    }
+
+    private func stopKeyMonitor() {
+        if let keyMonitor { NSEvent.removeMonitor(keyMonitor) }
+        keyMonitor = nil
+    }
+}
+
+/// Icon, title and count of one sidebar entry. On a highlighted row
+/// everything turns white, as the system's own labels do.
+private struct SidebarLabel<Title: View, Icon: View>: View {
+    let isSelected: Bool
+    /// Rows of the list take their cue from the list's highlight, which
+    /// goes gray when the list loses focus; the Settings row draws its own.
+    var followsListHighlight = true
+    let count: Int?
+    let title: Title
+    let icon: Icon
+
+    var body: some View {
+        if #available(macOS 14.0, *), followsListHighlight {
+            ProminenceReader { content(isHighlighted: $0) }
+        } else {
+            // macOS 13 does not say whether the highlight is the strong one.
+            content(isHighlighted: isSelected)
+        }
+    }
+
+    private func content(isHighlighted: Bool) -> some View {
+        HStack(spacing: Brand.Space.one) {
+            icon
+                .foregroundStyle(isHighlighted ? Color.white : Brand.accentText)
+                .frame(width: 20)
+            title
+                .lineLimit(1)
+                .truncationMode(.tail)
+            Spacer(minLength: Brand.Space.half)
+            if let count {
+                Text(verbatim: "\(count)")
+                    .font(.caption)
+                    .monospacedDigit()
+                    .foregroundStyle(isHighlighted ? Color.white.opacity(0.85) : Color.secondary)
+            }
+        }
+        .foregroundStyle(isHighlighted ? Color.white : Color.primary)
+    }
+}
+
+/// Whether the row this sits in currently has the strong selection highlight.
+@available(macOS 14.0, *)
+private struct ProminenceReader<Content: View>: View {
+    @Environment(\.backgroundProminence) private var prominence
+    @ViewBuilder let content: (Bool) -> Content
+
+    var body: some View {
+        content(prominence == .increased)
     }
 }
 

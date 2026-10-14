@@ -19,15 +19,19 @@ enum Brand {
         static let recordDeep = Color(hex: 0xD3112B)
     }
 
-    /// The tint of the standard controls, and the asset catalog's
-    /// `AccentColor`: #4B3FD1 in light mode, a lightened #8F87FF in dark mode.
-    /// macOS writes picker values and button titles in the tint, so it has to
-    /// work as text: 5.6:1 or more on the light backgrounds, 4.7:1 on the
-    /// dark grouped background and 5.6:1 on the dark window.
+    /// The tint of the SwiftUI controls: #4B3FD1 in light mode, a lightened
+    /// #8F87FF in dark mode. macOS writes picker values and button titles in
+    /// the tint, so it has to work as text: 5.6:1 or more on the light
+    /// backgrounds, 4.7:1 on the dark grouped background and 5.6:1 on the
+    /// dark window.
     static let accent = Color(light: 0x4B3FD1, dark: 0x8F87FF)
 
-    /// Shapes of our own that carry white text (the selected sidebar row):
-    /// the dark mode tint is too light for that (3:1), these give 7.2:1 and 6.1:1.
+    /// Fills that carry white text: #4B3FD1 in light mode, #574BDB in dark
+    /// mode (7.2:1 and 6.1:1; on the dark mode tint white would be 3:1).
+    /// This pair is also the asset catalog's `AccentColor`, which is what
+    /// AppKit draws with when the system accent color is Multicolor: the
+    /// sidebar's selection, focus rings, the default button of an alert, the
+    /// highlighted item of a menu.
     static let fill = Color(light: 0x4B3FD1, dark: 0x574BDB)
 
     /// Our own indigo marks on the window background: icons, the status
