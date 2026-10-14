@@ -83,6 +83,14 @@ See `CLAUDE.md` for an architecture overview and development notes.
 
 If you would rather not build it yourself, a prebuilt dmg is available under [Releases](https://github.com/ozturkmert1212/clip-app/releases/latest), see "Download" above.
 
+## Running the tests
+
+```bash
+scripts/test.sh
+```
+
+Runs the XCTest suite with `xcodebuild test` and prints which test classes passed, any failing assertions, and the totals. The tests do not launch ClipApp and need no permission: the media tests feed synthetic pictures and tones through the real encoder and writers and check the resulting files with AVFoundation. Pass a class or a single test to run only that, for example `scripts/test.sh ClipAppTests/TrimTests`.
+
 ## License
 
 MIT, see `LICENSE`.
