@@ -13,7 +13,7 @@
   <img src="docs/images/settings-bottom.png" alt="ClipApp settings: audio, saving and general options" width="300">
 </p>
 
-A menu bar "instant replay" clipping app for macOS (the Medal / ShadowPlay idea). It captures the screen in the background, keeps the last N seconds in memory and saves them as an mp4 when you press a global shortcut.
+An "instant replay" clipping app for macOS (the Medal / ShadowPlay idea). It captures the screen in the background, keeps the last N seconds in memory and saves them as an mp4 when you press a global shortcut. Saved clips are listed, played and trimmed in the app's window; closing the window leaves ClipApp running in the menu bar.
 
 The interface is in English by default. Türkçe için: Settings > General > Language.
 
@@ -23,7 +23,9 @@ The interface is in English by default. Türkçe için: Settings > General > Lan
 - Save the last N seconds as an mp4 with a global shortcut (default ⌃⌥⌘R) or from the menu; capture keeps running while the clip is written.
 - System audio and microphone, each with its own level. Mixed into one audio track by default; can be split into separate tracks in Settings.
 - A system notification when a clip is saved or something goes wrong (the notification reveals the clip in Finder), plus a small on-screen message in a corner of the screen for a few seconds. The message never ends up in clips and also shows above full screen games; its corner is chosen in Settings (default top left) and it can be turned off.
-- System notifications (banners) stay out of clips while a display is captured.
+- System notifications (banners) and ClipApp's own window stay out of clips while a display is captured.
+- A clip library: thumbnails of everything in the save folder, newest first, with rename, reveal in Finder, copy and move to Trash. Double-click a clip to play it.
+- Trimming: pick a range under the player and save it as a new file next to the original, either as an instant lossless copy or re-encoded to exactly the selected range.
 - Settings: buffer length, resolution, FPS, bitrate, source, audio, save folder, file name format, launch at login, language (English or Turkish).
 
 ## Requirements
