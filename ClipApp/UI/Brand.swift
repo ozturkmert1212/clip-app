@@ -190,41 +190,63 @@ struct RecordDot: View {
 
 // MARK: - The icon's glyph
 
-/// The app icon's mark, an arrow circling back around a dot, drawn in
-/// faded brand colors for empty states.
+/// The app icon's mark: an arrow circling back around a dot.
 struct BrandGlyph: View {
     var size: CGFloat = 96
+    var ring = Brand.accentText
+    var dot = Brand.recordDot
+    /// Empty states show it faded; on the badge it is drawn in full.
+    var strength = 0.45
 
     var body: some View {
         Canvas { context, canvas in
             let center = CGPoint(x: canvas.width / 2, y: canvas.height / 2)
-            let radius = canvas.width * 0.34
+            let radius = canvas.width * 0.33
             let width = canvas.width * 0.105
             // From about one o'clock the long way round to about four o'clock.
-            let start = Angle.degrees(-62), end = Angle.degrees(28)
-            var ring = Path()
-            ring.addArc(center: center, radius: radius, startAngle: start, endAngle: end, clockwise: true)
-            context.stroke(ring, with: .color(Brand.accentText.opacity(0.4)), style: StrokeStyle(lineWidth: width, lineCap: .round))
+            let start = Angle.degrees(-58), end = Angle.degrees(32)
+            var arc = Path()
+            arc.addArc(center: center, radius: radius, startAngle: start, endAngle: end, clockwise: true)
 
             // The arrowhead continues the way the ring was travelling.
-            let tip = CGPoint(x: center.x + radius * cos(end.radians), y: center.y + radius * sin(end.radians))
+            let base = CGPoint(x: center.x + radius * cos(end.radians), y: center.y + radius * sin(end.radians))
             let along = CGVector(dx: sin(end.radians), dy: -cos(end.radians))
             let across = CGVector(dx: cos(end.radians), dy: sin(end.radians))
             var head = Path()
-            head.move(to: CGPoint(x: tip.x + along.dx * width * 1.5, y: tip.y + along.dy * width * 1.5))
-            head.addLine(to: CGPoint(x: tip.x + across.dx * width * 1.25 - along.dx * width * 0.2, y: tip.y + across.dy * width * 1.25 - along.dy * width * 0.2))
-            head.addLine(to: CGPoint(x: tip.x - across.dx * width * 1.25 - along.dx * width * 0.2, y: tip.y - across.dy * width * 1.25 - along.dy * width * 0.2))
+            head.move(to: CGPoint(x: base.x + along.dx * width * 2.1, y: base.y + along.dy * width * 2.1))
+            head.addLine(to: CGPoint(x: base.x + across.dx * width * 1.5, y: base.y + across.dy * width * 1.5))
+            head.addLine(to: CGPoint(x: base.x - across.dx * width * 1.5, y: base.y - across.dy * width * 1.5))
             head.closeSubpath()
-            context.fill(head, with: .color(Brand.accentText.opacity(0.4)))
 
-            let dot = canvas.width * 0.15
+            // Ring and head overlap; one layer keeps the overlap from showing when faded.
+            context.drawLayer { layer in
+                layer.opacity = strength
+                layer.stroke(arc, with: .color(ring), style: StrokeStyle(lineWidth: width, lineCap: .round))
+                layer.fill(head, with: .color(ring))
+            }
+            let dotRadius = canvas.width * 0.14
             context.fill(
-                Path(ellipseIn: CGRect(x: center.x - dot, y: center.y - dot, width: dot * 2, height: dot * 2)),
-                with: .color(Brand.recordDot.opacity(0.55))
+                Path(ellipseIn: CGRect(x: center.x - dotRadius, y: center.y - dotRadius, width: dotRadius * 2, height: dotRadius * 2)),
+                with: .color(dot.opacity(min(1, strength + 0.15)))
             )
         }
         .frame(width: size, height: size)
         .accessibilityHidden(true)
+    }
+}
+
+/// The app icon in small, drawn here rather than taken from the system:
+/// macOS can hand out a tinted or clear version of an app's icon, and this
+/// one is meant to show the brand's own colors.
+struct BrandBadge: View {
+    var size: CGFloat = 48
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: size * 0.225, style: .continuous)
+            .fill(LinearGradient(colors: [Brand.Palette.indigo, Brand.Palette.indigoDark], startPoint: .top, endPoint: .bottom))
+            .frame(width: size, height: size)
+            .overlay(BrandGlyph(size: size * 0.86, ring: Brand.Palette.lavender, dot: Brand.Palette.recordBright, strength: 1))
+            .accessibilityHidden(true)
     }
 }
 

@@ -187,10 +187,7 @@ struct SettingsView: View {
     private var aboutSection: some View {
         Section("About") {
             HStack(spacing: Brand.Space.two) {
-                Image(nsImage: NSApp.applicationIconImage)
-                    .resizable()
-                    .frame(width: 48, height: 48)
-                    .accessibilityHidden(true)
+                BrandBadge()
                 VStack(alignment: .leading, spacing: Brand.Space.half) {
                     Text(verbatim: "ClipApp")
                         .font(.headline)
