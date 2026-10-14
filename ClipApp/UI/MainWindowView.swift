@@ -54,40 +54,42 @@ struct MainWindowView: View {
 }
 
 /// Clips by game and the recordings on top; Settings and the capture status
-/// pinned to the bottom.
+/// pinned to the bottom. The rows draw their own selection, so it is indigo
+/// whatever accent color the system is set to.
 private struct Sidebar<Status: View>: View {
     @ObservedObject var navigation: MainNavigation
     @ObservedObject var library: ClipLibrary
     @ViewBuilder let status: () -> Status
 
     var body: some View {
-        List(selection: Binding<SidebarItem?>(
-            get: { navigation.selection },
-            set: { if let item = $0 { navigation.selection = item } }
-        )) {
+        List {
             Section("Clips") {
-                Label("All Clips", systemImage: "film.stack")
-                    .badge(library.clips.count)
-                    .tag(SidebarItem.allClips)
+                row(.allClips, count: library.clips.count) {
+                    Text("All Clips")
+                } icon: {
+                    Image(systemName: "film.stack")
+                }
                 ForEach(library.games) { game in
-                    Label {
+                    row(.game(game.name), count: game.count) {
                         Text(verbatim: game.name)
                     } icon: {
                         GameIcon(bundleID: game.bundleID)
                     }
-                    .badge(game.count)
-                    .tag(SidebarItem.game(game.name))
                 }
                 if library.otherCount > 0 {
-                    Label("Other", systemImage: "tray")
-                        .badge(library.otherCount)
-                        .tag(SidebarItem.other)
+                    row(.other, count: library.otherCount) {
+                        Text("Other")
+                    } icon: {
+                        Image(systemName: "tray")
+                    }
                 }
             }
             Section("Videos") {
-                Label("Recordings", systemImage: "video")
-                    .badge(library.videos.count)
-                    .tag(SidebarItem.videos)
+                row(.videos, count: library.videos.count) {
+                    Text("Recordings")
+                } icon: {
+                    Image(systemName: "video")
+                }
             }
         }
         .listStyle(.sidebar)
@@ -99,34 +101,69 @@ private struct Sidebar<Status: View>: View {
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 0) {
-                settingsRow
+                row(.settings, count: nil) {
+                    Text("Settings")
+                } icon: {
+                    Image(systemName: "gearshape")
+                }
+                .padding(.horizontal, Brand.Space.one)
+                .padding(.bottom, Brand.Space.one)
                 status()
             }
         }
     }
 
-    private var settingsRow: some View {
-        let isSelected = navigation.selection == .settings
-        return Button {
-            navigation.selection = .settings
-        } label: {
-            Label("Settings", systemImage: "gearshape")
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 6)
-                .background(
-                    isSelected ? Color.accentColor.opacity(0.3) : Color.clear,
-                    in: RoundedRectangle(cornerRadius: 6, style: .continuous)
-                )
-                .contentShape(Rectangle())
+    private func row<Title: View, Icon: View>(
+        _ item: SidebarItem, count: Int?,
+        @ViewBuilder title: () -> Title, @ViewBuilder icon: () -> Icon
+    ) -> some View {
+        SidebarRow(isSelected: navigation.selection == item, count: count, title: title(), icon: icon()) {
+            navigation.selection = item
         }
-        .buttonStyle(.plain)
-        .padding(.horizontal, 10)
-        .padding(.bottom, 8)
+        .listRowInsets(EdgeInsets(top: 1, leading: 0, bottom: 1, trailing: 0))
     }
 }
 
-/// The icon of the app a game's clips were recorded in, if it is installed.
+private struct SidebarRow<Title: View, Icon: View>: View {
+    let isSelected: Bool
+    let count: Int?
+    let title: Title
+    let icon: Icon
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: Brand.Space.one) {
+                icon
+                    .foregroundStyle(isSelected ? Color.white : Brand.accentText)
+                    .frame(width: 20)
+                title
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                Spacer(minLength: Brand.Space.half)
+                if let count {
+                    Text(verbatim: "\(count)")
+                        .font(.caption)
+                        .monospacedDigit()
+                        .foregroundStyle(isSelected ? Color.white.opacity(0.85) : Color.secondary)
+                }
+            }
+            .foregroundStyle(isSelected ? Color.white : Color.primary)
+            .padding(.horizontal, Brand.Space.one)
+            .padding(.vertical, Brand.Space.one - 2)
+            .background(
+                isSelected ? Brand.accent : Color.clear,
+                in: RoundedRectangle(cornerRadius: Brand.Radius.row, style: .continuous)
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+}
+
+/// The icon of the app a game's clips were recorded in, if it is installed;
+/// a plain film frame otherwise.
 struct GameIcon: View {
     let bundleID: String?
 
@@ -138,7 +175,7 @@ struct GameIcon: View {
                 .resizable()
                 .frame(width: 18, height: 18)
         } else {
-            Image(systemName: "gamecontroller")
+            Image(systemName: "film")
         }
     }
 

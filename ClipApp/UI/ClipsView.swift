@@ -62,7 +62,10 @@ struct ClipsView: View {
                 Divider()
             }
             ScrollView {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 210, maximum: 340), spacing: 12)], spacing: 12) {
+                LazyVGrid(
+                    columns: [GridItem(.adaptive(minimum: 216, maximum: 340), spacing: Brand.Space.two)],
+                    spacing: Brand.Space.two
+                ) {
                     ForEach(shown) { clip in
                         ClipCard(clip: clip, showsGame: filter == .allClips, isSelected: selection.contains(clip.url)) {
                             actions(for: clip)
@@ -72,7 +75,7 @@ struct ClipsView: View {
                         .contextMenu { actions(for: clip) }
                     }
                 }
-                .padding(16)
+                .padding(Brand.Space.two)
             }
         }
         // Command-A, both as the Edit menu's Select All and as a plain shortcut.
@@ -88,7 +91,7 @@ struct ClipsView: View {
     /// How many clips are selected and what can be done with all of them.
     private var selectionBar: some View {
         let clips = selected
-        return HStack(spacing: 10) {
+        return HStack(spacing: Brand.Space.one) {
             Text("\(clips.count) selected")
                 .font(.callout.weight(.medium))
                 .monospacedDigit()
@@ -101,8 +104,8 @@ struct ClipsView: View {
             Button("Move to Trash", role: .destructive) { trash(clips) }
             Button("Deselect") { selection = [] }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
+        .padding(.horizontal, Brand.Space.two)
+        .padding(.vertical, Brand.Space.one)
     }
 
     /// The selected clips in the order they are listed.
@@ -279,19 +282,38 @@ private struct ClipCard<Actions: View>: View {
 
     @Environment(\.locale) private var locale
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var isHovered = false
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        let shape = RoundedRectangle(cornerRadius: Brand.Radius.card, style: .continuous)
+        VStack(alignment: .leading, spacing: Brand.Space.one) {
             ClipThumbnail(clip: clip)
-            HStack(alignment: .top, spacing: 4) {
+                .overlay(alignment: .bottomTrailing) {
+                    if let duration = clip.duration {
+                        Text(verbatim: ClipFormat.duration(duration))
+                            .font(.caption.weight(.medium))
+                            .monospacedDigit()
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.black.opacity(0.65), in: Capsule())
+                            .padding(6)
+                    }
+                }
+            HStack(alignment: .top, spacing: Brand.Space.half) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(verbatim: clip.name)
+                        .fontWeight(.medium)
                         .lineLimit(1)
                         .truncationMode(.middle)
                         .help(clip.name)
                     Text(verbatim: subtitle)
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text(verbatim: details)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                    Text(verbatim: ByteCountFormatter.string(fromByteCount: clip.size, countStyle: .file))
                         .font(.caption)
                         .monospacedDigit()
                         .foregroundStyle(.secondary)
@@ -305,24 +327,26 @@ private struct ClipCard<Actions: View>: View {
                 .fixedSize()
             }
         }
-        .padding(8)
-        .background(
-            isSelected ? Color.accentColor.opacity(0.25) : Color.clear,
-            in: RoundedRectangle(cornerRadius: 10, style: .continuous)
-        )
+        .padding(Brand.Space.one)
+        .background(shape.fill(isSelected ? Brand.accent.opacity(0.16) : Color(nsColor: .controlBackgroundColor)))
+        .overlay(shape.strokeBorder(border, lineWidth: isSelected ? 2 : 1))
+        .shadow(color: Color.black.opacity(isHovered ? 0.2 : 0), radius: isHovered ? 8 : 0, y: isHovered ? 3 : 0)
+        .offset(y: isHovered && !reduceMotion ? -1 : 0)
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: isHovered)
+        .onHover { isHovered = $0 }
         .contentShape(Rectangle())
+    }
+
+    /// Selected: a firm indigo frame. Under the pointer: a thin one. Otherwise a hairline.
+    private var border: Color {
+        if isSelected { return Brand.accentText }
+        return isHovered ? Brand.accentText.opacity(0.7) : Brand.hairline
     }
 
     private var subtitle: String {
         let date = clip.date.formatted(.dateTime.day().month(.abbreviated).year().hour().minute().locale(locale))
         guard showsGame, case .game(let name) = clip.category else { return date }
         return "\(name) · \(date)"
-    }
-
-    private var details: String {
-        let size = ByteCountFormatter.string(fromByteCount: clip.size, countStyle: .file)
-        guard let duration = clip.duration else { return size }
-        return "\(ClipFormat.duration(duration)) · \(size)"
     }
 }
 
@@ -344,7 +368,7 @@ private struct ClipThumbnail: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: Brand.Radius.control, style: .continuous))
             .task(id: clip.fingerprint) {
                 image = await ThumbnailCache.shared.image(for: clip)
             }
