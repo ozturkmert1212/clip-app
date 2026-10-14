@@ -20,12 +20,13 @@ The interface is in English by default. Türkçe için: Settings > General > Lan
 ## Features
 
 - Continuous screen capture (a display, a single window or a single application), hardware H.264 encoding, a 15–120 second buffer in memory.
-- Save the last N seconds as an mp4 with a global shortcut (default ⌃⌥⌘R) or from the menu; capture keeps running while the clip is written.
-- System audio and microphone, each with its own level. Mixed into one audio track by default; can be split into separate tracks in Settings.
+- Save the last N seconds as an mp4 with a global shortcut (default ⌃⌥⌘R) or from the menu; capture keeps running while the clip is written. Clips are filed by game: `Clips/<app in front>/` under the save folder.
+- Record for as long as you like with Start/Stop Recording (menu, sidebar or a shortcut you assign in Settings). Recordings go to `Videos/`, are written straight to disk in fragments so a crash does not lose them, and the replay buffer keeps working meanwhile.
+- System audio and microphone, each with its own level. Every file gets a mixed audio track that all players use; game audio and microphone are also stored as separate, disabled tracks so their balance can be changed later (can be turned off in Settings).
 - A system notification when a clip is saved or something goes wrong (the notification reveals the clip in Finder), plus a small on-screen message in a corner of the screen for a few seconds. The message never ends up in clips and also shows above full screen games; its corner is chosen in Settings (default top left) and it can be turned off.
 - System notifications (banners) and ClipApp's own window stay out of clips while a display is captured.
-- A clip library: thumbnails of everything in the save folder, newest first, with rename, reveal in Finder, copy and move to Trash. Double-click a clip to play it.
-- Trimming: pick a range under the player and save it as a new file next to the original, either as an instant lossless copy or re-encoded to exactly the selected range.
+- A clip library: thumbnails grouped by game in the sidebar, newest first, with rename, move to another game, reveal in Finder, copy and move to Trash, for one clip or a selection (⌘-click, ⇧-click, ⌘A). Double-click a clip to play it.
+- Editing: pick a range under the player and set the level of game audio and microphone separately (0–150 %, or mute) while listening. Save as a new file or over the original; the video is copied losslessly, or re-encoded to exactly the selected range.
 - Settings: buffer length, resolution, FPS, bitrate, source, audio, save folder, file name format, launch at login, language (English or Turkish).
 
 ## Requirements
@@ -64,9 +65,9 @@ English is the default, regardless of the system language. Turkish can be select
 
 - To keep notifications out of clips, Notification Center is excluded from capture; desktop widgets belong to it too, so they do not appear in display clips. With a single window or application as the source, only that application is captured anyway.
 - The global shortcut may not work in games that run in exclusive fullscreen. Use borderless or windowed mode in the game's display settings.
-- With separate audio tracks, QuickTime plays both together; VLC, browsers and Discord only play the first one (system audio).
+- The separate game audio and microphone tracks are marked disabled, so players use the mixed track; a player that ignores that flag and plays every track at once would play the audio doubled.
 - On content that is very hard to compress (heavy noise, grainy footage) the encoder overshoots the target bitrate. Memory is capped at buffer length × bitrate × 3; once the cap is hit, clips come out shorter than configured and the menu shows an info line.
-- If microphone and system audio arrive at different sample rates they cannot be mixed and are written as separate tracks.
+- If microphone and system audio arrive at different sample rates they cannot be mixed and are written as two ordinary tracks; such a clip cannot be re-balanced in the editor.
 
 ## Troubleshooting
 
