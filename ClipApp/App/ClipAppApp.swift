@@ -25,29 +25,33 @@ struct ClipAppApp: App {
                 )
             }
         } label: {
-            MenuBarLabel(controller: appDelegate.controller)
+            MenuBarLabel(
+                controller: appDelegate.controller,
+                capture: appDelegate.controller.capture,
+                permissions: appDelegate.permissions
+            )
         }
     }
 }
 
-/// The menu bar icon; red with a running time while a recording is going.
+/// The menu bar icon, and nothing else: normal while capturing, with a red
+/// dot while a recording runs, faded when capture is off or not permitted.
 private struct MenuBarLabel: View {
     @ObservedObject var controller: ClipController
-
-    private static let recordingIcon: NSImage = {
-        let image = NSImage(systemSymbolName: "record.circle.fill", accessibilityDescription: nil)?
-            .withSymbolConfiguration(NSImage.SymbolConfiguration(paletteColors: [.systemRed])) ?? NSImage()
-        // A template image would be drawn in the menu bar's own color.
-        image.isTemplate = false
-        return image
-    }()
+    @ObservedObject var capture: CaptureManager
+    @ObservedObject var permissions: PermissionManager
 
     var body: some View {
-        if let seconds = controller.recordingSeconds {
-            Image(nsImage: Self.recordingIcon)
-            Text(verbatim: ClipFormat.duration(TimeInterval(seconds)))
-        } else {
-            Image(systemName: "record.circle")
+        Image(nsImage: icon)
+            .accessibilityLabel(Text(verbatim: "ClipApp"))
+    }
+
+    private var icon: NSImage {
+        if controller.isRecording { return MenuBarIcon.shared.recording }
+        guard permissions.screenRecordingGranted else { return MenuBarIcon.shared.dimmed }
+        switch capture.state {
+        case .running, .starting: return MenuBarIcon.shared.normal
+        case .idle, .failed, .permissionDenied: return MenuBarIcon.shared.dimmed
         }
     }
 }
