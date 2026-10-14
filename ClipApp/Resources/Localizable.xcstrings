@@ -134,6 +134,16 @@
         }
       }
     },
+    "Cancel" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vazgeç"
+          }
+        }
+      }
+    },
     "Capture error, retrying" : {
       "localizations" : {
         "tr" : {
@@ -337,12 +347,42 @@
         }
       }
     },
+    "Copy File" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dosyayı Kopyala"
+          }
+        }
+      }
+    },
     "Couldn't create the video track" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Video track'i oluşturulamadı"
+          }
+        }
+      }
+    },
+    "Couldn't move the clip to the Trash" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip Çöp Sepetine taşınamadı"
+          }
+        }
+      }
+    },
+    "Couldn't rename the clip" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip yeniden adlandırılamadı"
           }
         }
       }
@@ -607,6 +647,26 @@
         }
       }
     },
+    "Move to Trash" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çöp Sepetine Taşı"
+          }
+        }
+      }
+    },
+    "Name" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ad"
+          }
+        }
+      }
+    },
     "Native" : {
       "localizations" : {
         "tr" : {
@@ -693,6 +753,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bildirimler"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tamam"
           }
         }
       }
@@ -797,6 +867,36 @@
         }
       }
     },
+    "Rename" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeniden Adlandır"
+          }
+        }
+      }
+    },
+    "Rename Clip" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klibi Yeniden Adlandır"
+          }
+        }
+      }
+    },
+    "Rename…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeniden Adlandır…"
+          }
+        }
+      }
+    },
     "Required. To capture the screen and keep the last seconds in memory." : {
       "localizations" : {
         "tr" : {
@@ -843,6 +943,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yeniden deneniyor: %@"
+          }
+        }
+      }
+    },
+    "Reveal in Finder" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finder'da Göster"
           }
         }
       }

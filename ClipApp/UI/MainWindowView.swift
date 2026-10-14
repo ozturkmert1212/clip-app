@@ -32,6 +32,7 @@ struct MainWindowView: View {
     let permissions: PermissionManager
     let controller: ClipController
     let capture: CaptureManager
+    let library: ClipLibrary
 
     var body: some View {
         HStack(spacing: 0) {
@@ -59,7 +60,7 @@ struct MainWindowView: View {
             Group {
                 switch navigation.tab {
                 case .clips:
-                    ClipsView()
+                    ClipsView(library: library)
                 case .settings:
                     SettingsView(settings: settings, permissions: permissions, capture: capture)
                 }

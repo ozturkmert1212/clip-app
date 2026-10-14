@@ -13,6 +13,8 @@ final class WindowManager: NSObject, NSWindowDelegate {
     private let permissions: PermissionManager
     private let controller: ClipController
     private var windows: [String: NSWindow] = [:]
+    /// Starts watching the save folder the first time the window is shown.
+    private lazy var library = ClipLibrary(settings: settings, controller: controller)
 
     init(settings: SettingsStore, permissions: PermissionManager, controller: ClipController) {
         self.settings = settings
@@ -41,7 +43,8 @@ final class WindowManager: NSObject, NSWindowDelegate {
             settings: settings,
             permissions: permissions,
             controller: controller,
-            capture: controller.capture
+            capture: controller.capture,
+            library: library
         ))
         // The window, not the content, decides the size.
         hosting.sizingOptions = []
