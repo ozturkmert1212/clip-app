@@ -347,6 +347,16 @@
         }
       }
     },
+    "Clips are moved into this game's folder. A new name creates a new game." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klipler bu oyunun klasörüne taşınır. Yeni bir ad yeni bir oyun oluşturur."
+          }
+        }
+      }
+    },
     "Copies the video as it is: instant and lossless. Because a cut can only start on a keyframe (every 2 s), the file keeps up to 2 s of hidden footage before the start; most players skip it." : {
       "localizations" : {
         "tr" : {
@@ -373,6 +383,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Video track'i oluşturulamadı"
+          }
+        }
+      }
+    },
+    "Couldn't move the clip" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip taşınamadı"
           }
         }
       }
@@ -567,6 +587,16 @@
         }
       }
     },
+    "Game" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oyun"
+          }
+        }
+      }
+    },
     "General" : {
       "localizations" : {
         "tr" : {
@@ -703,6 +733,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sesleri tek track'te birleştir"
+          }
+        }
+      }
+    },
+    "Move" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taşı"
+          }
+        }
+      }
+    },
+    "Move to Game" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oyuna Taşı"
+          }
+        }
+      }
+    },
+    "Move to Game…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oyuna Taşı…"
           }
         }
       }

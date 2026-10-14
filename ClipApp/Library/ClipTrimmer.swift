@@ -132,6 +132,8 @@ enum ClipTrimmer {
         let reader = try AVAssetReader(asset: asset)
         reader.timeRange = range
         let writer = try AVAssetWriter(outputURL: output, fileType: .mp4)
+        // Carries the clip's own record (game, time) over, see `ClipInfo`.
+        writer.metadata = try await asset.load(.metadata)
 
         var compression: [String: Any] = [
             AVVideoAverageBitRateKey: Int(dataRate),

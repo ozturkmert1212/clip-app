@@ -17,7 +17,7 @@ final class WindowManager: NSObject, NSWindowDelegate {
     private let controller: ClipController
     private var windows: [String: NSWindow] = [:]
     /// Starts watching the save folder the first time the window is shown.
-    private lazy var library = ClipLibrary(settings: settings, controller: controller)
+    private lazy var library = ClipLibrary(settings: settings)
     private var cancellables: Set<AnyCancellable> = []
 
     init(settings: SettingsStore, permissions: PermissionManager, controller: ClipController) {

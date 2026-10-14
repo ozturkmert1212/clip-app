@@ -168,13 +168,16 @@ final class ClipController: ObservableObject {
         }
         var sourceName = AppLanguage.string("Display")
         if case .running(let source, _, _, _) = capture.state { sourceName = source }
-        let directory = settings.saveDirectory
+        // Filed under whatever is in front right now, not when the write finishes.
+        let game = GameContext.current()
+        let directory = settings.clipsDirectory.appendingPathComponent(game.name, isDirectory: true)
+        let info = ClipInfo(game: game.name, bundleID: game.bundleID, recorded: Date())
         let name = settings.clipFileName(source: sourceName)
         let mixAudio = settings.mixAudioTracks
         isSaving = true
         Task {
             do {
-                finish(.saved(try await ClipWriter.write(snapshot, to: directory, name: name, mixAudio: mixAudio)))
+                finish(.saved(try await ClipWriter.write(snapshot, to: directory, name: name, mixAudio: mixAudio, info: info)))
             } catch {
                 finish(.failed(error.localizedDescription))
             }

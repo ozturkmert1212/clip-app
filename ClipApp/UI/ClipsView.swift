@@ -7,49 +7,40 @@ struct ClipsView: View {
     @State private var playing: ClipItem?
     @State private var renaming: ClipItem?
     @State private var newName = ""
-    @State private var failure: Failure?
+    @State private var moving: [ClipItem] = []
+    @State private var gameName = ""
+    @State private var failure: ClipFailure?
 
-    private struct Failure {
-        let title: String
-        let message: String
-    }
 
     var body: some View {
-        Group {
-            if let playing {
-                ClipPlayerView(clip: playing, onTrimmed: library.refresh) { self.playing = nil }
-                    .id(playing.url)
-            } else if !library.isLoaded {
-                ProgressView()
-            } else if library.clips.isEmpty {
-                emptyState
-            } else {
-                grid
+        content
+            // A clip deleted or renamed behind the player's back closes it.
+            .onChange(of: library.items) { items in
+                if let playing, !items.contains(where: { $0.url == playing.url }) { self.playing = nil }
             }
-        }
-        // A clip deleted or renamed behind the player's back closes it.
-        .onChange(of: library.clips) { clips in
-            if let playing, !clips.contains(where: { $0.url == playing.url }) { self.playing = nil }
-        }
-        .alert("Rename Clip", isPresented: Binding(get: { renaming != nil }, set: { if !$0 { renaming = nil } })) {
-            TextField("Name", text: $newName)
-            Button("Rename", action: commitRename)
-            Button("Cancel", role: .cancel) {}
-        }
-        .alert(
-            failure?.title ?? "",
-            isPresented: Binding(get: { failure != nil }, set: { if !$0 { failure = nil } })
-        ) {
-            Button("OK") {}
-        } message: {
-            Text(verbatim: failure?.message ?? "")
+            .modifier(RenameAlert(clip: $renaming, name: $newName, commit: commitRename))
+            .modifier(MoveAlert(clips: $moving, game: $gameName, commit: commitMove))
+            .modifier(FailureAlert(failure: $failure))
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if let playing {
+            ClipPlayerView(clip: playing, onTrimmed: library.refresh) { self.playing = nil }
+                .id(playing.url)
+        } else if !library.isLoaded {
+            ProgressView()
+        } else if library.items.isEmpty {
+            emptyState
+        } else {
+            grid
         }
     }
 
     private var grid: some View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 210, maximum: 340), spacing: 12)], spacing: 12) {
-                ForEach(library.clips) { clip in
+                ForEach(library.items) { clip in
                     ClipCard(clip: clip, isSelected: selection == clip.url) {
                         actions(for: clip)
                     }
@@ -85,15 +76,29 @@ struct ClipsView: View {
             newName = clip.name
             renaming = clip
         }
-        Button("Reveal in Finder") { library.reveal(clip) }
-        Button("Copy File") { library.copy(clip) }
+        if clip.category != .video {
+            Button("Move to Game…") {
+                if case .game(let name) = clip.category { gameName = name } else { gameName = "" }
+                moving = [clip]
+            }
+        }
+        Button("Reveal in Finder") { library.reveal([clip]) }
+        Button("Copy File") { library.copy([clip]) }
         Divider()
         Button("Move to Trash", role: .destructive) {
             do {
-                try library.trash(clip)
+                try library.trash([clip])
             } catch {
-                failure = Failure(title: AppLanguage.string("Couldn't move the clip to the Trash"), message: error.localizedDescription)
+                failure = ClipFailure(title: AppLanguage.string("Couldn't move the clip to the Trash"), message: error.localizedDescription)
             }
+        }
+    }
+
+    private func commitMove() {
+        do {
+            try library.move(moving, toGame: gameName)
+        } catch {
+            failure = ClipFailure(title: AppLanguage.string("Couldn't move the clip"), message: error.localizedDescription)
         }
     }
 
@@ -102,7 +107,57 @@ struct ClipsView: View {
         do {
             try library.rename(clip, to: newName)
         } catch {
-            failure = Failure(title: AppLanguage.string("Couldn't rename the clip"), message: error.localizedDescription)
+            failure = ClipFailure(title: AppLanguage.string("Couldn't rename the clip"), message: error.localizedDescription)
+        }
+    }
+}
+
+struct ClipFailure {
+    let title: String
+    let message: String
+}
+
+private struct RenameAlert: ViewModifier {
+    @Binding var clip: ClipItem?
+    @Binding var name: String
+    let commit: () -> Void
+
+    func body(content: Content) -> some View {
+        content.alert("Rename Clip", isPresented: Binding(get: { clip != nil }, set: { if !$0 { clip = nil } })) {
+            TextField("Name", text: $name)
+            Button("Rename", action: commit)
+            Button("Cancel", role: .cancel) {}
+        }
+    }
+}
+
+private struct MoveAlert: ViewModifier {
+    @Binding var clips: [ClipItem]
+    @Binding var game: String
+    let commit: () -> Void
+
+    func body(content: Content) -> some View {
+        content.alert("Move to Game", isPresented: Binding(get: { !clips.isEmpty }, set: { if !$0 { clips = [] } })) {
+            TextField("Game", text: $game)
+            Button("Move", action: commit)
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Clips are moved into this game's folder. A new name creates a new game.")
+        }
+    }
+}
+
+private struct FailureAlert: ViewModifier {
+    @Binding var failure: ClipFailure?
+
+    func body(content: Content) -> some View {
+        content.alert(
+            failure?.title ?? "",
+            isPresented: Binding(get: { failure != nil }, set: { if !$0 { failure = nil } })
+        ) {
+            Button("OK") {}
+        } message: {
+            Text(verbatim: failure?.message ?? "")
         }
     }
 }

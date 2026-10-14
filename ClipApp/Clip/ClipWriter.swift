@@ -24,11 +24,13 @@ enum ClipWriter {
     private static let queue = DispatchQueue(label: "com.mertozturk.ClipApp.clipwriter", qos: .userInitiated)
 
     /// `mixAudio` puts all audio sources into one track instead of one each.
+    /// `info` is stored in the file, see `ClipInfo`.
     static func write(
         _ snapshot: RingBuffer.Snapshot,
         to directory: URL,
         name: String,
-        mixAudio: Bool
+        mixAudio: Bool,
+        info: ClipInfo
     ) async throws -> URL {
         guard let first = snapshot.video.first, let format = first.formatDescription else {
             throw WriteError.emptyBuffer
@@ -52,6 +54,7 @@ enum ClipWriter {
             throw WriteError.writerFailed(error)
         }
         writer.shouldOptimizeForNetworkUse = true
+        writer.metadata = info.metadataItems
         let input = AVAssetWriterInput(mediaType: .video, outputSettings: nil, sourceFormatHint: format)
         input.expectsMediaDataInRealTime = false
         guard writer.canAdd(input) else { throw WriteError.cannotAddInput }
