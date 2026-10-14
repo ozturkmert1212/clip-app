@@ -149,6 +149,10 @@ struct SettingsView: View {
                 Text("Appears in the chosen corner for a few seconds when a clip is saved or something goes wrong; it never ends up in clips. A system notification is sent as well.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                Toggle("Show ClipApp in recordings", isOn: $settings.showClipAppInCaptures)
+                Text("ClipApp's own windows and menu appear in clips and recordings. The brief on-screen message never does.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 Toggle("Open window at launch", isOn: $settings.openWindowAtLaunch)
                 Toggle("Launch at login", isOn: Binding(
                     get: { settings.launchAtLogin },

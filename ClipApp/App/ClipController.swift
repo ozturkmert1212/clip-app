@@ -48,6 +48,7 @@ final class ClipController: ObservableObject {
     private let notifier = Notifier()
     private let games = GameTracker()
     private let hud = HUD()
+    private let windowSharing: WindowSharing
     private let logger = Logger(subsystem: "com.mertozturk.ClipApp", category: "clip")
     private var outageTask: Task<Void, Never>?
     private var reportedFallback = false
@@ -85,6 +86,7 @@ final class ClipController: ObservableObject {
             onAudioSample: { systemAudio.process($0) }
         )
         microphone = MicrophoneCapture { microphoneAudio.process($0, at: $1) }
+        windowSharing = WindowSharing(neverShared: [hud.windowID])
         capture.excludedWindowIDs = [hud.windowID]
         applySettings()
         hotkeys = HotkeyManager(
@@ -181,6 +183,9 @@ final class ClipController: ObservableObject {
         if let appliedSource, appliedSource != settings.source { ringBuffer.reset() }
         appliedSource = settings.source
         capture.configuration = settings.captureConfiguration
+        // Applied to the running stream in place, the buffer stays.
+        capture.showsClipApp = settings.showClipAppInCaptures
+        windowSharing.setShareable(settings.showClipAppInCaptures)
         // The source list holds finished titles.
         if appliedLanguage != settings.language {
             appliedLanguage = settings.language

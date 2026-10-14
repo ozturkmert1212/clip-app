@@ -73,6 +73,12 @@ final class SettingsStore: ObservableObject {
     @Published var showHUD: Bool { didSet { defaults.set(showHUD, forKey: Key.showHUD) } }
     @Published var hudCorner: HUD.Corner { didSet { defaults.set(hudCorner.rawValue, forKey: Key.hudCorner) } }
 
+    /// Whether ClipApp's own windows and menus show up in clips and
+    /// recordings; the HUD never does. See `CapturePrivacy`.
+    @Published var showClipAppInCaptures: Bool {
+        didSet { defaults.set(showClipAppInCaptures, forKey: CapturePrivacy.showsClipAppKey) }
+    }
+
     /// Whether the main window comes up at launch. A launch as a login item
     /// never opens it.
     @Published var openWindowAtLaunch: Bool { didSet { defaults.set(openWindowAtLaunch, forKey: Key.openWindowAtLaunch) } }
@@ -136,6 +142,7 @@ final class SettingsStore: ObservableObject {
                 .appendingPathComponent("ClipApp", isDirectory: true)
         showHUD = defaults.object(forKey: Key.showHUD) as? Bool ?? true
         hudCorner = defaults.string(forKey: Key.hudCorner).flatMap(HUD.Corner.init) ?? .topLeft
+        showClipAppInCaptures = CapturePrivacy.storedShowsClipApp(in: defaults)
         openWindowAtLaunch = defaults.object(forKey: Key.openWindowAtLaunch) as? Bool ?? true
         editSaveMode = defaults.string(forKey: Key.editSaveMode).flatMap(EditSaveMode.init) ?? .ask
         language = AppLanguage.selected

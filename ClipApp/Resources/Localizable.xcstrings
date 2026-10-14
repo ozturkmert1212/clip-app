@@ -364,6 +364,16 @@
         }
       }
     },
+    "ClipApp's own windows and menu appear in clips and recordings. The brief on-screen message never does." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ClipApp'in kendi pencereleri ve menüsü kliplerde ve kayıtlarda görünür. Kısa ekran mesajı hiçbir zaman görünmez."
+          }
+        }
+      }
+    },
     "Clips" : {
       "localizations" : {
         "tr" : {
@@ -1540,6 +1550,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ayarlar…"
+          }
+        }
+      }
+    },
+    "Show ClipApp in recordings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıtlarda ClipApp'i göster"
           }
         }
       }

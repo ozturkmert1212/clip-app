@@ -57,8 +57,10 @@ final class HUD {
         // Above full screen games, and on whichever Space is showing.
         panel.level = .screenSaver
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]
-        // Belt and braces: capture also excludes the panel by window ID, which
-        // is the part to rely on with ScreenCaptureKit.
+        // Never shared, whatever `showClipAppInCaptures` says (`WindowSharing`
+        // leaves this panel alone). Belt and braces: the capture filter is the
+        // part to rely on with ScreenCaptureKit, and it always excludes the
+        // panel, as part of ClipApp or by window ID.
         panel.sharingType = .none
         panel.contentView = hosting
     }
