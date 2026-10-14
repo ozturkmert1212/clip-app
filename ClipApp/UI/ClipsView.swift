@@ -6,7 +6,9 @@ struct ClipsView: View {
     /// The sidebar row this list belongs to; never `.settings`.
     let filter: SidebarItem
 
-    @State private var selection: URL?
+    @State private var selection: Set<URL> = []
+    /// Where a Shift-click range starts: the clip clicked last without Shift.
+    @State private var anchor: URL?
     @State private var playing: ClipItem?
     /// Bumped when the open clip was replaced on disk, to load it afresh.
     @State private var playerGeneration = 0
@@ -19,11 +21,15 @@ struct ClipsView: View {
 
     var body: some View {
         content
-            .onChange(of: filter) { _ in playing = nil }
+            .onChange(of: filter) { _ in
+                playing = nil
+                selection = []
+            }
             .onChange(of: playing?.url) { _ in playerGeneration = 0 }
             // A clip deleted or renamed behind the player's back closes it.
             .onChange(of: library.items) { items in
                 if let playing, !items.contains(where: { $0.url == playing.url }) { self.playing = nil }
+                selection.formIntersection(items.map(\.url))
             }
             .modifier(RenameAlert(clip: $renaming, name: $newName, commit: commitRename))
             .modifier(MoveAlert(clips: $moving, game: $gameName, commit: commitMove))
@@ -50,19 +56,80 @@ struct ClipsView: View {
     }
 
     private var grid: some View {
-        ScrollView {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 210, maximum: 340), spacing: 12)], spacing: 12) {
-                ForEach(shown) { clip in
-                    ClipCard(clip: clip, showsGame: filter == .allClips, isSelected: selection == clip.url) {
-                        actions(for: clip)
-                    }
-                    .onTapGesture { selection = clip.url }
-                    .simultaneousGesture(TapGesture(count: 2).onEnded { playing = clip })
-                    .contextMenu { actions(for: clip) }
-                }
+        VStack(spacing: 0) {
+            if !selection.isEmpty {
+                selectionBar
+                Divider()
             }
-            .padding(16)
+            ScrollView {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 210, maximum: 340), spacing: 12)], spacing: 12) {
+                    ForEach(shown) { clip in
+                        ClipCard(clip: clip, showsGame: filter == .allClips, isSelected: selection.contains(clip.url)) {
+                            actions(for: clip)
+                        }
+                        .onTapGesture { select(clip) }
+                        .simultaneousGesture(TapGesture(count: 2).onEnded { playing = clip })
+                        .contextMenu { actions(for: clip) }
+                    }
+                }
+                .padding(16)
+            }
         }
+        // Command-A, both as the Edit menu's Select All and as a plain shortcut.
+        .onCommand(#selector(NSText.selectAll(_:))) { selectAll() }
+        .background {
+            Button("Select All", action: selectAll)
+                .keyboardShortcut("a", modifiers: .command)
+                .opacity(0)
+                .allowsHitTesting(false)
+        }
+    }
+
+    /// How many clips are selected and what can be done with all of them.
+    private var selectionBar: some View {
+        let clips = selected
+        return HStack(spacing: 10) {
+            Text("\(clips.count) selected")
+                .font(.callout.weight(.medium))
+                .monospacedDigit()
+            Spacer()
+            if filter != .videos {
+                Button("Move to Game…") { beginMove(clips) }
+            }
+            Button("Reveal in Finder") { library.reveal(clips) }
+            Button(clips.count > 1 ? "Copy Files" : "Copy File") { library.copy(clips) }
+            Button("Move to Trash", role: .destructive) { trash(clips) }
+            Button("Deselect") { selection = [] }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+    }
+
+    /// The selected clips in the order they are listed.
+    private var selected: [ClipItem] {
+        shown.filter { selection.contains($0.url) }
+    }
+
+    /// A plain click selects one clip, Command adds or removes one, Shift
+    /// extends from the last plainly clicked clip.
+    private func select(_ clip: ClipItem) {
+        let modifiers = NSEvent.modifierFlags
+        if modifiers.contains(.command) {
+            selection.formSymmetricDifference([clip.url])
+            anchor = clip.url
+        } else if modifiers.contains(.shift), let anchor,
+                  let from = shown.firstIndex(where: { $0.url == anchor }),
+                  let to = shown.firstIndex(where: { $0.url == clip.url }) {
+            selection = Set(shown[min(from, to)...max(from, to)].map(\.url))
+        } else {
+            selection = [clip.url]
+            anchor = clip.url
+        }
+    }
+
+    private func selectAll() {
+        guard playing == nil else { return }
+        selection = Set(shown.map(\.url))
     }
 
     private var shown: [ClipItem] {
@@ -91,29 +158,47 @@ struct ClipsView: View {
         .padding()
     }
 
+    /// For a clip that is part of a larger selection the menu acts on all of
+    /// it; otherwise on that clip alone.
     @ViewBuilder
     private func actions(for clip: ClipItem) -> some View {
-        Button("Play") { playing = clip }
-        Divider()
-        Button("Rename…") {
-            newName = clip.name
-            renaming = clip
-        }
-        if clip.category != .video {
-            Button("Move to Game…") {
-                if case .game(let name) = clip.category { gameName = name } else { gameName = "" }
-                moving = [clip]
+        let targets = selection.contains(clip.url) && selection.count > 1 ? selected : [clip]
+        if targets.count == 1 {
+            Button("Play") { playing = clip }
+            Divider()
+            Button("Rename…") {
+                newName = clip.name
+                renaming = clip
             }
+        } else {
+            Text("\(targets.count) selected")
         }
-        Button("Reveal in Finder") { library.reveal([clip]) }
-        Button("Copy File") { library.copy([clip]) }
+        if targets.contains(where: { $0.category != .video }) {
+            Button("Move to Game…") { beginMove(targets) }
+        }
+        Button("Reveal in Finder") { library.reveal(targets) }
+        Button(targets.count > 1 ? "Copy Files" : "Copy File") { library.copy(targets) }
         Divider()
-        Button("Move to Trash", role: .destructive) {
-            do {
-                try library.trash([clip])
-            } catch {
-                failure = ClipFailure(title: AppLanguage.string("Couldn't move the clip to the Trash"), message: error.localizedDescription)
-            }
+        Button("Move to Trash", role: .destructive) { trash(targets) }
+    }
+
+    private func beginMove(_ clips: [ClipItem]) {
+        // Starts from the game the clips are in, if they share one.
+        let games = Set(clips.map(\.category))
+        if games.count == 1, case .game(let name) = clips[0].category { gameName = name } else { gameName = "" }
+        moving = clips
+    }
+
+    private func trash(_ clips: [ClipItem]) {
+        do {
+            try library.trash(clips)
+        } catch {
+            failure = ClipFailure(
+                title: clips.count > 1
+                    ? AppLanguage.string("Couldn't move the clips to the Trash")
+                    : AppLanguage.string("Couldn't move the clip to the Trash"),
+                message: error.localizedDescription
+            )
         }
     }
 

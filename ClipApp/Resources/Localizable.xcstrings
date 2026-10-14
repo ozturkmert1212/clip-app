@@ -14,6 +14,16 @@
         }
       }
     },
+    "%lld selected" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld seçili"
+          }
+        }
+      }
+    },
     "%lld%%" : {
       "localizations" : {
         "tr" : {
@@ -414,6 +424,16 @@
         }
       }
     },
+    "Copy Files" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dosyaları Kopyala"
+          }
+        }
+      }
+    },
     "Couldn't create the video track" : {
       "localizations" : {
         "tr" : {
@@ -440,6 +460,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Klip Çöp Sepetine taşınamadı"
+          }
+        }
+      }
+    },
+    "Couldn't move the clips to the Trash" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klipler Çöp Sepetine taşınamadı"
           }
         }
       }
@@ -520,6 +550,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kırpılmış klip yazılamadı"
+          }
+        }
+      }
+    },
+    "Deselect" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seçimi Kaldır"
           }
         }
       }
@@ -1470,6 +1510,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ekran kaydı izni gerekli"
+          }
+        }
+      }
+    },
+    "Select All" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tümünü Seç"
           }
         }
       }
