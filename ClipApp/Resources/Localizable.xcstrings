@@ -174,16 +174,6 @@
         }
       }
     },
-    "Buffer: %lld of %lld s" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tampon: %lld / %lld sn"
-          }
-        }
-      }
-    },
     "Can't write to the save folder: %@" : {
       "localizations" : {
         "tr" : {
@@ -284,16 +274,6 @@
         }
       }
     },
-    "Capturing · %@" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yakalanıyor · %@"
-          }
-        }
-      }
-    },
     "Changing the source restarts capture and clears the replay buffer." : {
       "localizations" : {
         "tr" : {
@@ -370,6 +350,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ClipApp'in kendi pencereleri ve menüsü kliplerde ve kayıtlarda görünür. Kısa ekran mesajı hiçbir zaman görünmez."
+          }
+        }
+      }
+    },
+    "Clipping is off" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip alma kapalı"
+          }
+        }
+      }
+    },
+    "Clipping off" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip alma kapalı"
+          }
+        }
+      }
+    },
+    "Clipping · %@ · %lld s buffered" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip alma · %@ · tamponda %lld sn"
           }
         }
       }
@@ -1134,6 +1144,16 @@
         }
       }
     },
+    "Press Start Clipping first" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önce Klip Almayı Başlat'a bas"
+          }
+        }
+      }
+    },
     "Quit ClipApp" : {
       "localizations" : {
         "tr" : {
@@ -1604,6 +1624,16 @@
         }
       }
     },
+    "Start Clipping" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip Almayı Başlat"
+          }
+        }
+      }
+    },
     "Start Recording" : {
       "localizations" : {
         "tr" : {
@@ -1620,6 +1650,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yakalama başlatılıyor…"
+          }
+        }
+      }
+    },
+    "Stop Clipping" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip Almayı Durdur"
           }
         }
       }

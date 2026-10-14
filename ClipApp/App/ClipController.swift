@@ -21,6 +21,11 @@ final class ClipController: ObservableObject {
     @Published private(set) var bufferedSeconds = 0
     /// How long the running recording has been going; `nil` when there is none.
     @Published private(set) var recordingSeconds: Int?
+    /// Set while a recording waits for the stream to deliver its first frames.
+    @Published private(set) var isStartingRecording = false
+    /// Whether clipping is on and a recording runs, which decides whether the
+    /// stream runs and the buffer fills. Changed only through `setActivity`.
+    @Published private(set) var activity = CaptureActivity()
 
     let capture: CaptureManager
 
@@ -38,8 +43,9 @@ final class ClipController: ObservableObject {
     private let microphoneAudio: AudioPipeline
     private let microphone: MicrophoneCapture
     private var hotkeys: HotkeyManager?
-    /// Where the pipeline's output is copied to while a recording runs.
-    private let recording = RecordingTap()
+    /// Where the pipeline's output goes: the buffer while clipping, the
+    /// recording while one runs.
+    private let tap: PipelineTap
     private var recordingStart: Date?
     private var isEndingRecording = false
     private var askedForMicrophone = false
@@ -60,21 +66,13 @@ final class ClipController: ObservableObject {
             duration: TimeInterval(settings.bufferSeconds),
             byteLimit: settings.bufferByteLimit
         )
-        // The replay buffer keeps filling during a recording; the recording
-        // gets the same samples on the side.
-        let recording = self.recording
-        let encoder = EncoderPipeline(fps: settings.fps, bitrate: settings.bitrate) {
-            ringBuffer.append($0)
-            recording.writer?.appendVideo($0)
-        }
-        let systemAudio = AudioPipeline {
-            ringBuffer.append($0, to: .system)
-            recording.writer?.appendAudio($0, from: .system)
-        }
-        let microphoneAudio = AudioPipeline {
-            ringBuffer.append($0, to: .microphone)
-            recording.writer?.appendAudio($0, from: .microphone)
-        }
+        // The replay buffer keeps filling during a recording if clipping is
+        // on; the recording gets the same samples on the side.
+        let tap = PipelineTap(ringBuffer: ringBuffer)
+        let encoder = EncoderPipeline(fps: settings.fps, bitrate: settings.bitrate) { tap.video($0) }
+        let systemAudio = AudioPipeline { tap.audio($0, from: .system) }
+        let microphoneAudio = AudioPipeline { tap.audio($0, from: .microphone) }
+        self.tap = tap
         self.settings = settings
         self.permissions = permissions
         self.ringBuffer = ringBuffer
@@ -100,6 +98,14 @@ final class ClipController: ObservableObject {
             .merge(with: permissions.objectWillChange)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in self?.applySettings() }
+            .store(in: &cancellables)
+        // Granted while the stream is wanted (it normally takes a relaunch).
+        permissions.$screenRecordingGranted
+            .removeDuplicates()
+            .sink { [weak self] granted in
+                guard let self, granted, self.activity.streamRuns else { return }
+                self.capture.start()
+            }
             .store(in: &cancellables)
         Timer.publish(every: 1, on: .main, in: .common).autoconnect()
             .sink { [weak self] _ in
@@ -162,7 +168,11 @@ final class ClipController: ObservableObject {
                     identifier: "capture"
                 )
             }
-        case .idle, .starting:
+        case .idle:
+            // Stopped on purpose: whatever was failing no longer matters.
+            outageTask?.cancel()
+            outageTask = nil
+        case .starting:
             break
         }
     }
@@ -199,15 +209,89 @@ final class ClipController: ObservableObject {
             askedForMicrophone = true
             permissions.requestMicrophone()
         }
-        let microphoneOn = settings.microphoneEnabled && permissions.microphoneStatus == .granted
+        // Only while the stream runs, so a stopped app shows no microphone indicator either.
+        let microphoneOn = activity.streamRuns && microphoneWanted
         microphone.setEnabled(microphoneOn)
         // A source that was just switched off must not show up in the next clip.
         if !settings.systemAudioEnabled { ringBuffer.removeAudio(.system) }
         if !microphoneOn { ringBuffer.removeAudio(.microphone) }
     }
 
+    private var microphoneWanted: Bool {
+        settings.microphoneEnabled && permissions.microphoneStatus == .granted
+    }
+
+    // MARK: - Clipping
+
+    var isClipping: Bool { activity.isClipping }
+
+    /// Starts the stream (unless a recording already runs it) and the buffer.
+    /// Without the permission it asks for it, the first time, and shows
+    /// Settings, where it is granted.
+    func startClipping() {
+        guard !activity.isClipping else { return }
+        guard permissions.screenRecordingGranted else {
+            logger.notice("Start clipping: no Screen Recording permission")
+            if !permissions.screenRecordingRequested { permissions.requestScreenRecording() }
+            onOpenSettings()
+            return
+        }
+        var next = activity
+        next.isClipping = true
+        setActivity(next)
+    }
+
+    /// Empties the buffer; the stream stops unless a recording runs.
+    func stopClipping() {
+        guard activity.isClipping else { return }
+        var next = activity
+        next.isClipping = false
+        setActivity(next)
+    }
+
+    private func setRecordingActivity(_ isRecording: Bool) {
+        var next = activity
+        next.isRecording = isRecording
+        setActivity(next)
+    }
+
+    private func setActivity(_ next: CaptureActivity) {
+        let effects = activity.effects(to: next)
+        activity = next
+        for effect in effects {
+            switch effect {
+            case .clearBuffer: tap.setBuffering(false)
+            case .fillBuffer: tap.setBuffering(true)
+            case .startStream:
+                // Formats from an earlier stream say nothing about the next one.
+                tap.forgetFormats()
+                capture.start()
+            case .stopStream: capture.stop()
+            }
+        }
+        logger.notice("Clipping \(next.isClipping ? "on" : "off", privacy: .public), recording \(next.isRecording ? "on" : "off", privacy: .public), stream \(next.streamRuns ? "runs" : "stopped", privacy: .public)")
+        if !next.fillsBuffer {
+            bufferedSeconds = 0
+            byteLimitedSeconds = nil
+        }
+        // The microphone follows the stream.
+        applySettings()
+    }
+
     func saveClip() {
         guard !isSaving else { return }
+        // Nothing is kept while clipping is off; the shortcut only says so.
+        guard activity.canSaveClip else {
+            logger.notice("Save clip: clipping is off")
+            let title = AppLanguage.string("Clipping is off")
+            let detail = AppLanguage.string("Press Start Clipping first")
+            if settings.showHUD {
+                hud.show(.failure, title: title, detail: detail, in: settings.hudCorner)
+            } else {
+                notifier.show(title: title, body: detail, identifier: "clipFailed")
+            }
+            return
+        }
         // Without the permission the buffer is empty or holds stale footage.
         if capture.state == .permissionDenied || !permissions.screenRecordingGranted {
             isSaving = false
@@ -250,6 +334,7 @@ final class ClipController: ObservableObject {
     var isRecording: Bool { recordingSeconds != nil }
 
     func toggleRecording() {
+        guard !isStartingRecording else { return }
         if isRecording {
             Task { await stopRecording() }
         } else {
@@ -257,18 +342,56 @@ final class ClipController: ObservableObject {
         }
     }
 
+    /// With clipping off this starts the stream first and waits for what it
+    /// delivers, since the file is set up for the formats coming out of the
+    /// pipeline.
     func startRecording() {
-        guard !isRecording else { return }
-        let formats = ringBuffer.formats()
-        guard capture.state != .permissionDenied, permissions.screenRecordingGranted, let videoFormat = formats.video else {
-            let reason = permissions.screenRecordingGranted
+        guard !isRecording, !isStartingRecording else { return }
+        guard permissions.screenRecordingGranted else {
+            fail(title: AppLanguage.string("Couldn't start recording"), message: AppLanguage.string("No Screen Recording permission"), identifier: "recording")
+            return
+        }
+        isStartingRecording = true
+        setRecordingActivity(true)
+        Task {
+            let formats = await currentFormats()
+            isStartingRecording = false
+            guard activity.isRecording else { return }
+            beginRecording(with: formats)
+        }
+    }
+
+    /// The pipeline's formats once video is coming out, with a moment more
+    /// for the audio sources that are on: a stream that was just started
+    /// delivers its first audio a little after its first frame.
+    private func currentFormats() async -> PipelineTap.Formats {
+        let expected = Set(AudioTrack.allCases.filter { $0 == .system ? settings.systemAudioEnabled : microphoneWanted })
+        let start = Date()
+        var videoSince: Date?
+        while true {
+            let formats = tap.formats()
+            if formats.video != nil {
+                let since = videoSince ?? Date()
+                videoSince = since
+                if expected.isSubset(of: formats.audio.keys) || Date().timeIntervalSince(since) > 1 { return formats }
+            } else if Date().timeIntervalSince(start) > 5 || !activity.isRecording || capture.state == .permissionDenied {
+                return formats
+            }
+            try? await Task.sleep(nanoseconds: 50_000_000)
+        }
+    }
+
+    private func beginRecording(with formats: PipelineTap.Formats) {
+        guard let videoFormat = formats.video else {
+            setRecordingActivity(false)
+            let reason = permissions.screenRecordingGranted && capture.state != .permissionDenied
                 ? AppLanguage.string("Nothing has been captured yet")
                 : AppLanguage.string("No Screen Recording permission")
             fail(title: AppLanguage.string("Couldn't start recording"), message: reason, identifier: "recording")
             return
         }
         // Only the sources that are on, in the order of the tracks.
-        let microphoneOn = settings.microphoneEnabled && permissions.microphoneStatus == .granted
+        let microphoneOn = microphoneWanted
         let audioFormats = AudioTrack.allCases.compactMap { track -> (track: AudioTrack, format: CMAudioFormatDescription)? in
             guard track == .system ? settings.systemAudioEnabled : microphoneOn, let format = formats.audio[track] else { return nil }
             return (track, format)
@@ -287,8 +410,9 @@ final class ClipController: ObservableObject {
                 // The writer cannot go on; what it has is closed as the result.
                 Task { @MainActor in await self?.stopRecording() }
             }
-            recording.writer = writer
+            tap.writer = writer
         } catch {
+            setRecordingActivity(false)
             fail(title: AppLanguage.string("Couldn't start recording"), message: error.localizedDescription, identifier: "recording")
             return
         }
@@ -302,13 +426,15 @@ final class ClipController: ObservableObject {
 
     /// Returns once the file is closed.
     func stopRecording() async {
-        guard let writer = recording.writer, !isEndingRecording else { return }
+        guard let writer = tap.writer, !isEndingRecording else { return }
         isEndingRecording = true
-        recording.writer = nil
+        tap.writer = nil
         let outcome = await writer.finish(at: CMClockGetTime(CMClockGetHostTimeClock()))
         isEndingRecording = false
         recordingStart = nil
         recordingSeconds = nil
+        // With clipping off the stream was only running for the recording.
+        setRecordingActivity(false)
         if let url = outcome.url {
             logger.notice("Recording saved: \(url.path, privacy: .public)")
             notifier.saved(url, title: AppLanguage.string("Recording saved"))
@@ -355,10 +481,24 @@ final class ClipController: ObservableObject {
     }
 }
 
-/// The running recording, if any, as seen from the capture threads.
-private final class RecordingTap: @unchecked Sendable {
+/// Where the pipeline's samples go, as seen from the capture threads: the
+/// replay buffer while clipping is on, the recording while one runs. It also
+/// keeps the newest format of each, which is what a recording is set up for.
+private final class PipelineTap: @unchecked Sendable {
+    struct Formats {
+        var video: CMFormatDescription?
+        var audio: [AudioTrack: CMAudioFormatDescription] = [:]
+    }
+
     private let lock = NSLock()
+    private let ringBuffer: RingBuffer
+    private var buffering = false
     private var current: RecordingWriter?
+    private var latest = Formats()
+
+    init(ringBuffer: RingBuffer) {
+        self.ringBuffer = ringBuffer
+    }
 
     var writer: RecordingWriter? {
         get {
@@ -371,5 +511,42 @@ private final class RecordingTap: @unchecked Sendable {
             current = newValue
             lock.unlock()
         }
+    }
+
+    /// Off empties the buffer. Under the same lock as the appends, so no
+    /// sample that was on its way slips in after the reset.
+    func setBuffering(_ on: Bool) {
+        lock.lock()
+        defer { lock.unlock() }
+        buffering = on
+        if !on { ringBuffer.reset() }
+    }
+
+    func formats() -> Formats {
+        lock.lock()
+        defer { lock.unlock() }
+        return latest
+    }
+
+    func forgetFormats() {
+        lock.lock()
+        latest = Formats()
+        lock.unlock()
+    }
+
+    func video(_ sample: CMSampleBuffer) {
+        lock.lock()
+        defer { lock.unlock() }
+        latest.video = sample.formatDescription
+        if buffering { ringBuffer.append(sample) }
+        current?.appendVideo(sample)
+    }
+
+    func audio(_ sample: CMSampleBuffer, from track: AudioTrack) {
+        lock.lock()
+        defer { lock.unlock() }
+        latest.audio[track] = sample.formatDescription
+        if buffering { ringBuffer.append(sample, to: track) }
+        current?.appendAudio(sample, from: track)
     }
 }

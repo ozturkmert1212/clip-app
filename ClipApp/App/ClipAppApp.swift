@@ -1,4 +1,3 @@
-import Combine
 import SwiftUI
 
 /// The language has to be pinned before SwiftUI or AppKit load any string.
@@ -62,7 +61,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let settings: SettingsStore
     let controller: ClipController
     let windows: WindowManager
-    private var cancellables: Set<AnyCancellable> = []
 
     override init() {
         permissions = PermissionManager()
@@ -84,13 +82,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             // Started by the system at login, the app stays in the menu bar.
             windows.showMain(.allClips)
         }
-        // Capture starts as soon as the permission is there, including at launch.
-        permissions.$screenRecordingGranted
-            .removeDuplicates()
-            .sink { [controller] granted in
-                if granted { controller.capture.start() }
-            }
-            .store(in: &cancellables)
+        // Capture only starts when the user starts clipping or a recording.
     }
 
     /// A click on the Dock icon, or opening the app again while it runs.

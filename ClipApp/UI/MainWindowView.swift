@@ -266,8 +266,9 @@ struct GameIcon: View {
     }
 }
 
-/// Capture state, how much is buffered, and the two actions that are also
-/// on the shortcuts: saving a clip and starting or stopping a recording.
+/// Capture state, how much is buffered, and the actions that are also on
+/// the shortcuts: starting clipping or, once it is on, saving a clip and
+/// stopping it again; starting or stopping a recording.
 private struct CaptureStatusView: View {
     @ObservedObject var permissions: PermissionManager
     @ObservedObject var settings: SettingsStore
@@ -286,18 +287,15 @@ private struct CaptureStatusView: View {
                         .lineLimit(3)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                // During a recording the headline is the recording; the source moves down here.
+                // During a recording the headline is the recording; clipping moves down here.
                 if controller.isRecording {
                     Text(verbatim: captureText)
                         .font(.caption)
+                        .monospacedDigit()
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                Text("Buffer: \(controller.bufferedSeconds) of \(settings.bufferSeconds) s")
-                    .font(.caption)
-                    .monospacedDigit()
-                    .foregroundStyle(.secondary)
                 if let seconds = controller.byteLimitedSeconds {
                     Text("Memory cap active: content exceeds the target bitrate, keeping the last ~\(seconds) s")
                         .font(.caption)
@@ -305,18 +303,42 @@ private struct CaptureStatusView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            Button {
-                controller.saveClip()
-            } label: {
-                Text(controller.isSaving
-                     ? AppLanguage.string("Saving Clip…")
-                     : AppLanguage.string("Save Last \(settings.bufferSeconds) Seconds"))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-                    .frame(maxWidth: .infinity)
+            switch controller.activity.primaryAction {
+            case .startClipping:
+                Button {
+                    controller.startClipping()
+                } label: {
+                    Text("Start Clipping")
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(PrimaryButtonStyle())
+            case .saveClip:
+                HStack(spacing: Brand.Space.one) {
+                    Button {
+                        controller.saveClip()
+                    } label: {
+                        Text(controller.isSaving
+                             ? AppLanguage.string("Saving Clip…")
+                             : AppLanguage.string("Save Last \(settings.bufferSeconds) Seconds"))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(PrimaryButtonStyle())
+                    .disabled(controller.isSaving)
+                    // Secondary and small: the sidebar has no room for two titles side by side.
+                    Button {
+                        controller.stopClipping()
+                    } label: {
+                        Image(systemName: "stop.fill")
+                    }
+                    .buttonStyle(NeutralButtonStyle())
+                    .help(Text("Stop Clipping"))
+                    .accessibilityLabel(Text("Stop Clipping"))
+                }
             }
-            .buttonStyle(PrimaryButtonStyle())
-            .disabled(controller.isSaving)
             Button {
                 controller.toggleRecording()
             } label: {
@@ -338,6 +360,7 @@ private struct CaptureStatusView: View {
                 .frame(maxWidth: .infinity)
             }
             .buttonStyle(RecordingButtonStyle(isRecording: controller.isRecording))
+            .disabled(controller.isStartingRecording)
         }
         .padding([.horizontal, .bottom], Brand.Space.two - Brand.Space.half)
     }
@@ -363,6 +386,7 @@ private struct CaptureStatusView: View {
     private var status: Brand.Status {
         guard permissions.screenRecordingGranted else { return .problem }
         if controller.isRecording { return .recording }
+        guard controller.activity.streamRuns else { return .idle }
         switch capture.state {
         case .running: return .capturing
         case .starting, .idle: return .idle
@@ -379,10 +403,13 @@ private struct CaptureStatusView: View {
 
     private var captureText: String {
         guard permissions.screenRecordingGranted else { return AppLanguage.string("Screen Recording permission required") }
+        guard controller.activity.streamRuns else { return AppLanguage.string("Clipping off") }
         switch capture.state {
-        case .idle: return AppLanguage.string("Capture off")
-        case .starting: return AppLanguage.string("Starting capture…")
-        case .running(let source, _, _, _): return AppLanguage.string("Capturing · \(source)")
+        case .idle, .starting: return AppLanguage.string("Starting capture…")
+        case .running(let source, _, _, _):
+            return controller.isClipping
+                ? AppLanguage.string("Clipping · \(source) · \(controller.bufferedSeconds) s buffered")
+                : AppLanguage.string("Clipping off")
         case .failed: return AppLanguage.string("Capture error, retrying")
         case .permissionDenied: return AppLanguage.string("No Screen Recording permission, capture stopped")
         }
