@@ -167,6 +167,8 @@ struct SettingsView: View {
                         .foregroundStyle(.red)
                 }
             }
+
+            aboutSection
         }
         .formStyle(.grouped)
         .task { await reloadSources() }
@@ -181,6 +183,28 @@ struct SettingsView: View {
             Task { await reloadSources() }
         }
     }
+
+    private var aboutSection: some View {
+        Section("About") {
+            HStack(spacing: Brand.Space.two) {
+                Image(nsImage: NSApp.applicationIconImage)
+                    .resizable()
+                    .frame(width: 48, height: 48)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: Brand.Space.half) {
+                    Text(verbatim: "ClipApp")
+                        .font(.headline)
+                    Text("Version \(Self.version) (\(Self.build))")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(.vertical, Brand.Space.half)
+        }
+    }
+
+    private static let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
+    private static let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"
 
     @ViewBuilder
     private var sourceOptions: some View {

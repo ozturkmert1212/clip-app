@@ -145,20 +145,12 @@ struct ClipsView: View {
     }
 
     private var emptyState: some View {
-        VStack(spacing: 8) {
-            Image(systemName: filter == .videos ? "video" : "film.stack")
-                .font(.system(size: 40))
-                .foregroundStyle(.secondary)
-            Text(filter == .videos ? "No recordings yet" : "No clips yet")
-                .font(.title3)
-            Text(filter == .videos
-                 ? "Recordings appear here. Start one from the sidebar, the menu or with the recording shortcut."
-                 : "Saved clips appear here. Press the clip shortcut or use the save button to keep the last seconds.")
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: 360)
-        }
-        .padding()
+        EmptyStateView(
+            title: filter == .videos ? "No recordings yet" : "No clips yet",
+            message: filter == .videos
+                ? "Recordings appear here. Start one from the sidebar, the menu or with the recording shortcut."
+                : "Saved clips appear here. Press the clip shortcut or use the save button to keep the last seconds."
+        )
     }
 
     /// For a clip that is part of a larger selection the menu acts on all of
