@@ -37,6 +37,7 @@ final class ClipController: ObservableObject {
     private var recordingStart: Date?
     private var isEndingRecording = false
     private let notifier = Notifier()
+    private let games = GameTracker()
     private let hud = HUD()
     private let logger = Logger(subsystem: "com.mertozturk.ClipApp", category: "clip")
     private var outageTask: Task<Void, Never>?
@@ -192,8 +193,9 @@ final class ClipController: ObservableObject {
         }
         var sourceName = AppLanguage.string("Display")
         if case .running(let source, _, _, _) = capture.state { sourceName = source }
-        // Filed under whatever is in front right now, not when the write finishes.
-        let game = GameContext.current()
+        // Filed under the app in front right now (not when the write finishes),
+        // or the one that was in front during the clip if ClipApp is now.
+        let game = games.current(within: TimeInterval(settings.bufferSeconds))
         let directory = settings.clipsDirectory.appendingPathComponent(game.name, isDirectory: true)
         let info = ClipInfo(game: game.name, bundleID: game.bundleID, recorded: Date())
         let name = settings.clipFileName(source: sourceName)
@@ -236,7 +238,7 @@ final class ClipController: ObservableObject {
             guard track == .system ? settings.systemAudioEnabled : microphoneOn, let format = formats.audio[track] else { return nil }
             return (track, format)
         }
-        let game = GameContext.current()
+        let game = games.current(within: TimeInterval(settings.bufferSeconds))
         let directory = settings.videosDirectory
         do {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
