@@ -24,6 +24,7 @@ struct MainWindowView: View {
     let permissions: PermissionManager
     let controller: ClipController
     let capture: CaptureManager
+    let updates: UpdateController
     let library: ClipLibrary
 
     var body: some View {
@@ -42,7 +43,7 @@ struct MainWindowView: View {
 
             Group {
                 if navigation.selection == .settings {
-                    SettingsView(settings: settings, permissions: permissions, capture: capture)
+                    SettingsView(settings: settings, permissions: permissions, capture: capture, updates: updates)
                         .id(navigation.settingsVisit)
                 } else {
                     ClipsView(library: library, settings: settings, filter: navigation.selection)

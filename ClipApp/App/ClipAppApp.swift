@@ -20,6 +20,7 @@ struct ClipAppApp: App {
                     settings: appDelegate.settings,
                     controller: appDelegate.controller,
                     capture: appDelegate.controller.capture,
+                    updates: appDelegate.updates,
                     windows: appDelegate.windows
                 )
             }
@@ -73,12 +74,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let settings: SettingsStore
     let controller: ClipController
     let windows: WindowManager
+    let updates: UpdateController
 
     override init() {
         permissions = PermissionManager()
         settings = SettingsStore()
         controller = ClipController(settings: settings, permissions: permissions)
-        windows = WindowManager(settings: settings, permissions: permissions, controller: controller)
+        updates = UpdateController()
+        windows = WindowManager(settings: settings, permissions: permissions, controller: controller, updates: updates)
         super.init()
     }
 

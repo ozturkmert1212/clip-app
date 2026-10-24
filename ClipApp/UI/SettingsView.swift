@@ -5,6 +5,7 @@ struct SettingsView: View {
     @ObservedObject var settings: SettingsStore
     @ObservedObject var permissions: PermissionManager
     let capture: CaptureManager
+    @ObservedObject var updates: UpdateController
 
     @State private var sources: AvailableSources?
 
@@ -170,6 +171,21 @@ struct SettingsView: View {
                     Text(error)
                         .font(.caption)
                         .foregroundStyle(Brand.failure)
+                }
+            }
+
+            Section("Updates") {
+                Toggle("Check for updates automatically", isOn: Binding(
+                    get: { updates.automaticallyChecksForUpdates },
+                    set: { updates.automaticallyChecksForUpdates = $0 }
+                ))
+                Text("Once a day. A new version is never installed without asking.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                LabeledContent("Current version") {
+                    Text(verbatim: "\(Self.version) (\(Self.build))")
+                    Button("Check for Updates…", action: updates.checkForUpdates)
+                        .disabled(!updates.canCheckForUpdates)
                 }
             }
 

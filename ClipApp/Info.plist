@@ -31,5 +31,19 @@
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>ClipApp uses the microphone to add your voice to your clips.</string>
+	<key>SUAllowsAutomaticUpdates</key>
+	<false/>
+	<key>SUAutomaticallyUpdate</key>
+	<false/>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUEnableSystemProfiling</key>
+	<false/>
+	<key>SUFeedURL</key>
+	<string>https://ozturkmert1212.github.io/clip-app/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>zlSR5pJy/YB7Tg+/JYPu8RG90jEzitDbt7PpO+5smuI=</string>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
 </dict>
 </plist>

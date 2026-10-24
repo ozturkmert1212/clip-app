@@ -7,6 +7,7 @@ struct MenuBarView: View {
     @ObservedObject var settings: SettingsStore
     @ObservedObject var controller: ClipController
     @ObservedObject var capture: CaptureManager
+    @ObservedObject var updates: UpdateController
     let windows: WindowManager
 
     // Menu items are AppKit in the end, so every title is looked up in the
@@ -70,6 +71,10 @@ struct MenuBarView: View {
         Button(AppLanguage.string("Open ClipApp")) {
             windows.showMain(.allClips)
         }
+        Button(AppLanguage.string("Check for Updates…")) {
+            updates.checkForUpdates()
+        }
+        .disabled(!updates.canCheckForUpdates)
         Button(AppLanguage.string("Settings…")) {
             windows.showMain(.settings)
         }

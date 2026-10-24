@@ -13,14 +13,16 @@ final class WindowManager: NSObject, NSWindowDelegate {
     private let settings: SettingsStore
     private let permissions: PermissionManager
     private let controller: ClipController
+    private let updates: UpdateController
     private var mainWindow: NSWindow?
     /// Starts watching the save folder the first time the window is shown.
     private lazy var library = ClipLibrary(settings: settings)
 
-    init(settings: SettingsStore, permissions: PermissionManager, controller: ClipController) {
+    init(settings: SettingsStore, permissions: PermissionManager, controller: ClipController, updates: UpdateController) {
         self.settings = settings
         self.permissions = permissions
         self.controller = controller
+        self.updates = updates
     }
 
     /// Brings the main window forward; `item` nil keeps what it was showing.
@@ -46,6 +48,7 @@ final class WindowManager: NSObject, NSWindowDelegate {
                 permissions: permissions,
                 controller: controller,
                 capture: controller.capture,
+                updates: updates,
                 library: library
             )
         })

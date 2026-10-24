@@ -254,6 +254,26 @@
         }
       }
     },
+    "Check for Updates…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncellemeleri Denetle…"
+          }
+        }
+      }
+    },
+    "Check for updates automatically" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncellemeleri otomatik denetle"
+          }
+        }
+      }
+    },
     "Choose" : {
       "localizations" : {
         "tr" : {
@@ -530,6 +550,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kırpılmış klip yazılamadı"
+          }
+        }
+      }
+    },
+    "Current version" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mevcut sürüm"
           }
         }
       }
@@ -1010,6 +1040,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tamam"
+          }
+        }
+      }
+    },
+    "Once a day. A new version is never installed without asking." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Günde bir kez. Yeni bir sürüm sorulmadan asla kurulmaz."
           }
         }
       }
@@ -1840,6 +1880,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sesi aç"
+          }
+        }
+      }
+    },
+    "Updates" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncellemeler"
           }
         }
       }

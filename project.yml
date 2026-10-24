@@ -10,6 +10,9 @@ packages:
   KeyboardShortcuts:
     url: https://github.com/sindresorhus/KeyboardShortcuts
     from: 2.0.0
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: 2.10.0
 settings:
   base:
     SWIFT_VERSION: "5.0"
@@ -25,6 +28,7 @@ targets:
       - ClipApp
     dependencies:
       - package: KeyboardShortcuts
+      - package: Sparkle
     info:
       path: ClipApp/Info.plist
       properties:
@@ -36,6 +40,15 @@ targets:
         LSUIElement: true
         LSApplicationCategoryType: public.app-category.utilities
         NSMicrophoneUsageDescription: ClipApp uses the microphone to add your voice to your clips.
+        # Sparkle: a daily check, an update is offered and never installed
+        # without asking, and nothing about the Mac is sent.
+        SUFeedURL: https://ozturkmert1212.github.io/clip-app/appcast.xml
+        SUPublicEDKey: zlSR5pJy/YB7Tg+/JYPu8RG90jEzitDbt7PpO+5smuI=
+        SUEnableAutomaticChecks: true
+        SUScheduledCheckInterval: 86400
+        SUAutomaticallyUpdate: false
+        SUAllowsAutomaticUpdates: false
+        SUEnableSystemProfiling: false
     entitlements:
       path: ClipApp/ClipApp.entitlements
       properties:
