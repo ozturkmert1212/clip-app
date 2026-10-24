@@ -31,6 +31,24 @@ xcodebuild -project ClipApp.xcodeproj -scheme ClipApp -configuration Release -de
   CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="$IDENTITY" DEVELOPMENT_TEAM="$TEAM" \
   OTHER_CODE_SIGN_FLAGS=--timestamp CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO \
   clean build
+
+# Sparkle's helpers are signed inside out with the same identity, hardened
+# runtime and a secure timestamp, then the app over them; --deep would give
+# every piece the app's entitlements. Downloader.xpc keeps its own.
+sign() { codesign --force --sign "$IDENTITY" --options runtime --timestamp "$@"; }
+SPARKLE="$APP/Contents/Frameworks/Sparkle.framework"
+for XPC in "$SPARKLE"/Versions/B/XPCServices/*.xpc; do
+  [[ -e $XPC ]] || continue
+  if [[ $(basename "$XPC") == Downloader.xpc ]]; then
+    sign --preserve-metadata=entitlements "$XPC"
+  else
+    sign "$XPC"
+  fi
+done
+sign "$SPARKLE/Versions/B/Autoupdate"
+sign "$SPARKLE/Versions/B/Updater.app"
+sign "$SPARKLE"
+sign --preserve-metadata=entitlements "$APP"
 codesign --verify --strict --deep "$APP"
 
 STAGE=$(mktemp -d)
