@@ -44,6 +44,12 @@ The release is signed with a Developer ID and notarized by Apple: just open the 
 
 After an update macOS may ask for the permissions again (always when updating from 0.2.0 or earlier, whose builds were signed differently).
 
+## Updates
+
+From 0.3.0 on, ClipApp updates itself through [Sparkle](https://sparkle-project.org): it looks for a new version once a day and asks before installing it. Use Check for Updates… in the menu bar menu or in Settings > Updates to look right away, or turn off the daily check there. Nothing about your Mac is sent with the check. Updates are signed, and ClipApp only installs one that carries the project's signature.
+
+0.2.1 and earlier have no updater: download 0.3.0 once from [Releases](https://github.com/ozturkmert1212/clip-app/releases/latest) and replace the old app in Applications. Later versions then arrive on their own.
+
 ## Build and install
 
 ```bash
@@ -84,7 +90,7 @@ See `CLAUDE.md` for an architecture overview and development notes.
 
 ## Building from source
 
-`project.yml` contains the author's `DEVELOPMENT_TEAM` and `bundleIdPrefix`. Replace both with your own before building (your Team ID is the `OU=` value of your "Apple Development" certificate, also shown in Xcode > Settings > Accounts). Without a stable signing identity, macOS may ask for the Screen Recording permission again after every rebuild.
+`project.yml` contains the author's `DEVELOPMENT_TEAM` and `bundleIdPrefix`. Replace both with your own before building (your Team ID is the `OU=` value of your "Apple Development" certificate, also shown in Xcode > Settings > Accounts). Without a stable signing identity, macOS may ask for the Screen Recording permission again after every rebuild. A build of your own still checks this project's update feed (`SUFeedURL` and `SUPublicEDKey` in `project.yml`); change or remove both if you distribute it.
 
 If you would rather not build it yourself, a prebuilt dmg is available under [Releases](https://github.com/ozturkmert1212/clip-app/releases/latest), see "Download" above.
 
