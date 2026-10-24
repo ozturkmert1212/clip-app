@@ -38,15 +38,11 @@ The interface is in English by default. Türkçe için: Settings > General > Lan
 
 ## Download
 
-Get the latest dmg from [Releases](https://github.com/ozturkmert1212/clip-app/releases/latest) and drag ClipApp to Applications. Apple Silicon only, macOS 13 or later.
+Get the latest dmg from [Releases](https://github.com/ozturkmert1212/clip-app/releases/latest). Apple Silicon only, macOS 13 or later.
 
-The build is not signed with a Developer ID or notarized, so macOS blocks the first launch:
+The release is signed with a Developer ID and notarized by Apple: just open the dmg and drag ClipApp to Applications. Grant Screen Recording when asked (Settings > Permissions in ClipApp), then restart ClipApp.
 
-1. Open ClipApp once and dismiss the warning.
-2. Open System Settings > Privacy & Security and click **Open Anyway** next to ClipApp (or run `xattr -dr com.apple.quarantine /Applications/ClipApp.app`).
-3. Grant Screen Recording when asked (Settings > Permissions in ClipApp), then restart ClipApp.
-
-After an update macOS may ask for the permissions again.
+After an update macOS may ask for the permissions again (always when updating from 0.2.0 or earlier, whose builds were signed differently).
 
 ## Build and install
 
