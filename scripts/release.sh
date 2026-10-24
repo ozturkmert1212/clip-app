@@ -1,5 +1,6 @@
 #!/bin/bash
-# Builds a Developer ID signed, notarized and stapled dmg into dist/.
+# Builds a Developer ID signed, notarized and stapled dmg, holding an app
+# that is notarized and stapled itself, into dist/.
 #
 #   scripts/release.sh                 full release
 #   scripts/release.sh --no-notarize   build, sign and package only
@@ -34,6 +35,16 @@ codesign --verify --strict --deep "$APP"
 
 STAGE=$(mktemp -d)
 trap 'rm -rf "$STAGE"' EXIT
+
+# The app gets its own ticket before it goes into the dmg, so it passes
+# Gatekeeper offline once copied out of it, not only the dmg.
+if [[ $NOTARIZE == 1 ]]; then
+  ditto -c -k --keepParent "$APP" "$STAGE/ClipApp.zip"
+  xcrun notarytool submit "$STAGE/ClipApp.zip" --keychain-profile "$NOTARY_PROFILE" --wait
+  rm "$STAGE/ClipApp.zip"
+  xcrun stapler staple "$APP"
+fi
+
 ditto "$APP" "$STAGE/ClipApp.app"
 ln -s /Applications "$STAGE/Applications"
 
