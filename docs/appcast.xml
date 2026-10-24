@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>ClipApp</title>
+    <link>https://github.com/ozturkmert1212/clip-app</link>
+    <description>ClipApp updates</description>
+    <language>en</language>
+    <item>
+      <title>Version 0.3.0</title>
+      <pubDate>Sat, 24 Oct 2026 23:40:36 +0000</pubDate>
+      <sparkle:version>5</sparkle:version>
+      <sparkle:shortVersionString>0.3.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+      <sparkle:fullReleaseNotesLink>https://github.com/ozturkmert1212/clip-app/releases/tag/v0.3.0</sparkle:fullReleaseNotesLink>
+      <enclosure url="https://github.com/ozturkmert1212/clip-app/releases/download/v0.3.0/ClipApp-0.3.0.dmg" sparkle:edSignature="8AzaLlhEuF7J0ljgCM9NsS+onZWwPSVK5RRGinfRCsCJTFzGbazZN1QMbCnBOlZCUXdUG6mma/3X+WeFBQ9mDA==" length="3430589" type="application/octet-stream"/>
+    </item>
+  </channel>
+</rss>
