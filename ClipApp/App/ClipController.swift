@@ -92,7 +92,8 @@ final class ClipController: ObservableObject {
         applySettings()
         hotkeys = HotkeyManager(
             onSaveClip: { [weak self] in self?.saveClip() },
-            onToggleRecording: { [weak self] in self?.toggleRecording() }
+            onToggleRecording: { [weak self] in self?.toggleRecording() },
+            onToggleClipping: { [weak self] in self?.toggleClipping() }
         )
 
         // `objectWillChange` fires before the new value is stored, hence the hop.
@@ -250,6 +251,25 @@ final class ClipController: ObservableObject {
         var next = activity
         next.isClipping = false
         setActivity(next)
+    }
+
+    /// The Start/Stop Clipping shortcut: the same step as the buttons, through
+    /// `startClipping()` and `stopClipping()`, and a short message, since the
+    /// window and the menu are usually not on screen when it is pressed.
+    func toggleClipping() {
+        let next = activity.togglingClipping
+        if next.isClipping { startClipping() } else { stopClipping() }
+        // Without the permission nothing changed and Settings is open instead.
+        guard activity == next else { return }
+        let title = next.isClipping ? AppLanguage.string("Clipping started") : AppLanguage.string("Clipping stopped")
+        let detail = next.isClipping
+            ? AppLanguage.string("Keeping the last \(settings.bufferSeconds) seconds")
+            : AppLanguage.string("Replay buffer cleared")
+        if settings.showHUD {
+            hud.show(.success, title: title, detail: detail, in: settings.hudCorner)
+        } else {
+            notifier.show(title: title, body: detail, identifier: "clipping")
+        }
     }
 
     private func setRecordingActivity(_ isRecording: Bool) {

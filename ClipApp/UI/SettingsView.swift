@@ -58,6 +58,7 @@ struct SettingsView: View {
                 }
                 KeyboardShortcuts.Recorder("Clip shortcut", name: .saveClip)
                 KeyboardShortcuts.Recorder("Recording shortcut", name: .toggleRecording)
+                KeyboardShortcuts.Recorder("Start/Stop Clipping shortcut", name: .toggleClipping)
             }
 
             Section("Video") {

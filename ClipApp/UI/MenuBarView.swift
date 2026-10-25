@@ -1,3 +1,4 @@
+import KeyboardShortcuts
 import SwiftUI
 
 /// The menu bar menu: the controls that are wanted in the middle of a game.
@@ -37,6 +38,7 @@ struct MenuBarView: View {
         switch controller.activity.primaryAction {
         case .startClipping:
             Button(AppLanguage.string("Start Clipping")) { controller.startClipping() }
+                .globalKeyboardShortcut(.toggleClipping)
         case .saveClip:
             Button(controller.isSaving
                    ? AppLanguage.string("Saving Clip…")
@@ -47,6 +49,7 @@ struct MenuBarView: View {
         }
         if controller.activity.offersStopClipping {
             Button(AppLanguage.string("Stop Clipping")) { controller.stopClipping() }
+                .globalKeyboardShortcut(.toggleClipping)
         }
         Button(controller.recordingSeconds.map { AppLanguage.string("Stop Recording (\(ClipFormat.duration(TimeInterval($0))))") }
                ?? AppLanguage.string("Start Recording")) {

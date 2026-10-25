@@ -59,6 +59,14 @@ struct CaptureActivity: Equatable {
     /// Next to Save in the window and below it in the menu.
     var offersStopClipping: Bool { isClipping }
 
+    /// Start/Stop Clipping as one step (the shortcut): clipping flipped, a
+    /// running recording left as it is.
+    var togglingClipping: CaptureActivity {
+        var next = self
+        next.isClipping.toggle()
+        return next
+    }
+
     /// `captureWorks`: the permission is there and the stream is running or
     /// on its way, not failed.
     func icon(captureWorks: Bool) -> Icon {

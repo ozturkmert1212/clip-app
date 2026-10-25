@@ -104,6 +104,40 @@ final class CaptureActivityTests: XCTestCase {
         XCTAssertEqual(recording.effects(to: clipping), [.fillBuffer])
     }
 
+    // MARK: - Start/Stop Clipping shortcut
+
+    func testTheShortcutFlipsClippingAndLeavesTheRecording() {
+        XCTAssertEqual(off.togglingClipping, clipping)
+        XCTAssertEqual(clipping.togglingClipping, off)
+        XCTAssertEqual(recording.togglingClipping, both)
+        XCTAssertEqual(both.togglingClipping, recording)
+        for state in all {
+            XCTAssertEqual(state.togglingClipping.togglingClipping, state, "\(state)")
+        }
+    }
+
+    /// The same transitions as the Start and Stop Clipping buttons.
+    func testTheShortcutTakesTheButtonsEffects() {
+        XCTAssertEqual(off.effects(to: off.togglingClipping), [.startStream, .fillBuffer])
+        XCTAssertEqual(clipping.effects(to: clipping.togglingClipping), [.clearBuffer, .stopStream])
+        // During a recording the stream stays, only the buffer goes and comes.
+        XCTAssertEqual(both.effects(to: both.togglingClipping), [.clearBuffer])
+        XCTAssertEqual(recording.effects(to: recording.togglingClipping), [.fillBuffer])
+    }
+
+    /// Once the shortcut has stopped clipping, Save Last N Seconds only says
+    /// that clipping is off again, with or without a recording.
+    func testSavingIsRefusedAgainAfterTheShortcutStopsClipping() {
+        for state in [clipping, both] {
+            let stopped = state.togglingClipping
+            XCTAssertFalse(stopped.canSaveClip, "\(state)")
+            XCTAssertEqual(stopped.primaryAction, .startClipping, "\(state)")
+            XCTAssertFalse(stopped.offersStopClipping, "\(state)")
+        }
+        XCTAssertTrue(off.togglingClipping.canSaveClip)
+        XCTAssertTrue(recording.togglingClipping.canSaveClip)
+    }
+
     func testNoChangeHasNoEffect() {
         for state in all {
             XCTAssertEqual(state.effects(to: state), [], "\(state)")

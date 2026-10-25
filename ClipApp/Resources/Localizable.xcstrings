@@ -384,6 +384,26 @@
         }
       }
     },
+    "Clipping started" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip alma başladı"
+          }
+        }
+      }
+    },
+    "Clipping stopped" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip alma durdu"
+          }
+        }
+      }
+    },
     "Clipping · %@ · %lld s buffered" : {
       "localizations" : {
         "tr" : {
@@ -750,6 +770,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Düzenleme için ayrı ses kanallarını sakla"
+          }
+        }
+      }
+    },
+    "Keeping the last %lld seconds" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son %lld saniye tutuluyor"
           }
         }
       }
@@ -1364,6 +1394,16 @@
         }
       }
     },
+    "Replay buffer cleared" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekrar tamponu temizlendi"
+          }
+        }
+      }
+    },
     "Request" : {
       "localizations" : {
         "tr" : {
@@ -1680,6 +1720,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ClipApp açılınca klip almayı başlat"
+          }
+        }
+      }
+    },
+    "Start/Stop Clipping shortcut" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klip alma başlat/durdur kısayolu"
           }
         }
       }

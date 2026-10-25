@@ -20,7 +20,7 @@ The interface is in English by default. Türkçe için: Settings > General > Lan
 
 ## Features
 
-- **Start / Stop Clipping.** Capture runs only when you ask for it: Start Clipping (sidebar or menu bar) starts the replay buffer, Stop Clipping empties it and stops capture, so no CPU is used and the screen recording indicator is off. Settings > General > Start clipping when ClipApp opens starts it at launch (off by default, also applies at login).
+- **Start / Stop Clipping.** Capture runs only when you ask for it: Start Clipping (sidebar or menu bar) starts the replay buffer, Stop Clipping empties it and stops capture, so no CPU is used and the screen recording indicator is off. Settings > General > Start clipping when ClipApp opens starts it at launch (off by default, also applies at login). A global Start/Stop Clipping shortcut can be set under Settings > Clip (none by default); it works from any app and briefly confirms "Clipping started" / "Clipping stopped" on screen.
 - **Save the last N seconds** (15–120 s) with a global shortcut (default ⌃⌥⌘R), the sidebar or the menu. Captures a display, a window or an application, with hardware H.264 encoding.
 - **Clip library by game.** Clips go to `Clips/<game>/` and are named `<game>_<date>_<time>.mp4` automatically, the game being the app in front (or the one you just left). The sidebar lists every game with its icon; rename, move to another game, reveal in Finder, copy or trash one clip or a selection.
 - **Trimming.** Pick a range under the player and save as a new clip or over the original, either losslessly or re-encoded to the exact range.
