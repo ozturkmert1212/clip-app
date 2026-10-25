@@ -87,6 +87,7 @@ targets:
       - ClipApp/Settings/AppLanguage.swift
       - ClipApp/App/GameContext.swift
       - ClipApp/App/CaptureActivity.swift
+      - ClipApp/App/UpdateReminder.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mertozturk.ClipAppTests
