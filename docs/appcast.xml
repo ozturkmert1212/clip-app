@@ -6,6 +6,15 @@
     <description>ClipApp updates</description>
     <language>en</language>
     <item>
+      <title>Version 0.3.1</title>
+      <pubDate>Sun, 25 Oct 2026 02:51:16 +0000</pubDate>
+      <sparkle:version>6</sparkle:version>
+      <sparkle:shortVersionString>0.3.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+      <sparkle:fullReleaseNotesLink>https://github.com/ozturkmert1212/clip-app/releases/tag/v0.3.1</sparkle:fullReleaseNotesLink>
+      <enclosure url="https://github.com/ozturkmert1212/clip-app/releases/download/v0.3.1/ClipApp-0.3.1.dmg" sparkle:edSignature="ghPCUCb+vkMy3IL41jBqhhFOK36Zf4HPDPFagqO26PvJBYLfpQEIer2GDMsbueL26/cexvXXggZ/KTJK6TUYBQ==" length="3888976" type="application/octet-stream"/>
+    </item>
+    <item>
       <title>Version 0.3.0</title>
       <pubDate>Sat, 24 Oct 2026 23:40:36 +0000</pubDate>
       <sparkle:version>5</sparkle:version>
