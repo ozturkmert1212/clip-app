@@ -5,7 +5,8 @@
 #   scripts/release.sh                 full release
 #   scripts/release.sh --no-notarize   build, sign and package only
 #
-# Needs a "Developer ID Application" certificate in the keychain and, once:
+# Needs a "Developer ID Application" certificate in the keychain, dmgbuild
+# (python3 -m pip install --user dmgbuild) and, once:
 #   xcrun notarytool store-credentials ClipApp --apple-id <id> --team-id <team>
 #
 # IDENTITY, NOTARY_PROFILE and OUT_DIR can be overridden from the environment.
@@ -22,6 +23,11 @@ VERSION=$(sed -n 's/.*MARKETING_VERSION: *"\(.*\)".*/\1/p' project.yml)
 TEAM=$(sed -n 's/.*DEVELOPMENT_TEAM: *\(.*\)/\1/p' project.yml)
 APP=build/Build/Products/Release/ClipApp.app
 DMG="$OUT_DIR/ClipApp-$VERSION.dmg"
+
+python3 -m dmgbuild --help >/dev/null 2>&1 || {
+  echo "dmgbuild is missing: python3 -m pip install --user dmgbuild" >&2
+  exit 1
+}
 
 # Notarization rejects a build without a secure timestamp or with
 # get-task-allow, which Xcode injects unless told otherwise. Command line
@@ -63,11 +69,13 @@ if [[ $NOTARIZE == 1 ]]; then
   xcrun stapler staple "$APP"
 fi
 
-ditto "$APP" "$STAGE/ClipApp.app"
-ln -s /Applications "$STAGE/Applications"
-
+# The install window (background, icon positions, hidden bars) is written
+# into the image's .DS_Store by dmgbuild, see scripts/dmg/settings.py.
 mkdir -p "$OUT_DIR"
-hdiutil create -volname ClipApp -srcfolder "$STAGE" -format UDZO -ov "$DMG"
+rm -f "$DMG"
+python3 -m dmgbuild -s scripts/dmg/settings.py \
+  -D app="$APP" -D background=scripts/dmg/background.tiff \
+  ClipApp "$DMG"
 codesign --sign "$IDENTITY" --timestamp "$DMG"
 
 if [[ $NOTARIZE == 1 ]]; then
