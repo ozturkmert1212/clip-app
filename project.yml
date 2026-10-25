@@ -89,6 +89,7 @@ targets:
       - ClipApp/App/GameContext.swift
       - ClipApp/App/CaptureActivity.swift
       - ClipApp/App/UpdateReminder.swift
+      - ClipApp/Permissions/Relaunch.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mertozturk.ClipAppTests

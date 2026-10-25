@@ -65,7 +65,7 @@ For development, build with `-configuration Debug` and open `build/Build/Product
 
 All permissions are listed under Settings > Permissions with their current state and a button to request them or to open the right page of System Settings. If Screen Recording is missing, the app opens there.
 
-- **Screen Recording (required):** Requested from that row or by the first Start Clipping. After granting it, restart the app (the row offers a button).
+- **Screen Recording (required):** Requested from that row or by the first Start Clipping. After granting it, restart the app with the row's Restart ClipApp button: it restarts the copy you are running. macOS's own "Quit & Reopen" may open the copy in Applications instead if you have more than one.
 - **Microphone (optional):** Requested when the microphone is turned on. Without it, clips have system audio only.
 - **Notifications (optional):** Requested at first launch. macOS hides banners while the screen is being captured; to see them, turn on "Allow notifications when mirroring or sharing the display" under System Settings > Notifications (the row links there). The on-screen message works either way.
 

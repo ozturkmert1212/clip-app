@@ -1,6 +1,7 @@
 import AVFoundation
 import AppKit
 import CoreGraphics
+import OSLog
 import UserNotifications
 
 @MainActor
@@ -116,11 +117,23 @@ final class PermissionManager: ObservableObject {
         }
     }
 
-    /// Screen Recording changes only take effect in a fresh process.
+    /// Screen Recording changes only take effect in a fresh process. The
+    /// running copy starts again by its own path, see `Relaunch`.
     func relaunch() {
+        let url = Relaunch.target(for: .main)
         let configuration = NSWorkspace.OpenConfiguration()
-        configuration.createsNewApplicationInstance = true
-        NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: configuration) { _, _ in
+        configuration.createsNewApplicationInstance = Relaunch.createsNewInstance
+        NSWorkspace.shared.openApplication(at: url, configuration: configuration) { _, error in
+            let logger = Logger(subsystem: "com.mertozturk.ClipApp", category: "permissions")
+            if let error {
+                logger.error("Relaunch of \(url.path, privacy: .public) failed, staying: \(error.localizedDescription, privacy: .public)")
+            } else {
+                logger.notice("Relaunched \(url.path, privacy: .public)")
+            }
+            guard Relaunch.quitsAfterLaunch(error: error) else {
+                DispatchQueue.main.async { NSSound.beep() }
+                return
+            }
             DispatchQueue.main.async { NSApp.terminate(nil) }
         }
     }
