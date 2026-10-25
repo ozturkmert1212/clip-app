@@ -9,10 +9,13 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
     private static let revealAction = "reveal"
     private static let pathKey = "path"
     private static let settingsKey = "settings"
+    private static let updateKey = "update"
 
     /// Called on the main queue when a notification about a missing
     /// permission is clicked.
     var onOpenSettings: () -> Void = {}
+    /// Called on the main queue when the update notification is clicked.
+    var onShowUpdate: () -> Void = {}
 
     private let logger = Logger(subsystem: "com.mertozturk.ClipApp", category: "notifications")
     private let center = UNUserNotificationCenter.current()
@@ -53,6 +56,16 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
         post(content, identifier: identifier)
     }
 
+    /// A new version found while ClipApp was in the background. Only one is
+    /// kept: a newer version replaces the notification about an older one.
+    func updateAvailable(version: String) {
+        let content = UNMutableNotificationContent()
+        content.title = AppLanguage.string("ClipApp \(version) is available")
+        content.body = AppLanguage.string("Click to see what's new and update.")
+        content.userInfo = [Self.updateKey: true]
+        post(content, identifier: "updateAvailable")
+    }
+
     private func post(_ content: UNNotificationContent, identifier: String) {
         center.add(UNNotificationRequest(identifier: identifier, content: content, trigger: nil)) { [logger] error in
             if let error {
@@ -70,7 +83,8 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
         completionHandler([.banner, .list])
     }
 
-    /// Both the action button and a click on the notification reveal the clip.
+    /// Both the action button and a click on the notification reveal the
+    /// clip; the other notifications lead to Settings or the update.
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
@@ -84,6 +98,8 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
                 }
             } else if userInfo[Self.settingsKey] != nil {
                 DispatchQueue.main.async { [onOpenSettings] in onOpenSettings() }
+            } else if userInfo[Self.updateKey] != nil {
+                DispatchQueue.main.async { [onShowUpdate] in onShowUpdate() }
             }
         }
         completionHandler()

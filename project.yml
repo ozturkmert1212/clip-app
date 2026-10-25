@@ -40,12 +40,13 @@ targets:
         LSUIElement: true
         LSApplicationCategoryType: public.app-category.utilities
         NSMicrophoneUsageDescription: ClipApp uses the microphone to add your voice to your clips.
-        # Sparkle: a daily check, an update is offered and never installed
+        # Sparkle: a check every 6 hours (and one at launch, see
+        # UpdateController), an update is offered and never installed
         # without asking, and nothing about the Mac is sent.
         SUFeedURL: https://ozturkmert1212.github.io/clip-app/appcast.xml
         SUPublicEDKey: zlSR5pJy/YB7Tg+/JYPu8RG90jEzitDbt7PpO+5smuI=
         SUEnableAutomaticChecks: true
-        SUScheduledCheckInterval: 86400
+        SUScheduledCheckInterval: 21600
         SUAutomaticallyUpdate: false
         SUAllowsAutomaticUpdates: false
         SUEnableSystemProfiling: false

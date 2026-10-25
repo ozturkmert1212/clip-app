@@ -51,7 +51,7 @@ final class ClipController: ObservableObject {
     private var askedForMicrophone = false
     private var appliedSource: CaptureSource?
     private var appliedLanguage: AppLanguage?
-    private let notifier = Notifier()
+    private let notifier: Notifier
     private let games = GameTracker()
     private let hud = HUD()
     private let windowSharing: WindowSharing
@@ -61,7 +61,10 @@ final class ClipController: ObservableObject {
     private var lastFailure = ""
     private var cancellables: Set<AnyCancellable> = []
 
-    init(settings: SettingsStore, permissions: PermissionManager) {
+    /// The notifier is shared with the updater: there is one notification
+    /// center delegate per app.
+    init(settings: SettingsStore, permissions: PermissionManager, notifier: Notifier) {
+        self.notifier = notifier
         let ringBuffer = RingBuffer(
             duration: TimeInterval(settings.bufferSeconds),
             byteLimit: settings.bufferByteLimit

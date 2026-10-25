@@ -294,6 +294,16 @@
         }
       }
     },
+    "Click to see what's new and update." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yenilikleri görmek ve güncellemek için tıkla."
+          }
+        }
+      }
+    },
     "Clip" : {
       "localizations" : {
         "tr" : {
@@ -320,6 +330,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Klip kısayolu"
+          }
+        }
+      }
+    },
+    "ClipApp %@ is available" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ClipApp %@ çıktı"
           }
         }
       }
@@ -1040,16 +1060,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tamam"
-          }
-        }
-      }
-    },
-    "Once a day. A new version is never installed without asking." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Günde bir kez. Yeni bir sürüm sorulmadan asla kurulmaz."
           }
         }
       }
@@ -1884,6 +1894,26 @@
         }
       }
     },
+    "Update available · %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncelleme var · %@"
+          }
+        }
+      }
+    },
+    "Update available: ClipApp %@…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncelleme var: ClipApp %@…"
+          }
+        }
+      }
+    },
     "Updates" : {
       "localizations" : {
         "tr" : {
@@ -1920,6 +1950,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Videolar"
+          }
+        }
+      }
+    },
+    "When ClipApp opens and every few hours. A new version is never installed without asking." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ClipApp açılınca ve birkaç saatte bir. Yeni bir sürüm sorulmadan asla kurulmaz."
           }
         }
       }

@@ -29,7 +29,7 @@ struct MainWindowView: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            Sidebar(navigation: navigation, library: library) {
+            Sidebar(navigation: navigation, library: library, updates: updates) {
                 CaptureStatusView(
                     permissions: permissions,
                     settings: settings,
@@ -61,6 +61,7 @@ struct MainWindowView: View {
 private struct Sidebar<Status: View>: View {
     @ObservedObject var navigation: MainNavigation
     @ObservedObject var library: ClipLibrary
+    @ObservedObject var updates: UpdateController
     @ViewBuilder let status: () -> Status
 
     @FocusState private var isListFocused: Bool
@@ -111,6 +112,9 @@ private struct Sidebar<Status: View>: View {
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 0) {
+                if let version = updates.availableUpdate {
+                    updateNotice(version)
+                }
                 settingsRow
                 status()
             }
@@ -125,6 +129,23 @@ private struct Sidebar<Status: View>: View {
     ) -> some View {
         SidebarLabel(isSelected: navigation.selection == item, count: count, title: title(), icon: icon())
             .tag(item)
+    }
+
+    /// A scheduled check found an update while the user was elsewhere; the
+    /// click shows it in Sparkle's window. Gone once the user has seen it there.
+    private func updateNotice(_ version: String) -> some View {
+        Button(action: updates.showUpdate) {
+            HStack(alignment: .firstTextBaseline, spacing: Brand.Space.one) {
+                Image(systemName: "arrow.down.circle.fill")
+                Text("Update available · \(version)")
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+            }
+        }
+        .buttonStyle(NoticeButtonStyle())
+        .padding(.horizontal, Brand.Space.one)
+        .padding(.bottom, Brand.Space.one)
     }
 
     /// Looks and reads like a row of the list above it, and is one more stop

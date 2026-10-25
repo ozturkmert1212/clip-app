@@ -13,6 +13,11 @@ struct MenuBarView: View {
     // Menu items are AppKit in the end, so every title is looked up in the
     // chosen language here instead of relying on the environment.
     var body: some View {
+        // Found by a scheduled check while the user was elsewhere; leads to Sparkle's window.
+        if let version = updates.availableUpdate {
+            Button(AppLanguage.string("Update available: ClipApp \(version)…")) { updates.showUpdate() }
+            Divider()
+        }
         // A missing permission takes the place of the status and leads to where it is fixed.
         if !permissions.screenRecordingGranted {
             Button(AppLanguage.string("Screen Recording permission needed")) { windows.showMain(.settings) }

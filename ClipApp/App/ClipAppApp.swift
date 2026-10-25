@@ -75,11 +75,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let controller: ClipController
     let windows: WindowManager
     let updates: UpdateController
+    private let notifier = Notifier()
 
     override init() {
         permissions = PermissionManager()
         settings = SettingsStore()
-        controller = ClipController(settings: settings, permissions: permissions)
+        controller = ClipController(settings: settings, permissions: permissions, notifier: notifier)
         updates = UpdateController()
         windows = WindowManager(settings: settings, permissions: permissions, controller: controller, updates: updates)
         super.init()
@@ -103,6 +104,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if settings.startClippingAtLaunch, permissions.screenRecordingGranted {
             controller.startClipping()
         }
+        // Where a found update shows up depends on all of the above.
+        updates.isMainWindowVisible = { [windows] in windows.isMainWindowVisible }
+        updates.isCapturing = { [controller] in controller.activity.streamRuns }
+        updates.notificationsAllowed = { [permissions] in permissions.notificationStatus == .granted }
+        updates.notify = { [notifier] in notifier.updateAvailable(version: $0) }
+        notifier.onShowUpdate = { [updates] in updates.showUpdate() }
+        updates.start()
     }
 
     /// A click on the Dock icon, or opening the app again while it runs.

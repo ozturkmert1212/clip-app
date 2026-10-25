@@ -40,6 +40,12 @@ final class WindowManager: NSObject, NSWindowDelegate {
         window.makeKeyAndOrderFront(nil)
     }
 
+    /// On screen and not in the Dock.
+    var isMainWindowVisible: Bool {
+        guard let mainWindow else { return false }
+        return mainWindow.isVisible && !mainWindow.isMiniaturized
+    }
+
     private func makeMainWindow() -> NSWindow {
         let hosting = NSHostingController(rootView: LanguageRoot(settings: settings) { [self] in
             MainWindowView(

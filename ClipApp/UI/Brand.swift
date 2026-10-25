@@ -71,6 +71,11 @@ enum Brand {
     static let warning = Color.orange
     static let failure = Color.red
 
+    /// Under `accentText`, for a notice that leads somewhere (the update
+    /// reminder): lavender in light mode, deep indigo in dark mode, as in the
+    /// icon. Indigo on it is 5.6:1, lavender on the dark one 7.3:1.
+    static let noticeFill = Color(light: 0xE4E0FF, dark: 0x2A2392)
+
     /// Hairlines around cards and neutral buttons.
     static let hairline = Color(nsColor: .separatorColor)
 
@@ -168,6 +173,25 @@ struct NeutralButtonStyle: ButtonStyle {
             }
             .overlay(Color.black.opacity(configuration.isPressed ? 0.15 : 0).clipShape(shape))
             .opacity(isEnabled ? 1 : 0.5)
+            .contentShape(Rectangle())
+    }
+}
+
+/// A notice that is also a button, such as "Update available" in the
+/// sidebar: indigo on lavender, never the recording red.
+struct NoticeButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        let shape = RoundedRectangle(cornerRadius: Brand.Radius.control, style: .continuous)
+        configuration.label
+            .font(.callout.weight(.medium))
+            .foregroundStyle(Brand.accentText)
+            .padding(.vertical, Brand.Space.one)
+            .padding(.horizontal, Brand.Space.one + Brand.Space.half)
+            .background {
+                shape.fill(Brand.noticeFill)
+                shape.strokeBorder(Brand.accentText.opacity(0.25))
+            }
+            .overlay(Color.black.opacity(configuration.isPressed ? 0.12 : 0).clipShape(shape))
             .contentShape(Rectangle())
     }
 }

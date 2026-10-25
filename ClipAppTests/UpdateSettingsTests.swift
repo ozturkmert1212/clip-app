@@ -30,7 +30,7 @@ final class UpdateSettingsTests: XCTestCase {
     func testUpdatesAreOfferedNotInstalledAndNothingIsProfiled() throws {
         let info = try infoPlist()
         XCTAssertEqual(info["SUEnableAutomaticChecks"] as? Bool, true)
-        XCTAssertEqual(info["SUScheduledCheckInterval"] as? Int, 86400)
+        XCTAssertEqual(info["SUScheduledCheckInterval"] as? Int, 21600)
         XCTAssertEqual(info["SUAutomaticallyUpdate"] as? Bool, false)
         XCTAssertEqual(info["SUAllowsAutomaticUpdates"] as? Bool, false)
         XCTAssertEqual(info["SUEnableSystemProfiling"] as? Bool, false)

@@ -179,7 +179,7 @@ struct SettingsView: View {
                     get: { updates.automaticallyChecksForUpdates },
                     set: { updates.automaticallyChecksForUpdates = $0 }
                 ))
-                Text("Once a day. A new version is never installed without asking.")
+                Text("When ClipApp opens and every few hours. A new version is never installed without asking.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 LabeledContent("Current version") {
