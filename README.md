@@ -46,7 +46,7 @@ After an update macOS may ask for the permissions again (always when updating fr
 
 ## Updates
 
-From 0.3.0 on, ClipApp updates itself through [Sparkle](https://sparkle-project.org): it looks for a new version once a day and asks before installing it. Use Check for Updates… in the menu bar menu or in Settings > Updates to look right away, or turn off the daily check there. Nothing about your Mac is sent with the check. Updates are signed, and ClipApp only installs one that carries the project's signature.
+From 0.3.0 on, ClipApp updates itself through [Sparkle](https://sparkle-project.org): it looks for a new version when it opens and every few hours, and asks before installing it. If you are looking at ClipApp's window, the update window comes up right away; otherwise (ClipApp in the background, its window closed, clipping or a recording running) it waits for you as "Update available" at the top of the menu bar menu and above Settings in the window, plus one notification per version if notifications are allowed. Use Check for Updates… in the menu bar menu or in Settings > Updates to look right away, or turn off the automatic checks there. Nothing about your Mac is sent with the check. Updates are signed, and ClipApp only installs one that carries the project's signature.
 
 0.2.1 and earlier have no updater: download 0.3.0 once from [Releases](https://github.com/ozturkmert1212/clip-app/releases/latest) and replace the old app in Applications. Later versions then arrive on their own.
 
