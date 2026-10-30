@@ -9,9 +9,8 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/menu.png" alt="The menu bar menu while clipping: status, Save Last 30 Seconds, Stop Clipping, Start Recording, source and audio switches" width="220">
-  <img src="docs/images/settings-top.png" alt="Settings: permissions, clip, video and audio" width="290">
-  <img src="docs/images/settings-bottom.png" alt="Settings: audio, saving and general options" width="290">
+  <img src="docs/images/settings-top.png" alt="Settings: permissions, clip, video and audio" width="405">
+  <img src="docs/images/settings-bottom.png" alt="Settings: audio, saving and general options" width="405">
 </p>
 
 An "instant replay" clipping app for macOS (the Medal / ShadowPlay idea). Start clipping and ClipApp keeps the last N seconds of your screen in memory; press a shortcut and they are saved as an mp4. Clips are sorted by game, played, trimmed and re-balanced in the app's window. Closing the window leaves ClipApp in the menu bar.
